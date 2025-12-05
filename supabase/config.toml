@@ -75,7 +75,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.google-oauth-callback]
-verify_jwt = true
+verify_jwt = false
 
 [functions.google-import-contacts]
 verify_jwt = true
+
+[functions.get-google-client-id]
+verify_jwt = false

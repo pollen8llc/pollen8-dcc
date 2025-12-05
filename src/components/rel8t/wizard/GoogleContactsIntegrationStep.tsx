@@ -17,8 +17,8 @@ interface ImportSummary {
   errors: number;
 }
 
-const GOOGLE_CLIENT_ID = ''; // User must configure this
 const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
+const OAUTH_REDIRECT_URI = 'https://oltcuwvgdzszxshpfnre.supabase.co/functions/v1/google-oauth-callback';
 
 export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationStepProps> = ({ 
   onComplete 
@@ -31,10 +31,48 @@ export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationSt
   const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
   const [importSummary, setImportSummary] = useState<ImportSummary | null>(null);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+  const [googleClientId, setGoogleClientId] = useState<string | null>(null);
 
   useEffect(() => {
+    fetchClientId();
     checkIntegrationStatus();
+    checkUrlParams();
   }, [currentUser]);
+
+  const fetchClientId = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('get-google-client-id', {});
+      if (data?.clientId) {
+        setGoogleClientId(data.clientId);
+      }
+    } catch (err) {
+      console.error('Error fetching Google Client ID:', err);
+    }
+  };
+
+  const checkUrlParams = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const googleConnected = urlParams.get('google_connected');
+    const googleError = urlParams.get('google_error');
+
+    if (googleConnected === 'true') {
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+      setIsConnected(true);
+      checkIntegrationStatus();
+      toast({
+        title: 'Connected to Google',
+        description: 'Successfully connected your Google account',
+      });
+    } else if (googleError) {
+      window.history.replaceState({}, '', window.location.pathname);
+      toast({
+        title: 'Connection Failed',
+        description: `Failed to connect: ${googleError}`,
+        variant: 'destructive',
+      });
+    }
+  };
 
   const checkIntegrationStatus = async () => {
     if (!currentUser) return;
@@ -60,25 +98,36 @@ export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationSt
   };
 
   const handleConnect = async () => {
+    if (!googleClientId) {
+      toast({
+        title: 'Configuration Error',
+        description: 'Google OAuth is not configured. Please contact support.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!currentUser?.id) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to connect Google Contacts',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsConnecting(true);
     
     try {
-      // Get session for auth token
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('Please sign in to connect Google Contacts');
-      }
-
-      // Build OAuth URL
-      const redirectUri = `${window.location.origin}/rel8/connect/import`;
+      // Build state with user info and return URL
       const state = btoa(JSON.stringify({ 
-        userId: currentUser?.id,
-        redirectUri 
+        userId: currentUser.id,
+        returnUrl: window.location.href.split('?')[0] // Current page without query params
       }));
       
       const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-      authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
-      authUrl.searchParams.set('redirect_uri', redirectUri);
+      authUrl.searchParams.set('client_id', googleClientId);
+      authUrl.searchParams.set('redirect_uri', OAUTH_REDIRECT_URI);
       authUrl.searchParams.set('response_type', 'code');
       authUrl.searchParams.set('scope', GOOGLE_SCOPES);
       authUrl.searchParams.set('access_type', 'offline');
@@ -97,59 +146,18 @@ export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationSt
         `width=${width},height=${height},left=${left},top=${top}`
       );
 
-      // Listen for OAuth callback
-      const handleMessage = async (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
-        
-        if (event.data?.type === 'google-oauth-callback') {
-          window.removeEventListener('message', handleMessage);
-          popup?.close();
-          
-          const { code, error } = event.data;
-          
-          if (error) {
-            throw new Error(error);
-          }
-
-          if (code) {
-            // Exchange code for token via edge function
-            const { data, error: callbackError } = await supabase.functions.invoke('google-oauth-callback', {
-              body: { 
-                code, 
-                redirectUri 
-              },
-            });
-
-            if (callbackError) {
-              throw new Error(callbackError.message || 'Failed to complete OAuth flow');
-            }
-
-            if (data?.success) {
-              setIsConnected(true);
-              setConnectedEmail(data.integration.google_email);
-              toast({
-                title: 'Connected to Google',
-                description: `Successfully connected as ${data.integration.google_email}`,
-              });
-            }
-          }
-        }
-      };
-
-      window.addEventListener('message', handleMessage);
-
       // Check if popup was blocked
       if (!popup) {
-        window.removeEventListener('message', handleMessage);
         throw new Error('Popup blocked. Please allow popups for this site.');
       }
 
-      // Cleanup listener if popup is closed without completing
+      // Poll for popup closure or redirect
       const checkClosed = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkClosed);
-          window.removeEventListener('message', handleMessage);
           setIsConnecting(false);
+          // Check integration status after popup closes
+          setTimeout(() => checkIntegrationStatus(), 500);
         }
       }, 500);
 
@@ -256,7 +264,7 @@ export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationSt
           
           <Button 
             onClick={handleConnect} 
-            disabled={isConnecting}
+            disabled={isConnecting || !googleClientId}
             className="w-full"
           >
             {isConnecting ? (
@@ -275,6 +283,20 @@ export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationSt
           <p className="text-xs text-muted-foreground text-center">
             We only request read-only access to your contacts. We never access your emails or other data.
           </p>
+
+          {!googleClientId && (
+            <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/20 p-3">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-yellow-600">Loading Configuration...</p>
+                  <p className="text-muted-foreground">
+                    Please wait while we load Google OAuth settings.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
@@ -349,20 +371,6 @@ export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationSt
             Disconnect Google Account
           </Button>
         </div>
-
-        {!GOOGLE_CLIENT_ID && (
-          <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/20 p-3">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium text-yellow-600">Configuration Required</p>
-                <p className="text-muted-foreground">
-                  Google OAuth credentials need to be configured. Please add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to your Supabase secrets.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

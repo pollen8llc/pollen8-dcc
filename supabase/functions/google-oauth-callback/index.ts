@@ -7,118 +7,229 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
+
+  const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+  const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+
+  if (!clientId || !clientSecret) {
+    console.error('Google OAuth credentials not configured');
+    return new Response('Google OAuth credentials not configured', { status: 500 });
+  }
+
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Handle GET request (browser redirect from Google OAuth)
+    if (req.method === 'GET') {
+      const url = new URL(req.url);
+      const code = url.searchParams.get('code');
+      const state = url.searchParams.get('state');
+      const error = url.searchParams.get('error');
 
-    const { code, redirectUri } = await req.json();
-
-    if (!code) {
-      throw new Error('Authorization code is required');
-    }
-
-    const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
-    const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
-
-    if (!clientId || !clientSecret) {
-      throw new Error('Google OAuth credentials not configured');
-    }
-
-    // Exchange code for access token
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        client_id: clientId,
-        client_secret: clientSecret,
-        code: code,
-        redirect_uri: redirectUri || `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-oauth-callback`,
-      }),
-    });
-
-    if (!tokenResponse.ok) {
-      const error = await tokenResponse.text();
-      console.error('Token exchange failed:', error);
-      throw new Error('Failed to exchange authorization code for token');
-    }
-
-    const tokenData = await tokenResponse.json();
-    const { access_token, refresh_token, expires_in } = tokenData;
-
-    console.log('Token exchange successful, fetching user info...');
-
-    // Get user info from Google
-    const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: {
-        'Authorization': `Bearer ${access_token}`,
-      },
-    });
-
-    if (!userResponse.ok) {
-      throw new Error('Failed to fetch Google user information');
-    }
-
-    const userData = await userResponse.json();
-    console.log('Google user info fetched:', userData.email);
-
-    // Get authenticated user from JWT
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      throw new Error('No authorization header');
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-
-    if (userError || !user) {
-      throw new Error('Invalid user token');
-    }
-
-    // Calculate token expiration
-    const expiresAt = new Date(Date.now() + (expires_in * 1000));
-
-    // Store or update integration
-    const { data, error } = await supabase
-      .from('google_integrations')
-      .upsert({
-        user_id: user.id,
-        access_token: access_token,
-        refresh_token: refresh_token,
-        token_expires_at: expiresAt.toISOString(),
-        google_user_id: userData.id,
-        google_email: userData.email,
-        connected_at: new Date().toISOString(),
-        is_active: true,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Database error:', error);
-      throw new Error('Failed to store integration');
-    }
-
-    console.log('Google integration successful for user:', user.id);
-
-    return new Response(JSON.stringify({ 
-      success: true, 
-      integration: {
-        id: data.id,
-        google_email: data.google_email,
-        connected_at: data.connected_at,
+      // Handle OAuth errors
+      if (error) {
+        console.error('OAuth error:', error);
+        const errorUrl = state ? JSON.parse(atob(state)).returnUrl : 'https://preview--pollen8-dcc.lovable.app/rel8/connect/import';
+        return Response.redirect(`${errorUrl}?google_error=${encodeURIComponent(error)}`, 302);
       }
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+
+      if (!code || !state) {
+        console.error('Missing code or state');
+        return new Response('Missing authorization code or state', { status: 400 });
+      }
+
+      // Decode state to get userId and returnUrl
+      let stateData;
+      try {
+        stateData = JSON.parse(atob(state));
+      } catch (e) {
+        console.error('Invalid state parameter:', e);
+        return new Response('Invalid state parameter', { status: 400 });
+      }
+
+      const { userId, returnUrl } = stateData;
+      const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-oauth-callback`;
+
+      console.log('Processing OAuth callback for user:', userId);
+
+      // Exchange code for access token
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: clientId,
+          client_secret: clientSecret,
+          code: code,
+          redirect_uri: redirectUri,
+        }),
+      });
+
+      if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        console.error('Token exchange failed:', errorText);
+        return Response.redirect(`${returnUrl}?google_error=token_exchange_failed`, 302);
+      }
+
+      const tokenData = await tokenResponse.json();
+      const { access_token, refresh_token, expires_in } = tokenData;
+
+      console.log('Token exchange successful, fetching user info...');
+
+      // Get user info from Google
+      const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+        },
+      });
+
+      if (!userResponse.ok) {
+        console.error('Failed to fetch Google user info');
+        return Response.redirect(`${returnUrl}?google_error=user_info_failed`, 302);
+      }
+
+      const userData = await userResponse.json();
+      console.log('Google user info fetched:', userData.email);
+
+      // Calculate token expiration
+      const expiresAt = new Date(Date.now() + (expires_in * 1000));
+
+      // Store or update integration
+      const { data, error: dbError } = await supabase
+        .from('google_integrations')
+        .upsert({
+          user_id: userId,
+          access_token: access_token,
+          refresh_token: refresh_token,
+          token_expires_at: expiresAt.toISOString(),
+          google_user_id: userData.id,
+          google_email: userData.email,
+          connected_at: new Date().toISOString(),
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        console.error('Database error:', dbError);
+        return Response.redirect(`${returnUrl}?google_error=database_error`, 302);
+      }
+
+      console.log('Google integration successful for user:', userId);
+
+      // Redirect back to app with success
+      return Response.redirect(`${returnUrl}?google_connected=true`, 302);
+    }
+
+    // Handle POST request (legacy API call method)
+    if (req.method === 'POST') {
+      const { code, redirectUri } = await req.json();
+
+      if (!code) {
+        throw new Error('Authorization code is required');
+      }
+
+      // Get authenticated user from JWT
+      const authHeader = req.headers.get('authorization');
+      if (!authHeader) {
+        throw new Error('No authorization header');
+      }
+
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+
+      if (userError || !user) {
+        throw new Error('Invalid user token');
+      }
+
+      // Exchange code for access token
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: clientId,
+          client_secret: clientSecret,
+          code: code,
+          redirect_uri: redirectUri || `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-oauth-callback`,
+        }),
+      });
+
+      if (!tokenResponse.ok) {
+        const error = await tokenResponse.text();
+        console.error('Token exchange failed:', error);
+        throw new Error('Failed to exchange authorization code for token');
+      }
+
+      const tokenData = await tokenResponse.json();
+      const { access_token, refresh_token, expires_in } = tokenData;
+
+      console.log('Token exchange successful, fetching user info...');
+
+      // Get user info from Google
+      const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch Google user information');
+      }
+
+      const userData = await userResponse.json();
+      console.log('Google user info fetched:', userData.email);
+
+      // Calculate token expiration
+      const expiresAt = new Date(Date.now() + (expires_in * 1000));
+
+      // Store or update integration
+      const { data, error } = await supabase
+        .from('google_integrations')
+        .upsert({
+          user_id: user.id,
+          access_token: access_token,
+          refresh_token: refresh_token,
+          token_expires_at: expiresAt.toISOString(),
+          google_user_id: userData.id,
+          google_email: userData.email,
+          connected_at: new Date().toISOString(),
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error('Failed to store integration');
+      }
+
+      console.log('Google integration successful for user:', user.id);
+
+      return new Response(JSON.stringify({ 
+        success: true, 
+        integration: {
+          id: data.id,
+          google_email: data.google_email,
+          connected_at: data.connected_at,
+        }
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response('Method not allowed', { status: 405 });
 
   } catch (error) {
     console.error('Error in google-oauth-callback:', error);
