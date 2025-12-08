@@ -25,7 +25,13 @@ const InvitePage = lazy(() => import("@/pages/InvitePage"));
 const InvitesDashboard = lazy(() => import("@/pages/organizer/InvitesDashboard"));
 const InviteMicrosite = lazy(() => import("@/pages/InviteMicrosite"));
 const InviteRedirect = lazy(() => import("@/components/invites/InviteRedirect"));
-const Settings = lazy(() => import("@/pages/Settings"));
+const SettingsIndex = lazy(() => import("@/pages/settings/SettingsIndex"));
+const AccountSettings = lazy(() => import("@/pages/settings/AccountSettings"));
+const PrivacySettings = lazy(() => import("@/pages/settings/PrivacySettings"));
+const DataSettings = lazy(() => import("@/pages/settings/DataSettings"));
+const NotificationSettings = lazy(() => import("@/pages/settings/NotificationSettings"));
+const PlatformSettings = lazy(() => import("@/pages/settings/PlatformSettings"));
+const TablesSettings = lazy(() => import("@/pages/settings/TablesSettings"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
@@ -163,11 +169,53 @@ const AppRoutes = () => {
             </NonServiceProviderRoute>
           } />
           
-          {/* Add new Settings route */}
+          {/* Settings routes */}
           <Route path="/settings" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <Settings />
+                <SettingsIndex />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/settings/account" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <AccountSettings />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/settings/privacy" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <PrivacySettings />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/settings/data" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <DataSettings />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/settings/notifications" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <NotificationSettings />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/settings/platform" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <PlatformSettings />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/settings/tables" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <TablesSettings />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
