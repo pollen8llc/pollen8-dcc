@@ -37,7 +37,23 @@ serve(async (req) => {
       if (error) {
         console.error('OAuth error:', error);
         const errorUrl = state ? JSON.parse(atob(state)).returnUrl : 'https://preview--pollen8-dcc.lovable.app/rel8/connect/import';
-        return Response.redirect(`${errorUrl}?google_error=${encodeURIComponent(error)}`, 302);
+        const errorHtml = `
+          <!DOCTYPE html>
+          <html>
+          <head><title>Connection Failed</title></head>
+          <body>
+            <script>
+              if (window.opener) {
+                window.opener.postMessage({ type: 'google_oauth_error', error: '${error}' }, '*');
+                setTimeout(() => window.close(), 500);
+              } else {
+                window.location.href = '${errorUrl}?google_error=${encodeURIComponent(error)}';
+              }
+            </script>
+          </body>
+          </html>
+        `;
+        return new Response(errorHtml, { headers: { 'Content-Type': 'text/html' } });
       }
 
       if (!code || !state) {
@@ -126,8 +142,39 @@ serve(async (req) => {
 
       console.log('Google integration successful for user:', userId);
 
-      // Redirect back to app with success
-      return Response.redirect(`${returnUrl}?google_connected=true`, 302);
+      // Return HTML that communicates with opener and closes popup
+      const successHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Google Connected</title>
+          <style>
+            body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #0a0a0a; color: #fff; }
+            .container { text-align: center; }
+            .spinner { width: 40px; height: 40px; border: 3px solid #333; border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+            @keyframes spin { to { transform: rotate(360deg); } }
+            p { color: #888; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="spinner"></div>
+            <p>Connecting to Google...</p>
+          </div>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage({ type: 'google_oauth_success', email: '${userData.email}' }, '*');
+              setTimeout(() => window.close(), 500);
+            } else {
+              window.location.href = '${returnUrl}?google_connected=true';
+            }
+          </script>
+        </body>
+        </html>
+      `;
+      return new Response(successHtml, {
+        headers: { 'Content-Type': 'text/html' },
+      });
     }
 
     // Handle POST request (legacy API call method)

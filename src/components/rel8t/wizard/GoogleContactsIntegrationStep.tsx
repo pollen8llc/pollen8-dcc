@@ -151,10 +151,37 @@ export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationSt
         throw new Error('Popup blocked. Please allow popups for this site.');
       }
 
-      // Poll for popup closure or redirect
+      // Listen for message from popup
+      const handleMessage = (event: MessageEvent) => {
+        if (event.data?.type === 'google_oauth_success') {
+          window.removeEventListener('message', handleMessage);
+          clearInterval(checkClosed);
+          setIsConnecting(false);
+          setIsConnected(true);
+          setConnectedEmail(event.data.email);
+          toast({
+            title: 'Connected to Google',
+            description: 'Successfully connected your Google account',
+          });
+          checkIntegrationStatus();
+        } else if (event.data?.type === 'google_oauth_error') {
+          window.removeEventListener('message', handleMessage);
+          clearInterval(checkClosed);
+          setIsConnecting(false);
+          toast({
+            title: 'Connection Failed',
+            description: `Failed to connect: ${event.data.error}`,
+            variant: 'destructive',
+          });
+        }
+      };
+      window.addEventListener('message', handleMessage);
+
+      // Fallback: Poll for popup closure
       const checkClosed = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkClosed);
+          window.removeEventListener('message', handleMessage);
           setIsConnecting(false);
           // Check integration status after popup closes
           setTimeout(() => checkIntegrationStatus(), 500);
