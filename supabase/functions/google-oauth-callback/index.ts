@@ -93,7 +93,23 @@ serve(async (req) => {
       if (!tokenResponse.ok) {
         const errorText = await tokenResponse.text();
         console.error('Token exchange failed:', errorText);
-        return Response.redirect(`${returnUrl}?google_error=token_exchange_failed`, 302);
+        const errorHtml = `
+          <!DOCTYPE html>
+          <html>
+          <head><title>Connection Failed</title></head>
+          <body>
+            <script>
+              if (window.opener) {
+                window.opener.postMessage({ type: 'google_oauth_error', error: 'token_exchange_failed' }, '*');
+                setTimeout(() => window.close(), 500);
+              } else {
+                window.location.href = '${returnUrl}?google_error=token_exchange_failed';
+              }
+            </script>
+          </body>
+          </html>
+        `;
+        return new Response(errorHtml, { headers: { 'Content-Type': 'text/html' } });
       }
 
       const tokenData = await tokenResponse.json();
@@ -110,7 +126,23 @@ serve(async (req) => {
 
       if (!userResponse.ok) {
         console.error('Failed to fetch Google user info');
-        return Response.redirect(`${returnUrl}?google_error=user_info_failed`, 302);
+        const errorHtml = `
+          <!DOCTYPE html>
+          <html>
+          <head><title>Connection Failed</title></head>
+          <body>
+            <script>
+              if (window.opener) {
+                window.opener.postMessage({ type: 'google_oauth_error', error: 'user_info_failed' }, '*');
+                setTimeout(() => window.close(), 500);
+              } else {
+                window.location.href = '${returnUrl}?google_error=user_info_failed';
+              }
+            </script>
+          </body>
+          </html>
+        `;
+        return new Response(errorHtml, { headers: { 'Content-Type': 'text/html' } });
       }
 
       const userData = await userResponse.json();
@@ -131,13 +163,29 @@ serve(async (req) => {
           google_email: userData.email,
           connected_at: new Date().toISOString(),
           is_active: true,
-        })
+        }, { onConflict: 'user_id' })
         .select()
         .single();
 
       if (dbError) {
         console.error('Database error:', dbError);
-        return Response.redirect(`${returnUrl}?google_error=database_error`, 302);
+        const errorHtml = `
+          <!DOCTYPE html>
+          <html>
+          <head><title>Connection Failed</title></head>
+          <body>
+            <script>
+              if (window.opener) {
+                window.opener.postMessage({ type: 'google_oauth_error', error: 'database_error' }, '*');
+                setTimeout(() => window.close(), 500);
+              } else {
+                window.location.href = '${returnUrl}?google_error=database_error';
+              }
+            </script>
+          </body>
+          </html>
+        `;
+        return new Response(errorHtml, { headers: { 'Content-Type': 'text/html' } });
       }
 
       console.log('Google integration successful for user:', userId);
@@ -253,7 +301,7 @@ serve(async (req) => {
           google_email: userData.email,
           connected_at: new Date().toISOString(),
           is_active: true,
-        })
+        }, { onConflict: 'user_id' })
         .select()
         .single();
 
