@@ -1,9 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Zap, Target, Star, Edit, Trash2 } from 'lucide-react';
+import { Heart, Edit, Trash2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ContactHeaderProps {
@@ -14,9 +14,6 @@ interface ContactHeaderProps {
   status?: 'active' | 'inactive';
   tags?: string[];
   affiliatedUserId?: string;
-  onActv8?: () => void;
-  onNomin8?: () => void;
-  onEvalu8?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -29,13 +26,15 @@ export function ContactHeader({
   status = 'active',
   tags = [],
   affiliatedUserId,
-  onActv8,
-  onNomin8,
-  onEvalu8,
   onEdit,
   onDelete
 }: ContactHeaderProps) {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+
+  const handleBuildRapport = () => {
+    navigate(`/rel8/wizard?contactId=${contactId}`);
+  };
 
   return (
     <Card className="relative overflow-hidden">
@@ -61,17 +60,9 @@ export function ContactHeader({
 
             {/* Action Buttons Grid */}
             <div className="grid grid-cols-2 gap-2">
-              <Button onClick={onActv8} variant="outline" size="sm" className="gap-2">
-                <Zap className="h-4 w-4" />
-                Actv8
-              </Button>
-              <Button onClick={onNomin8} variant="outline" size="sm" className="gap-2">
-                <Target className="h-4 w-4" />
-                Nomin8
-              </Button>
-              <Button onClick={onEvalu8} variant="outline" size="sm" className="gap-2">
-                <Star className="h-4 w-4" />
-                Evalu8
+              <Button onClick={handleBuildRapport} variant="default" size="sm" className="gap-2 col-span-2">
+                <Heart className="h-4 w-4" />
+                Build Rapport
               </Button>
               <Button onClick={onEdit} variant="outline" size="sm" className="gap-2">
                 <Edit className="h-4 w-4" />
@@ -81,7 +72,7 @@ export function ContactHeader({
                 onClick={onDelete} 
                 variant="outline" 
                 size="sm"
-                className="col-span-2 gap-2 text-destructive hover:bg-destructive/10"
+                className="gap-2 text-destructive hover:bg-destructive/10"
               >
                 <Trash2 className="h-4 w-4" />
                 Delete
@@ -108,17 +99,9 @@ export function ContactHeader({
 
             {/* Action Buttons Bar */}
             <div className="flex items-center gap-3">
-              <Button onClick={onActv8} variant="outline" className="flex-1 gap-2">
-                <Zap className="h-4 w-4" />
-                Actv8
-              </Button>
-              <Button onClick={onNomin8} variant="outline" className="flex-1 gap-2">
-                <Target className="h-4 w-4" />
-                Nomin8
-              </Button>
-              <Button onClick={onEvalu8} variant="outline" className="flex-1 gap-2">
-                <Star className="h-4 w-4" />
-                Evalu8
+              <Button onClick={handleBuildRapport} variant="default" className="flex-1 gap-2">
+                <Heart className="h-4 w-4" />
+                Build Rapport
               </Button>
               <Button onClick={onEdit} variant="outline" className="flex-1 gap-2">
                 <Edit className="h-4 w-4" />
