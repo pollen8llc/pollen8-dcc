@@ -7,9 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ProfileCard from '@/components/connections/ProfileCard';
 import { Mail, Phone, MapPin, Building2, Tag, Heart, Loader2, User, UserPlus, Clock, Cake, Calendar, Target, Users, MessageSquare } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { getContactById } from "@/services/rel8t/contactService";
 import { format } from "date-fns";
+
+// Helper to show placeholder text for empty fields
+const EmptyPlaceholder = ({ text }: { text: string }) => (
+  <span className="text-muted-foreground/50 italic">{text}</span>
+);
 
 export default function ContactProfile() {
   const { id } = useParams();
@@ -20,18 +24,6 @@ export default function ContactProfile() {
     queryFn: () => getContactById(id!),
     enabled: !!id,
   });
-
-  const handleActv8 = () => {
-    console.log('Actv8 clicked');
-  };
-
-  const handleNomin8 = () => {
-    console.log('Nomin8 clicked');
-  };
-
-  const handleEvalu8 = () => {
-    console.log('Evalu8 clicked');
-  };
 
   const handleEdit = () => {
     navigate(`/rel8/contacts/${id}/edit`);
@@ -111,9 +103,6 @@ export default function ContactProfile() {
           status={(contact.status || "active") as "active" | "inactive"}
           tags={contact.tags || []}
           affiliatedUserId={affiliatedUserId}
-          onActv8={handleActv8}
-          onNomin8={handleNomin8}
-          onEvalu8={handleEvalu8}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
@@ -138,64 +127,64 @@ export default function ContactProfile() {
                   </div>
                 </div>
                 
-                {contact.preferred_name && (
-                  <div className="flex items-start gap-3">
-                    <User className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Preferred Name</div>
-                      <div className="text-sm md:text-base">{contact.preferred_name}</div>
+                <div className="flex items-start gap-3">
+                  <User className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Preferred Name</div>
+                    <div className="text-sm md:text-base">
+                      {contact.preferred_name || <EmptyPlaceholder text="No preferred name set" />}
                     </div>
                   </div>
-                )}
+                </div>
                 
-                {contact.location && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Location</div>
-                      <div className="text-sm md:text-base">{contact.location}</div>
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Location</div>
+                    <div className="text-sm md:text-base">
+                      {contact.location || <EmptyPlaceholder text="No location specified" />}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Column 2 */}
               <div className="space-y-3 md:space-y-4">
-                {contact.email && (
-                  <div className="flex items-start gap-3">
-                    <Mail className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Email</div>
-                      <div className="text-sm md:text-base">{contact.email}</div>
+                <div className="flex items-start gap-3">
+                  <Mail className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Email</div>
+                    <div className="text-sm md:text-base">
+                      {contact.email || <EmptyPlaceholder text="No email added" />}
                     </div>
                   </div>
-                )}
+                </div>
                 
-                {contact.phone && (
-                  <div className="flex items-start gap-3">
-                    <Phone className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Phone</div>
-                      <div className="text-sm md:text-base">{contact.phone}</div>
+                <div className="flex items-start gap-3">
+                  <Phone className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Phone</div>
+                    <div className="text-sm md:text-base">
+                      {contact.phone || <EmptyPlaceholder text="No phone added" />}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
             
-            {contact.bio && (
-              <div className="pt-3 md:pt-4 border-t border-border/50 mt-4">
-                <h4 className="font-semibold mb-2 text-sm md:text-base">Bio</h4>
-                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.bio}</p>
-              </div>
-            )}
+            <div className="pt-3 md:pt-4 border-t border-border/50 mt-4">
+              <h4 className="font-semibold mb-2 text-sm md:text-base">Bio</h4>
+              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                {contact.bio || <EmptyPlaceholder text="No bio added" />}
+              </p>
+            </div>
             
-            {contact.interests && contact.interests.length > 0 && (
-              <div className="pt-3 md:pt-4 border-t border-border/50 mt-4">
-                <h4 className="font-semibold mb-2 text-sm md:text-base flex items-center gap-2">
-                  <Heart className="h-4 w-4" />
-                  Hobbies / Interests
-                </h4>
+            <div className="pt-3 md:pt-4 border-t border-border/50 mt-4">
+              <h4 className="font-semibold mb-2 text-sm md:text-base flex items-center gap-2">
+                <Heart className="h-4 w-4" />
+                Hobbies / Interests
+              </h4>
+              {contact.interests && contact.interests.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {contact.interests.map((interest) => (
                     <Badge key={interest} variant="outline" className="hover:scale-105 transition-transform">
@@ -203,8 +192,10 @@ export default function ContactProfile() {
                     </Badge>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <EmptyPlaceholder text="No interests added" />
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -218,25 +209,31 @@ export default function ContactProfile() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              {contact.last_introduction_date && (
-                <div className="flex items-start gap-3">
-                  <Clock className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                  <div>
-                    <div className="text-xs md:text-sm text-muted-foreground">Last Time You Spoke</div>
-                    <div className="text-sm md:text-base">{format(new Date(contact.last_introduction_date), "MMM d, yyyy")}</div>
+              <div className="flex items-start gap-3">
+                <Clock className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Last Time You Spoke</div>
+                  <div className="text-sm md:text-base">
+                    {contact.last_introduction_date 
+                      ? format(new Date(contact.last_introduction_date), "MMM d, yyyy")
+                      : <EmptyPlaceholder text="Not recorded" />
+                    }
                   </div>
                 </div>
-              )}
+              </div>
               
-              {contact.next_followup_date && (
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                  <div>
-                    <div className="text-xs md:text-sm text-muted-foreground">Next Follow-Up</div>
-                    <div className="text-sm md:text-base">{format(new Date(contact.next_followup_date), "MMM d, yyyy")}</div>
+              <div className="flex items-start gap-3">
+                <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Next Follow-Up</div>
+                  <div className="text-sm md:text-base">
+                    {contact.next_followup_date 
+                      ? format(new Date(contact.next_followup_date), "MMM d, yyyy")
+                      : <EmptyPlaceholder text="No follow-up scheduled" />
+                    }
                   </div>
                 </div>
-              )}
+              </div>
               
               <div className="flex items-start gap-3">
                 <Heart className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
@@ -249,70 +246,80 @@ export default function ContactProfile() {
                 </div>
               </div>
               
-              {contact.preferred_channel && (
-                <div className="flex items-start gap-3">
-                  <MessageSquare className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                  <div>
-                    <div className="text-xs md:text-sm text-muted-foreground">Preferred Channel</div>
-                    <div className="text-sm md:text-base capitalize">{contact.preferred_channel}</div>
+              <div className="flex items-start gap-3">
+                <MessageSquare className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Preferred Channel</div>
+                  <div className="text-sm md:text-base capitalize">
+                    {contact.preferred_channel || <EmptyPlaceholder text="Not specified" />}
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Relevant Dates */}
-        {(contact.birthday || contact.anniversary || contact.upcoming_event) && (
-          <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Cake className="h-5 w-5 text-primary" />
-                Relevant Dates
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                {contact.birthday && (
-                  <div className="flex items-start gap-3">
-                    <Cake className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Birthday</div>
-                      <div className="text-sm md:text-base">{format(new Date(contact.birthday), "MMM d, yyyy")}</div>
-                    </div>
+        <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Cake className="h-5 w-5 text-primary" />
+              Relevant Dates
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div className="flex items-start gap-3">
+                <Cake className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Birthday</div>
+                  <div className="text-sm md:text-base">
+                    {contact.birthday 
+                      ? format(new Date(contact.birthday), "MMM d, yyyy")
+                      : <EmptyPlaceholder text="No birthday added" />
+                    }
                   </div>
-                )}
-                
-                {contact.anniversary && (
-                  <div className="flex items-start gap-3">
-                    <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">
-                        Anniversary {contact.anniversary_type && `(${contact.anniversary_type})`}
-                      </div>
-                      <div className="text-sm md:text-base">{format(new Date(contact.anniversary), "MMM d, yyyy")}</div>
-                    </div>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">
+                    Anniversary {contact.anniversary_type && `(${contact.anniversary_type})`}
                   </div>
-                )}
-                
-                {contact.upcoming_event && (
-                  <div className="flex items-start gap-3 md:col-span-2">
-                    <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Upcoming Event</div>
+                  <div className="text-sm md:text-base">
+                    {contact.anniversary 
+                      ? format(new Date(contact.anniversary), "MMM d, yyyy")
+                      : <EmptyPlaceholder text="No anniversary added" />
+                    }
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3 md:col-span-2">
+                <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Upcoming Event</div>
+                  {contact.upcoming_event ? (
+                    <>
                       <div className="text-sm md:text-base font-medium">{contact.upcoming_event}</div>
                       {contact.upcoming_event_date && (
                         <div className="text-xs text-muted-foreground mt-1">
                           {format(new Date(contact.upcoming_event_date), "MMM d, yyyy")}
                         </div>
                       )}
+                    </>
+                  ) : (
+                    <div className="text-sm md:text-base">
+                      <EmptyPlaceholder text="No upcoming event" />
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Professional */}
         <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
@@ -324,58 +331,60 @@ export default function ContactProfile() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
-              {contact.organization && (
-                <div className="flex items-start gap-3">
-                  <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                  <div>
-                    <div className="text-xs md:text-sm text-muted-foreground">Current Company</div>
-                    <div className="text-sm md:text-base">{contact.organization}</div>
+              <div className="flex items-start gap-3">
+                <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Current Company</div>
+                  <div className="text-sm md:text-base">
+                    {contact.organization || <EmptyPlaceholder text="No company specified" />}
                   </div>
                 </div>
-              )}
+              </div>
               
-              {contact.role && (
-                <div className="flex items-start gap-3">
-                  <User className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                  <div>
-                    <div className="text-xs md:text-sm text-muted-foreground">Role / Title</div>
-                    <div className="text-sm md:text-base">{contact.role}</div>
+              <div className="flex items-start gap-3">
+                <User className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Role / Title</div>
+                  <div className="text-sm md:text-base">
+                    {contact.role || <EmptyPlaceholder text="No role specified" />}
                   </div>
                 </div>
-              )}
+              </div>
               
-              {contact.industry && (
-                <div className="flex items-start gap-3">
-                  <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                  <div>
-                    <div className="text-xs md:text-sm text-muted-foreground">Industry / Category</div>
-                    <div className="text-sm md:text-base">{contact.industry}</div>
+              <div className="flex items-start gap-3">
+                <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Industry / Category</div>
+                  <div className="text-sm md:text-base">
+                    {contact.industry || <EmptyPlaceholder text="No industry specified" />}
                   </div>
                 </div>
-              )}
+              </div>
               
-              {contact.category && (
-                <div className="flex items-start gap-3">
-                  <Tag className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                  <div>
-                    <div className="text-xs md:text-sm text-muted-foreground">Relationship Category</div>
+              <div className="flex items-start gap-3">
+                <Tag className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Relationship Category</div>
+                  {contact.category ? (
                     <Badge variant="outline" style={{ borderColor: contact.category.color }}>
                       {contact.category.name}
                     </Badge>
-                  </div>
+                  ) : (
+                    <EmptyPlaceholder text="No category assigned" />
+                  )}
                 </div>
-              )}
+              </div>
             </div>
             
-            {contact.professional_goals && (
-              <div className="pt-3 md:pt-4 border-t border-border/50">
-                <h4 className="font-semibold mb-2 text-sm md:text-base flex items-center gap-2">
-                  <Target className="h-4 w-4" />
-                  Professional Goals / Current Focus
-                </h4>
-                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.professional_goals}</p>
-              </div>
-            )}
+            <div className="pt-3 md:pt-4 border-t border-border/50">
+              <h4 className="font-semibold mb-2 text-sm md:text-base flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Professional Goals / Current Focus
+              </h4>
+              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                {contact.professional_goals || <EmptyPlaceholder text="No goals specified" />}
+              </p>
+            </div>
           </CardContent>
         </Card>
 
