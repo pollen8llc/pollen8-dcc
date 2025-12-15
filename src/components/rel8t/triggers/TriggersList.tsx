@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Plus, Trash2, Clock, Phone, Mail, MessageCircle, Video, MapPin, PhoneCall, Bell, MoreVertical } from "lucide-react";
+import { Calendar, Plus, Trash2, Clock, Phone, Mail, MessageCircle, Video, MapPin, PhoneCall, MoreVertical } from "lucide-react";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -58,21 +58,29 @@ export function TriggersList({
     }
   };
 
-  const formatCondition = (condition: string) => {
-    try {
-      // Remove escaped quotes and parse if it's a JSON string
-      const cleaned = condition.replace(/\\"/g, '"').replace(/^"|"$/g, '');
-      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-    } catch {
-      return condition;
+  const getFrequencyLabel = (trigger: Trigger) => {
+    if (!trigger.recurrence_pattern) return "One-time";
+    
+    const { type } = trigger.recurrence_pattern;
+    switch (type) {
+      case "hourly": return "Every hour";
+      case "daily": return "Daily";
+      case "weekly": return "Weekly";
+      case "biweekly": return "Every 2 weeks";
+      case "monthly": return "Monthly";
+      case "quarterly": return "Every 3 months";
+      case "yearly": return "Yearly";
+      default: return type ? type.charAt(0).toUpperCase() + type.slice(1) : "One-time";
     }
   };
 
-  const getRecurrenceText = (trigger: Trigger) => {
-    if (!trigger.recurrence_pattern) return null;
-    
-    const { type } = trigger.recurrence_pattern;
-    return `Repeats ${type}`;
+  const formatNextDate = (dateTimeStr?: string) => {
+    if (!dateTimeStr) return null;
+    try {
+      return format(new Date(dateTimeStr), "EEE, MMM d 'at' h:mm a");
+    } catch (error) {
+      return null;
+    }
   };
 
   const getChannelIcon = (channel?: string) => {
@@ -126,9 +134,11 @@ export function TriggersList({
   const isMobile = useIsMobile();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {triggers.map((trigger) => {
-        const nextExecTime = trigger.next_execution_at ? format(new Date(trigger.next_execution_at), "h:mm a") : null;
+        const nextDate = formatNextDate(trigger.next_execution_at);
+        const frequency = getFrequencyLabel(trigger);
+        const channelLabel = getChannelLabel(trigger.outreach_channel);
         const channelDetails = formatChannelDetails(trigger.outreach_channel, trigger.channel_details);
         
         return (
@@ -139,108 +149,80 @@ export function TriggersList({
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 {/* Status Indicator */}
-                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                <div className={`w-2.5 h-2.5 rounded-full mt-1 shrink-0 ${
                   trigger.is_active 
                     ? 'bg-primary shadow-[0_0_8px_rgba(0,234,218,0.4)] animate-pulse' 
-                    : 'bg-muted-foreground/50'
+                    : 'bg-muted-foreground/40'
                 }`} />
-                
-                {/* Icon */}
-                <div className="shrink-0 mt-0.5">
-                  <Bell className={`h-4 w-4 ${trigger.is_active ? 'text-primary' : 'text-muted-foreground'}`} />
-                </div>
                 
                 {/* Content */}
                 <div className="flex-1 min-w-0 space-y-2">
-                  {/* Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
-                    <h3 className={`font-medium text-sm leading-tight ${
-                      trigger.is_active ? 'text-primary' : 'text-foreground'
-                    } sm:truncate sm:flex-1`}>
-                      {trigger.name}
-                    </h3>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {nextExecTime && (
-                        <span className="text-xs text-muted-foreground whitespace-nowrap flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {nextExecTime}
+                  {/* Header with name and menu */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-medium text-sm leading-tight ${
+                        trigger.is_active ? 'text-foreground' : 'text-muted-foreground'
+                      }`}>
+                        {trigger.name}
+                      </h3>
+                      {trigger.description && (
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                          {trigger.description}
+                        </p>
+                      )}
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-primary/10 transition-opacity shrink-0`}
+                        >
+                          <MoreVertical className="h-3.5 w-3.5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="glass-morphism">
+                        <DropdownMenuItem onClick={() => onToggleActive(trigger.id, trigger.is_active || false)}>
+                          {trigger.is_active ? "Pause reminder" : "Resume reminder"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => onDelete(trigger.id)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  
+                  {/* Key Info: When & How Often */}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                    {nextDate && (
+                      <div className="flex items-center gap-1.5 text-primary">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span className="font-medium">{nextDate}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span>{frequency}</span>
+                    </div>
+                  </div>
+
+                  {/* Follow-up Method */}
+                  {trigger.outreach_channel && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-muted-foreground">Follow up via:</span>
+                      <div className="flex items-center gap-1.5 text-foreground">
+                        {getChannelIcon(trigger.outreach_channel)}
+                        <span className="font-medium">{channelLabel}</span>
+                      </div>
+                      {channelDetails && (
+                        <span className="text-muted-foreground truncate max-w-[150px]">
+                          ({channelDetails})
                         </span>
                       )}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-primary/10 transition-opacity`}
-                          >
-                            <MoreVertical className="h-3.5 w-3.5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="glass-morphism">
-                          <DropdownMenuItem onClick={() => onToggleActive(trigger.id, trigger.is_active || false)}>
-                            {trigger.is_active ? "Disable" : "Enable"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => onDelete(trigger.id)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="h-3.5 w-3.5 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                  
-                  {/* Description */}
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {trigger.description}
-                  </p>
-                  
-                  {/* Metadata Row 1 - Condition & Action */}
-                  <div className={`flex ${isMobile ? 'flex-col' : 'flex-row items-center'} gap-1.5 text-xs`}>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-primary/80 capitalize">
-                        {formatCondition(trigger.condition)}
-                      </span>
-                      <span className="text-muted-foreground/50">|</span>
-                      <span className="text-muted-foreground/70 capitalize">
-                        {trigger.action.replace(/_/g, ' ')}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Metadata Row 2 - Recurrence & ID */}
-                  <div className={`flex ${isMobile ? 'flex-col' : 'flex-row items-center'} gap-1.5 text-xs`}>
-                    {trigger.recurrence_pattern && (
-                      <>
-                        <span className="text-primary/60">
-                          {getRecurrenceText(trigger)}
-                        </span>
-                        {!isMobile && <span className="text-muted-foreground/50">|</span>}
-                      </>
-                    )}
-                    <span className="text-muted-foreground/70 font-mono text-[10px]">
-                      #{trigger.id.slice(0, 8)}
-                    </span>
-                  </div>
-
-                  {/* Follow-up Channel */}
-                  {trigger.outreach_channel && (
-                    <div className="flex items-start gap-2 mt-2 p-2 rounded-md bg-primary/5 border border-primary/10">
-                      <div className="text-primary mt-0.5">
-                        {getChannelIcon(trigger.outreach_channel)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-medium text-foreground">
-                          {getChannelLabel(trigger.outreach_channel)}
-                        </div>
-                        {channelDetails && (
-                          <div className="text-xs text-muted-foreground mt-0.5 break-words">
-                            {channelDetails}
-                          </div>
-                        )}
-                      </div>
                     </div>
                   )}
                 </div>
