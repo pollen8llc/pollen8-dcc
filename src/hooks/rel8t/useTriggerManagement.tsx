@@ -20,6 +20,8 @@ export function useTriggerManagement() {
   const [activeTab, setActiveTab] = useState("active");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingTrigger, setEditingTrigger] = useState<Trigger | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [frequencyFilter, setFrequencyFilter] = useState("all");
   const { currentUser } = useUser();
 
   // Fetch triggers
@@ -57,12 +59,28 @@ export function useTriggerManagement() {
     queryFn: getEmailNotifications,
   });
 
-  // Filter triggers based on active tab
-  const filteredTriggers = activeTab === "active"
-    ? triggers.filter(trigger => trigger.is_active)
-    : activeTab === "inactive" 
-      ? triggers.filter(trigger => !trigger.is_active)
-      : triggers;
+  // Filter triggers based on active tab, search query, and frequency filter
+  const filteredTriggers = triggers.filter(trigger => {
+    // Tab filter (active/inactive/all)
+    if (activeTab === "active" && !trigger.is_active) return false;
+    if (activeTab === "inactive" && trigger.is_active) return false;
+    
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesName = trigger.name?.toLowerCase().includes(query);
+      const matchesDescription = trigger.description?.toLowerCase().includes(query);
+      if (!matchesName && !matchesDescription) return false;
+    }
+    
+    // Frequency filter
+    if (frequencyFilter !== "all") {
+      const triggerFrequency = trigger.recurrence_pattern?.type?.toLowerCase();
+      if (triggerFrequency !== frequencyFilter) return false;
+    }
+    
+    return true;
+  });
 
   const handleEditTrigger = (trigger: Trigger) => {
     setEditingTrigger(trigger);
@@ -141,6 +159,10 @@ export function useTriggerManagement() {
     emailNotifications,
     filteredTriggers,
     isLoading,
+    searchQuery,
+    setSearchQuery,
+    frequencyFilter,
+    setFrequencyFilter,
     handleEditTrigger,
     handleUpdateTrigger,
     handleDeleteTrigger,

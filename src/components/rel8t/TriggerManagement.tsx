@@ -1,10 +1,8 @@
-
-import { useState } from "react";
-import { TriggerStatsCards } from "./triggers/TriggerStatsCards";
 import { renderTriggerIcon } from "./triggers/IconRenderer";
 import { TriggerHeader } from "./triggers/TriggerHeader";
 import { TriggerTabs } from "./triggers/TriggerTabs";
 import { TriggerEditDialog } from "./triggers/TriggerEditDialog";
+import { TriggerSearchFilter } from "./triggers/TriggerSearchFilter";
 import { useTriggerManagement } from "@/hooks/rel8t/useTriggerManagement";
 
 export function TriggerManagement() {
@@ -15,11 +13,12 @@ export function TriggerManagement() {
     setIsEditDialogOpen,
     editingTrigger,
     setEditingTrigger,
-    triggers,
-    emailStats,
-    triggerStats,
     filteredTriggers,
     isLoading,
+    searchQuery,
+    setSearchQuery,
+    frequencyFilter,
+    setFrequencyFilter,
     handleEditTrigger,
     handleUpdateTrigger,
     handleDeleteTrigger,
@@ -30,10 +29,11 @@ export function TriggerManagement() {
     <div className="space-y-6">
       <TriggerHeader />
 
-      <TriggerStatsCards 
-        pendingEmails={emailStats.pending} 
-        sentEmails={emailStats.sent} 
-        activeTriggers={triggers.filter(t => t.is_active).length} 
+      <TriggerSearchFilter
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        frequencyFilter={frequencyFilter}
+        onFrequencyFilterChange={setFrequencyFilter}
       />
 
       <TriggerTabs 
