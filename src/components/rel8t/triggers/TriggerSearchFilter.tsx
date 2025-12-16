@@ -11,10 +11,10 @@ interface TriggerSearchFilterProps {
 }
 
 const filterOptions = [
-  { value: "all", label: "All" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "quarterly", label: "Quarterly" },
+  { value: "all", label: "All", color: "bg-primary/20 border-primary/40 text-primary hover:bg-primary/30" },
+  { value: "weekly", label: "Weekly", color: "bg-blue-500/20 border-blue-500/40 text-blue-400 hover:bg-blue-500/30" },
+  { value: "monthly", label: "Monthly", color: "bg-emerald-500/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30" },
+  { value: "quarterly", label: "Quarterly", color: "bg-amber-500/20 border-amber-500/40 text-amber-400 hover:bg-amber-500/30" },
 ];
 
 export function TriggerSearchFilter({
@@ -37,17 +37,17 @@ export function TriggerSearchFilter({
         />
       </div>
 
-      {/* Filter Tabs - styled like profile/edit tabs */}
-      <div className="grid grid-cols-4 gap-2 p-1 rounded-lg bg-muted/50 backdrop-blur-sm">
+      {/* Filter Grid - 4 button grid on mobile and desktop */}
+      <div className="grid grid-cols-4 gap-2">
         {filterOptions.map((option) => (
           <button
             key={option.value}
             onClick={() => onFrequencyFilterChange(option.value)}
             className={cn(
-              "flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
+              "flex items-center justify-center px-2 py-2.5 text-xs sm:text-sm font-medium rounded-lg border transition-all duration-200",
               frequencyFilter === option.value
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                ? cn(option.color, "shadow-md ring-1 ring-white/10")
+                : "bg-muted/30 border-border/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             )}
           >
             {option.label}
