@@ -128,15 +128,15 @@ const TriggerWizard = () => {
         {/* Minimal Header */}
         <div className="flex items-center gap-3 mb-6 mt-6">
           <Zap className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-semibold">Create Trigger</h1>
+          <h1 className="text-xl font-semibold">Create Reminder</h1>
         </div>
 
         {/* Form Card */}
         <Card className="backdrop-blur-md bg-card/95 border-2 border-border">
-          {!showTemplateSelection && (
+            {!showTemplateSelection && (
             <CardHeader className="border-b border-border/50 pb-4">
               <CardTitle className="text-base font-medium">
-                Trigger Configuration
+                Reminder Details
               </CardTitle>
             </CardHeader>
           )}
@@ -165,9 +165,9 @@ const TriggerWizard = () => {
                     </div>
                   )}
 
-                  {/* Trigger Name */}
+                  {/* Reminder Name */}
                   <div className="space-y-2 mb-6">
-                    <Label htmlFor="name" className="text-sm font-medium">Trigger Name *</Label>
+                    <Label htmlFor="name" className="text-sm font-medium">Reminder Name *</Label>
                     <Input
                       id="name"
                       type="text"
@@ -351,7 +351,7 @@ const TriggerWizard = () => {
                         disabled={!formData.name.trim() || (formData.outreachChannel && !isChannelDetailsValid())}
                         className="h-11 px-8"
                       >
-                        {returnTo === 'relationship' ? 'Add Trigger' : 'Create Trigger'}
+                        {returnTo === 'relationship' ? 'Add Reminder' : 'Create Reminder'}
                       </Button>
                     </div>
                   </div>

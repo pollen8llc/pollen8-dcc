@@ -31,19 +31,19 @@ export function TriggersList({
   isLoading
 }: TriggersListProps) {
   if (isLoading) {
-    return <div className="py-8 text-center">Loading triggers...</div>;
+    return <div className="py-8 text-center">Loading reminders...</div>;
   }
   
   if (triggers.length === 0) {
     return (
       <div className="text-center py-8 border border-dashed rounded-lg">
         <Calendar className="mx-auto h-10 w-10 text-muted-foreground/50" />
-        <h3 className="mt-2 text-lg font-semibold">No triggers found</h3>
+        <h3 className="mt-2 text-lg font-semibold">No reminders found</h3>
         <p className="text-muted-foreground mt-1">
-          You don't have any triggers configured yet.
+          You don't have any reminders set up yet.
         </p>
         <Button className="mt-4" size="sm">
-          <Plus className="mr-2 h-4 w-4" /> Create Trigger
+          <Plus className="mr-2 h-4 w-4" /> Create Reminder
         </Button>
       </div>
     );
