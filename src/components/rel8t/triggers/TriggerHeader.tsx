@@ -9,9 +9,9 @@ export function TriggerHeader() {
       <div className="flex items-center gap-3">
         <Zap className="h-7 w-7 text-primary" />
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Automation Triggers</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Automated Reminders</h2>
           <p className="text-sm text-muted-foreground">
-            Create automated actions based on time schedules or contact events
+            Set up automated reminders to follow up with your contacts
           </p>
         </div>
       </div>
@@ -26,7 +26,7 @@ export function TriggerHeader() {
         <Link to="/rel8/triggers/wizard">
           <Button className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Create Trigger
+            Create Reminder
           </Button>
         </Link>
       </div>

@@ -27,9 +27,9 @@ export function TriggerTabs({
   return (
     <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab}>
       <TabsList>
-        <TabsTrigger value="active">Active Triggers</TabsTrigger>
-        <TabsTrigger value="inactive">Inactive Triggers</TabsTrigger>
-        <TabsTrigger value="all">All Triggers</TabsTrigger>
+        <TabsTrigger value="active">Active Reminders</TabsTrigger>
+        <TabsTrigger value="inactive">Paused Reminders</TabsTrigger>
+        <TabsTrigger value="all">All Reminders</TabsTrigger>
       </TabsList>
       <TabsContent value="active" className="space-y-4">
         <TriggersList

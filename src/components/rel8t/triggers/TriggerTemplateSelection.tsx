@@ -76,7 +76,7 @@ export const TRIGGER_TEMPLATES: TriggerTemplate[] = [
   {
     id: "custom",
     name: "Custom",
-    description: "Full control over all trigger settings",
+    description: "Full control over all reminder settings",
     icon: Settings,
     iconColor: "text-muted-foreground",
     accentColor: "border-white/20 hover:border-white/30",
@@ -138,7 +138,7 @@ export function TriggerTemplateSelection({
         <p className="text-sm text-muted-foreground">
           {showDatePickers 
             ? "Select a preset template and choose your start date" 
-            : "Select a preset template to quickly create your trigger"
+            : "Select a preset template to quickly create your reminder"
           }
         </p>
       </div>

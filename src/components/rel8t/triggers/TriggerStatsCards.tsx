@@ -44,7 +44,7 @@ export function TriggerStatsCards({
         <CardContent className="pt-6">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Active Triggers</p>
+              <p className="text-sm font-medium text-muted-foreground">Active Reminders</p>
               <h3 className="text-2xl font-bold">{activeTriggers}</h3>
             </div>
             <Calendar className="h-6 w-6 text-blue-500" />
