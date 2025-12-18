@@ -19,6 +19,8 @@ export function TriggerManagement() {
     setSearchQuery,
     frequencyFilter,
     setFrequencyFilter,
+    selectedDate,
+    setSelectedDate,
     handleEditTrigger,
     handleUpdateTrigger,
     handleDeleteTrigger,
@@ -34,6 +36,8 @@ export function TriggerManagement() {
         onSearchChange={setSearchQuery}
         frequencyFilter={frequencyFilter}
         onFrequencyFilterChange={setFrequencyFilter}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
       />
 
       <TriggerTabs 
