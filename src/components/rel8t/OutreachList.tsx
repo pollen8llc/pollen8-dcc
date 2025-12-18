@@ -19,13 +19,15 @@ interface OutreachListProps {
   showTabs?: boolean;
   defaultTab?: OutreachFilterTab;
   className?: string;
+  showCalendar?: boolean;
 }
 
 const OutreachList = ({ 
   maxItems, 
   showTabs = true, 
   defaultTab = "upcoming", 
-  className = "" 
+  className = "",
+  showCalendar = false
 }: OutreachListProps) => {
   const [activeTab, setActiveTab] = useState<OutreachFilterTab>(defaultTab);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -136,85 +138,87 @@ const OutreachList = ({
     <div className={className}>
       {showTabs && (
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OutreachFilterTab)}>
-          {/* Calendar - Full Width Responsive */}
-          <div className="glass-morphism bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl border border-primary/30 rounded-xl p-3 md:p-6 mb-6 shadow-xl">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 md:mb-4">
-              <h3 className="text-xs md:text-sm font-medium text-muted-foreground">
-                {selectedDate ? `Showing tasks for ${selectedDate.toLocaleDateString()}` : 'Select a date to filter tasks'}
-              </h3>
-              {selectedDate && (
-                <button
-                  onClick={() => setSelectedDate(undefined)}
-                  className="text-xs text-primary hover:underline min-h-[44px] md:min-h-0 flex items-center touch-manipulation"
-                >
-                  Clear filter
-                </button>
+          {/* Collapsible Calendar - shown when showCalendar is true */}
+          {showCalendar && (
+            <div className="glass-morphism bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl border border-primary/30 rounded-xl p-3 md:p-6 mb-6 shadow-xl animate-in slide-in-from-top-2 duration-300">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 md:mb-4">
+                <h3 className="text-xs md:text-sm font-medium text-muted-foreground">
+                  {selectedDate ? `Showing tasks for ${selectedDate.toLocaleDateString()}` : 'Select a date to filter tasks'}
+                </h3>
+                {selectedDate && (
+                  <button
+                    onClick={() => setSelectedDate(undefined)}
+                    className="text-xs text-primary hover:underline min-h-[44px] md:min-h-0 flex items-center touch-manipulation"
+                  >
+                    Clear filter
+                  </button>
+                )}
+              </div>
+              
+              {/* Desktop/Tablet: Calendar Grid */}
+              {!isMobile && (
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  components={{
+                    DayContent: ({ date }) => renderDayContent(date)
+                  }}
+                  className="w-full mx-auto border-0"
+                />
+              )}
+              
+              {/* Mobile: List View */}
+              {isMobile && (
+                <div className="space-y-2">
+                  {/* Date picker button */}
+                  <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="w-full min-h-[44px] justify-start touch-manipulation glassmorphic">
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        {selectedDate ? format(selectedDate, 'EEEE, MMMM d, yyyy') : 'Pick a date'}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="h-[100dvh] w-full max-w-full sm:max-w-[425px] sm:h-auto backdrop-blur-xl bg-card/90 border-primary/30 p-6">
+                      <DialogHeader className="text-center">
+                        <DialogTitle className="text-lg font-semibold">Select a date</DialogTitle>
+                      </DialogHeader>
+                      <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2">
+                        {datesWithTasks.length === 0 ? (
+                          <p className="text-center text-muted-foreground text-sm py-8">No scheduled tasks</p>
+                        ) : (
+                          datesWithTasks.map(({ date, count }) => {
+                            const isSelected = selectedDate && isSameDay(date, selectedDate);
+                            return (
+                              <button
+                                key={date.toISOString()}
+                                onClick={() => {
+                                  setSelectedDate(isSelected ? undefined : date);
+                                  setIsCalendarOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between p-4 rounded-lg transition-all touch-manipulation min-h-[56px] backdrop-blur-md ${
+                                  isSelected 
+                                    ? 'bg-primary/90 text-primary-foreground shadow-lg border border-primary' 
+                                    : 'bg-card/50 hover:bg-card/70 border border-primary/20'
+                                }`}
+                              >
+                                <span className="font-medium text-left">{format(date, 'EEEE, MMMM d, yyyy')}</span>
+                                <span className={`min-w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-bold shadow-sm ${
+                                  isSelected ? 'bg-primary-foreground text-primary' : 'bg-primary text-primary-foreground'
+                                }`}>
+                                  {count}
+                                </span>
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               )}
             </div>
-            
-            {/* Desktop/Tablet: Calendar Grid */}
-            {!isMobile && (
-              <CalendarComponent
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                components={{
-                  DayContent: ({ date }) => renderDayContent(date)
-                }}
-                className="w-full mx-auto border-0"
-              />
-            )}
-            
-            {/* Mobile: List View */}
-            {isMobile && (
-              <div className="space-y-2">
-                {/* Date picker button */}
-                <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full min-h-[44px] justify-start touch-manipulation glassmorphic">
-                      <CalendarDays className="mr-2 h-4 w-4" />
-                      {selectedDate ? format(selectedDate, 'EEEE, MMMM d, yyyy') : 'Pick a date'}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="h-[100dvh] w-full max-w-full sm:max-w-[425px] sm:h-auto backdrop-blur-xl bg-card/90 border-primary/30 p-6">
-                    <DialogHeader className="text-center">
-                      <DialogTitle className="text-lg font-semibold">Select a date</DialogTitle>
-                    </DialogHeader>
-                    <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2">
-                      {datesWithTasks.length === 0 ? (
-                        <p className="text-center text-muted-foreground text-sm py-8">No scheduled tasks</p>
-                      ) : (
-                        datesWithTasks.map(({ date, count }) => {
-                          const isSelected = selectedDate && isSameDay(date, selectedDate);
-                          return (
-                            <button
-                              key={date.toISOString()}
-                              onClick={() => {
-                                setSelectedDate(isSelected ? undefined : date);
-                                setIsCalendarOpen(false);
-                              }}
-                              className={`w-full flex items-center justify-between p-4 rounded-lg transition-all touch-manipulation min-h-[56px] backdrop-blur-md ${
-                                isSelected 
-                                  ? 'bg-primary/90 text-primary-foreground shadow-lg border border-primary' 
-                                  : 'bg-card/50 hover:bg-card/70 border border-primary/20'
-                              }`}
-                            >
-                              <span className="font-medium text-left">{format(date, 'EEEE, MMMM d, yyyy')}</span>
-                              <span className={`min-w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-bold shadow-sm ${
-                                isSelected ? 'bg-primary-foreground text-primary' : 'bg-primary text-primary-foreground'
-                              }`}>
-                                {count}
-                              </span>
-                            </button>
-                          );
-                        })
-                      )}
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            )}
-          </div>
+          )}
 
           <TabsList className="grid grid-cols-3 mb-6 backdrop-blur-sm bg-muted/50">
             <TabsTrigger value="upcoming" className="data-[state=active]:bg-background">

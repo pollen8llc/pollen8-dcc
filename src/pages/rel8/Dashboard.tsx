@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/component
 import { Badge } from "@/components/ui/badge";
 import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
-import { Calendar, Users, Heart, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle, Globe, ChevronDown } from "lucide-react";
+import { Calendar, Users, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle, Globe, ChevronDown } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import NetworkMapGlobe from "@/components/rel8t/NetworkMapGlobe";
@@ -15,6 +15,7 @@ import NetworkMapGlobe from "@/components/rel8t/NetworkMapGlobe";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isNetworkMapOpen, setIsNetworkMapOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   // Get outreach status counts with shorter staleTime
   const {
@@ -45,11 +46,6 @@ const Dashboard = () => {
     queryKey: ["contact-categories"],
     queryFn: getCategories
   });
-
-  // Handler for building rapport (renamed from handleCreateRelationship)
-  const handleBuildRapport = () => {
-    navigate("/rel8/wizard");
-  };
 
   // Quick stats calculations
   const quickStats = {
@@ -151,14 +147,18 @@ const Dashboard = () => {
                   <h3 className="text-lg font-semibold">Outreach Tasks</h3>
                 </div>
               </div>
-              <Button onClick={handleBuildRapport} size="sm">
-                <Heart className="h-4 w-4 mr-2" />
-                Build Rapport
+              <Button 
+                onClick={() => setIsCalendarOpen(!isCalendarOpen)} 
+                size="sm"
+                variant={isCalendarOpen ? "default" : "outline"}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                {isCalendarOpen ? "Hide Calendar" : "Search by Date"}
               </Button>
             </div>
           </div>
           <CardContent className="pt-6">
-            <OutreachList />
+            <OutreachList showCalendar={isCalendarOpen} />
           </CardContent>
         </Card>
 
