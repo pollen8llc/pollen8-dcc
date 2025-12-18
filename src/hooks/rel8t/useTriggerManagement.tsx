@@ -22,6 +22,7 @@ export function useTriggerManagement() {
   const [editingTrigger, setEditingTrigger] = useState<Trigger | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [frequencyFilter, setFrequencyFilter] = useState("all");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const { currentUser } = useUser();
 
   // Fetch triggers
@@ -59,7 +60,7 @@ export function useTriggerManagement() {
     queryFn: getEmailNotifications,
   });
 
-  // Filter triggers based on active tab, search query, and frequency filter
+  // Filter triggers based on active tab, search query, frequency filter, and date
   const filteredTriggers = triggers.filter(trigger => {
     // Tab filter (active/inactive/all)
     if (activeTab === "active" && !trigger.is_active) return false;
@@ -77,6 +78,25 @@ export function useTriggerManagement() {
     if (frequencyFilter !== "all") {
       const triggerFrequency = trigger.recurrence_pattern?.type?.toLowerCase();
       if (triggerFrequency !== frequencyFilter) return false;
+    }
+    
+    // Date filter
+    if (selectedDate) {
+      const triggerDate = trigger.recurrence_pattern?.start_date 
+        ? new Date(trigger.recurrence_pattern.start_date) 
+        : trigger.created_at 
+          ? new Date(trigger.created_at) 
+          : null;
+      
+      if (triggerDate) {
+        const isSameDay = 
+          triggerDate.getFullYear() === selectedDate.getFullYear() &&
+          triggerDate.getMonth() === selectedDate.getMonth() &&
+          triggerDate.getDate() === selectedDate.getDate();
+        if (!isSameDay) return false;
+      } else {
+        return false;
+      }
     }
     
     return true;
@@ -163,6 +183,8 @@ export function useTriggerManagement() {
     setSearchQuery,
     frequencyFilter,
     setFrequencyFilter,
+    selectedDate,
+    setSelectedDate,
     handleEditTrigger,
     handleUpdateTrigger,
     handleDeleteTrigger,
