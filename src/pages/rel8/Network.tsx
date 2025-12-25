@@ -6,6 +6,8 @@ import { NetworkContactCard } from "@/components/rel8t/network/NetworkContactCar
 import { Actv8EmptyState } from "@/components/rel8t/network/Actv8EmptyState";
 import { Button } from "@/components/ui/button";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
+import Navbar from "@/components/Navbar";
 import { UserPlus, Upload, BarChart3, Loader2 } from "lucide-react";
 
 export default function Network() {
@@ -39,7 +41,9 @@ export default function Network() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <Navbar />
+        <DotConnectorHeader />
         <div className="container max-w-7xl mx-auto px-4 py-6 pb-24">
           <div className="flex items-center justify-center py-24">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -54,7 +58,9 @@ export default function Network() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <Navbar />
+        <DotConnectorHeader />
         <div className="container max-w-7xl mx-auto px-4 py-6 pb-24">
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <p className="text-destructive mb-4">Failed to load contacts</p>
@@ -70,7 +76,9 @@ export default function Network() {
 
   if (contacts.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <Navbar />
+        <DotConnectorHeader />
         <div className="container max-w-7xl mx-auto px-4 py-6 pb-24">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
@@ -90,7 +98,9 @@ export default function Network() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <Navbar />
+      <DotConnectorHeader />
       <div className="container max-w-7xl mx-auto px-4 py-6 pb-24">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
