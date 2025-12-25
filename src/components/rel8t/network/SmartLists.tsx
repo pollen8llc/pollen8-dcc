@@ -1,7 +1,6 @@
 import { mockNetworkContacts, industries } from "@/data/mockNetworkData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Building2, Globe, Users } from "lucide-react";
 
 export function SmartLists() {
@@ -83,32 +82,22 @@ export function SmartLists() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={industryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {industryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(215 25% 10%)', 
-                    border: '1px solid hsl(215 25% 18%)',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="space-y-3">
+            {industryData.map((item, index) => (
+              <div 
+                key={item.name}
+                className="p-3 rounded-lg bg-card/40 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-2 h-6 rounded-full"
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  />
+                  <span className="text-sm">{item.name}</span>
+                </div>
+                <span className="text-xl font-bold text-primary">{item.value}</span>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
