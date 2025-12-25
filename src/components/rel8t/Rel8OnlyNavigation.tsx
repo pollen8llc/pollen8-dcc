@@ -57,7 +57,7 @@ export function Rel8OnlyNavigation() {
     <nav className="flex items-center gap-2 p-2 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg">
       {/* Avatar Link - scales down on smaller screens */}
       <Link
-        to="/p8/dashboard"
+        to="/rel8/actv8"
         className="flex items-center justify-center flex-shrink-0"
       >
         <UnifiedAvatar
