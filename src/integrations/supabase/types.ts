@@ -2219,6 +2219,221 @@ export type Database = {
           },
         ]
       }
+      rms_actv8_interactions: {
+        Row: {
+          actv8_contact_id: string
+          created_at: string | null
+          follow_up: string | null
+          id: string
+          interaction_date: string
+          location: string | null
+          strengthened: boolean | null
+          topics: string | null
+          user_id: string
+          warmth: string | null
+        }
+        Insert: {
+          actv8_contact_id: string
+          created_at?: string | null
+          follow_up?: string | null
+          id?: string
+          interaction_date: string
+          location?: string | null
+          strengthened?: boolean | null
+          topics?: string | null
+          user_id: string
+          warmth?: string | null
+        }
+        Update: {
+          actv8_contact_id?: string
+          created_at?: string | null
+          follow_up?: string | null
+          id?: string
+          interaction_date?: string
+          location?: string | null
+          strengthened?: boolean | null
+          topics?: string | null
+          user_id?: string
+          warmth?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_actv8_interactions_actv8_contact_id_fkey"
+            columns: ["actv8_contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_actv8_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rms_actv8_path_steps: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          name: string
+          path_id: string
+          step_order: number
+          suggested_action: string
+          suggested_channel: string
+          suggested_tone: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id: string
+          name: string
+          path_id: string
+          step_order: number
+          suggested_action: string
+          suggested_channel: string
+          suggested_tone: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          name?: string
+          path_id?: string
+          step_order?: number
+          suggested_action?: string
+          suggested_channel?: string
+          suggested_tone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_actv8_path_steps_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "rms_actv8_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rms_actv8_paths: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string
+          id: string
+          is_system: boolean | null
+          name: string
+          target_strength: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          id: string
+          is_system?: boolean | null
+          name: string
+          target_strength: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          id?: string
+          is_system?: boolean | null
+          name?: string
+          target_strength?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      rms_actv8_strategies: {
+        Row: {
+          actv8_contact_id: string
+          created_at: string | null
+          id: string
+          intention_id: string
+          intention_notes: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          actv8_contact_id: string
+          created_at?: string | null
+          id?: string
+          intention_id: string
+          intention_notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          actv8_contact_id?: string
+          created_at?: string | null
+          id?: string
+          intention_id?: string
+          intention_notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_actv8_strategies_actv8_contact_id_fkey"
+            columns: ["actv8_contact_id"]
+            isOneToOne: true
+            referencedRelation: "rms_actv8_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rms_actv8_strategy_actions: {
+        Row: {
+          action_type: string
+          channel: string
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          scheduled_date: string | null
+          status: string | null
+          strategy_id: string
+          tone: string
+          updated_at: string | null
+        }
+        Insert: {
+          action_type: string
+          channel: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_date?: string | null
+          status?: string | null
+          strategy_id: string
+          tone: string
+          updated_at?: string | null
+        }
+        Update: {
+          action_type?: string
+          channel?: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_date?: string | null
+          status?: string | null
+          strategy_id?: string
+          tone?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_actv8_strategy_actions_strategy_id_fkey"
+            columns: ["strategy_id"]
+            isOneToOne: false
+            referencedRelation: "rms_actv8_strategies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rms_contact_affiliations: {
         Row: {
           affiliated_community_id: string | null
