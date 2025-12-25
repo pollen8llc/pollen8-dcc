@@ -109,22 +109,14 @@ export function DevelopmentPathCard({
                   
                   {/* Current Step Actions */}
                   {isCurrent && (
-                    <div className="flex gap-2 mt-2">
+                    <div className="mt-2">
                       <Button 
                         size="sm" 
                         variant="default"
                         className="h-7 text-xs"
                         onClick={() => onPlanTouchpoint?.(index)}
                       >
-                        Plan Touchpoint
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        className="h-7 text-xs"
-                        onClick={onAdvanceStep}
-                      >
-                        Skip Step
+                        Manage Plan
                       </Button>
                     </div>
                   )}
