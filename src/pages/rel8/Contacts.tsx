@@ -7,12 +7,12 @@ import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { getContacts, deleteMultipleContacts, updateMultipleContacts, getCategories } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 import { BulkCategorizeDialog } from "@/components/rel8t/BulkCategorizeDialog";
+import { ActivateContactModal } from "@/components/rel8t/network/ActivateContactModal";
 
 const Contacts = () => {
   const navigate = useNavigate();
@@ -24,6 +24,11 @@ const Contacts = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [isCategorizeDialogOpen, setIsCategorizeDialogOpen] = useState(false);
+  
+  // Activation modal state
+  const [activateModalOpen, setActivateModalOpen] = useState(false);
+  const [activateContactId, setActivateContactId] = useState<string>("");
+  const [activateContactName, setActivateContactName] = useState<string>("");
 
   // Fetch contacts
   const { data: contacts = [], isLoading } = useQuery({
@@ -161,16 +166,30 @@ const Contacts = () => {
   };
 
   const handleBuildRapportWithSelected = () => {
-    // Get the full contact objects for all selected IDs
     const selectedContactObjects = contacts.filter(contact => 
       selectedContacts.includes(contact.id)
     );
-    
-    // Set them in the context
     setPreSelectedContacts(selectedContactObjects);
-    
-    // Navigate to the wizard
     navigate("/rel8/wizard");
+  };
+
+  const handleActivateSelected = () => {
+    if (selectedContacts.length === 1) {
+      const contact = contacts.find(c => c.id === selectedContacts[0]);
+      if (contact) {
+        setActivateContactId(contact.id);
+        setActivateContactName(contact.name || 'Contact');
+        setActivateModalOpen(true);
+      }
+    } else if (selectedContacts.length > 1) {
+      // For multiple contacts, activate first one and show a message
+      const contact = contacts.find(c => c.id === selectedContacts[0]);
+      if (contact) {
+        setActivateContactId(contact.id);
+        setActivateContactName(contact.name || 'Contact');
+        setActivateModalOpen(true);
+      }
+    }
   };
 
   return (
@@ -225,7 +244,7 @@ const Contacts = () => {
                     
                     <Button
                       variant="default"
-                      onClick={() => navigate("/rel8/actv8")}
+                      onClick={handleActivateSelected}
                       className="flex items-center justify-center gap-2 w-full sm:w-auto"
                       size="sm"
                     >
@@ -367,6 +386,13 @@ const Contacts = () => {
           onOpenChange={setIsCategorizeDialogOpen}
           selectedCount={selectedContacts.length}
           onSubmit={handleBulkCategorize}
+        />
+
+        <ActivateContactModal
+          open={activateModalOpen}
+          onOpenChange={setActivateModalOpen}
+          contactId={activateContactId}
+          contactName={activateContactName}
         />
       </div>
 
