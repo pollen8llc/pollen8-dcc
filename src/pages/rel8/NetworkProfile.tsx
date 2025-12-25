@@ -79,9 +79,9 @@ export default function NetworkProfile() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
       <div className="container max-w-4xl mx-auto px-4 py-6 pb-24">
         {/* Back Button */}
-        <Link to="/rel8/network" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+        <Link to="/rel8/actv8" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" />
-          Back to Network
+          Back to Actv8
         </Link>
 
         {/* Hero Section */}
@@ -225,7 +225,7 @@ export default function NetworkProfile() {
           <Button variant="outline" onClick={() => setShowLogModal(true)}>
             Log Interaction
           </Button>
-          <Link to={`/rel8/network/${id}/strategy`}>
+          <Link to={`/rel8/actv8/${id}/strategy`}>
             <Button variant="outline">Build Strategy</Button>
           </Link>
         </div>

@@ -450,22 +450,22 @@ const AppRoutes = () => {
             </NonServiceProviderRoute>
           } />
 
-          {/* REL8 Network Hub and Sub-pages */}
-          <Route path="/rel8/network" element={
+          {/* REL8 Actv8 Hub and Sub-pages */}
+          <Route path="/rel8/actv8" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <Network />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/rel8/network/:id/profile" element={
+          <Route path="/rel8/actv8/:id/profile" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <NetworkProfile />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/rel8/network/:id/strategy" element={
+          <Route path="/rel8/actv8/:id/strategy" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <NetworkStrategy />

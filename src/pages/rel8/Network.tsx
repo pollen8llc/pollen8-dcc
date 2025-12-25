@@ -46,7 +46,7 @@ export default function Network() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Link to="/rel8/insights">
+            <Link to="/rel8/actv8/insights">
               <Button variant="outline" className="gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Insights
