@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import ContactList from "@/components/rel8t/ContactList";
-import { Heart, Trash2, CheckSquare, Square, Search, Filter, Users } from "lucide-react";
+import { Heart, Trash2, CheckSquare, Square, Search, Filter, Users, Zap } from "lucide-react";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -221,6 +221,16 @@ const Contacts = () => {
                     >
                       <Heart className="h-4 w-4" />
                       <span>Build Rapport</span>
+                    </Button>
+                    
+                    <Button
+                      variant="default"
+                      onClick={() => navigate("/rel8/actv8")}
+                      className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                      size="sm"
+                    >
+                      <Zap className="h-4 w-4" />
+                      <span>Activate</span>
                     </Button>
                     
                     <Button

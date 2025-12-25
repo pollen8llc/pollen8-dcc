@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Heart, Edit, Trash2 } from 'lucide-react';
+import { Heart, Edit, Trash2, Zap } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ContactHeaderProps {
@@ -36,6 +36,10 @@ export function ContactHeader({
     navigate(`/rel8/wizard?contactId=${contactId}`);
   };
 
+  const handleActivate = () => {
+    navigate('/rel8/actv8');
+  };
+
   return (
     <Card className="relative overflow-hidden">
       <div className="p-4 md:p-6">
@@ -60,9 +64,13 @@ export function ContactHeader({
 
             {/* Action Buttons Grid */}
             <div className="grid grid-cols-2 gap-2">
-              <Button onClick={handleBuildRapport} variant="default" size="sm" className="gap-2 col-span-2">
+              <Button onClick={handleBuildRapport} variant="default" size="sm" className="gap-2">
                 <Heart className="h-4 w-4" />
                 Build Rapport
+              </Button>
+              <Button onClick={handleActivate} variant="default" size="sm" className="gap-2">
+                <Zap className="h-4 w-4" />
+                Activate
               </Button>
               <Button onClick={onEdit} variant="outline" size="sm" className="gap-2">
                 <Edit className="h-4 w-4" />
@@ -102,6 +110,10 @@ export function ContactHeader({
               <Button onClick={handleBuildRapport} variant="default" className="flex-1 gap-2">
                 <Heart className="h-4 w-4" />
                 Build Rapport
+              </Button>
+              <Button onClick={handleActivate} variant="default" className="flex-1 gap-2">
+                <Zap className="h-4 w-4" />
+                Activate
               </Button>
               <Button onClick={onEdit} variant="outline" className="flex-1 gap-2">
                 <Edit className="h-4 w-4" />
