@@ -2,6 +2,7 @@ import { mockNetworkContacts, industries } from "@/data/mockNetworkData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Globe, Users } from "lucide-react";
+import NetworkMapGlobe from "@/components/rel8t/NetworkMapGlobe";
 
 export function SmartLists() {
   // Calculate industry distribution
@@ -10,7 +11,7 @@ export function SmartLists() {
     value: mockNetworkContacts.filter(c => c.industry === industry).length
   })).filter(d => d.value > 0);
 
-  // Color palette for pie chart
+  // Color palette
   const COLORS = [
     'hsl(174, 100%, 46%)',
     'hsl(217, 91%, 60%)',
@@ -35,16 +36,9 @@ export function SmartLists() {
     { type: 'future_opportunity', label: 'Future Opportunities', count: mockNetworkContacts.filter(c => c.relationshipType === 'future_opportunity').length },
   ].filter(d => d.count > 0);
 
-  // Location distribution
-  const locations = [...new Set(mockNetworkContacts.map(c => c.location))];
-  const locationData = locations.map(loc => ({
-    location: loc,
-    count: mockNetworkContacts.filter(c => c.location === loc).length
-  })).sort((a, b) => b.count - a.count);
-
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      {/* Geographic Distribution */}
+      {/* Geographic Distribution - Network Map Globe */}
       <Card className="glass-card md:col-span-2">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -53,23 +47,7 @@ export function SmartLists() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {locationData.map((loc, index) => (
-              <div 
-                key={loc.location}
-                className="p-4 rounded-lg bg-card/40 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-2 h-8 rounded-full"
-                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                  />
-                  <span className="text-sm">{loc.location}</span>
-                </div>
-                <span className="text-2xl font-bold text-primary">{loc.count}</span>
-              </div>
-            ))}
-          </div>
+          <NetworkMapGlobe />
         </CardContent>
       </Card>
 
