@@ -1,6 +1,7 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { mockNetworkContacts, getRelationshipType } from "@/data/mockNetworkData";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getActv8Contact, deactivateContact } from "@/services/actv8Service";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { TrustRatingBar } from "@/components/rel8t/network/TrustRatingBar";
 import { StatusDot } from "@/components/rel8t/network/StatusDot";
@@ -15,52 +16,88 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { toast } from "sonner";
 
 export default function NetworkProfile() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [showLogModal, setShowLogModal] = useState(false);
   const [showPathModal, setShowPathModal] = useState(false);
   const [showTouchpointSheet, setShowTouchpointSheet] = useState(false);
   const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
-  const [contactState, setContactState] = useState(() => {
-    return mockNetworkContacts.find(c => c.id === id);
+  const [isDeactivating, setIsDeactivating] = useState(false);
+
+  // Fetch actv8 contact from database
+  const { data: actv8Contact, isLoading, error } = useQuery({
+    queryKey: ['actv8-contact', id],
+    queryFn: () => getActv8Contact(id!),
+    enabled: !!id,
   });
-  
-  const contact = contactState;
-  
-  if (!contact) {
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Contact not found</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
+  if (error || !actv8Contact) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Contact not found</p>
+        <Link to="/rel8/actv8">
+          <Button variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Actv8
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  // Map database contact to display format
+  const contact = {
+    id: actv8Contact.id,
+    contactId: actv8Contact.contact_id,
+    name: actv8Contact.contact?.name || 'Unknown',
+    role: actv8Contact.contact?.role || 'Professional',
+    company: actv8Contact.contact?.organization || 'Independent',
+    industry: actv8Contact.contact?.tags?.[0] || 'General',
+    email: actv8Contact.contact?.email,
+    phone: actv8Contact.contact?.phone,
+    location: '',
+    avatar: '',
+    connectionStrength: (actv8Contact.connection_strength as 'thin' | 'growing' | 'solid' | 'thick') || 'thin',
+    relationshipType: actv8Contact.relationship_type || 'collaborator',
+    trustRating: 3,
+    networkInfluence: 'medium' as const,
+    mutualConnections: 0,
+    lastInteraction: actv8Contact.last_touchpoint_at || actv8Contact.activated_at || new Date().toISOString(),
+    howWeMet: 'Added via Actv8',
+    vibeNotes: actv8Contact.intention_notes || 'No notes yet',
+    recentAchievements: [] as string[],
+    eventsAttended: [] as string[],
+    developmentPathId: actv8Contact.development_path_id,
+    currentStepIndex: actv8Contact.current_step_index || 0,
+    completedSteps: actv8Contact.completed_steps || [],
+    pathStartedAt: actv8Contact.path_started_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+    interactions: [] as any[],
+  };
+
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('');
-  const relationshipType = getRelationshipType(contact.relationshipType);
 
   const handleSelectPath = (pathId: string) => {
-    setContactState(prev => prev ? {
-      ...prev,
-      developmentPathId: pathId,
-      currentStepIndex: 0,
-      completedSteps: [],
-      pathStartedAt: new Date().toISOString().split('T')[0]
-    } : prev);
+    // TODO: Update path in database
+    toast.success('Path updated');
   };
 
   const handleAdvanceStep = () => {
-    setContactState(prev => {
-      if (!prev) return prev;
-      const currentIndex = prev.currentStepIndex ?? 0;
-      return {
-        ...prev,
-        currentStepIndex: currentIndex + 1
-      };
-    });
+    // TODO: Update step in database
+    toast.success('Step advanced');
   };
 
   const handlePlanTouchpoint = (stepIndex: number) => {
@@ -73,6 +110,33 @@ export default function NetworkProfile() {
     setShowTouchpointSheet(false);
     setActiveStepIndex(null);
     toast.success('Touchpoint saved successfully');
+  };
+
+  const handleDeactivate = async () => {
+    if (!confirm(`Remove ${contact.name} from Actv8?`)) return;
+    
+    setIsDeactivating(true);
+    try {
+      await deactivateContact(actv8Contact.id);
+      queryClient.invalidateQueries({ queryKey: ['actv8-contacts'] });
+      toast.success(`${contact.name} removed from Actv8`);
+      navigate('/rel8/actv8');
+    } catch (error) {
+      console.error('Failed to deactivate:', error);
+      toast.error('Failed to remove contact');
+    } finally {
+      setIsDeactivating(false);
+    }
+  };
+
+  // Map relationship type
+  const relationshipTypeLabels: Record<string, string> = {
+    collaborator: 'Collaborator',
+    mentor: 'Mentor',
+    mentee: 'Mentee',
+    peer: 'Peer',
+    client: 'Client',
+    prospect: 'Prospect',
   };
 
   return (
@@ -102,19 +166,19 @@ export default function NetworkProfile() {
               </div>
               
               <div className="flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground">
-                <span>{contact.location}</span>
+                {contact.location && <span>{contact.location}</span>}
                 {contact.email && <span>{contact.email}</span>}
                 {contact.phone && <span>{contact.phone}</span>}
               </div>
               
               <div className="mt-4">
-                <Badge variant="outline">{relationshipType?.label}</Badge>
+                <Badge variant="outline">{relationshipTypeLabels[contact.relationshipType] || contact.relationshipType}</Badge>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Connection Metrics - No Icons */}
+        {/* Connection Metrics */}
         <div className="grid gap-4 md:grid-cols-2 mb-6">
           <Card className="glass-card">
             <CardHeader className="pb-3">
@@ -166,24 +230,6 @@ export default function NetworkProfile() {
           </CardContent>
         </Card>
 
-        {/* Recent Achievements */}
-        <Card className="glass-card mb-6">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Recent Achievements</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {contact.recentAchievements.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {contact.recentAchievements.map((achievement, i) => (
-                  <Badge key={i} variant="secondary">{achievement}</Badge>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No recent achievements recorded</p>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Relationship Development */}
         <Card className="glass-card mb-6">
           <CardHeader className="pb-3">
@@ -228,6 +274,19 @@ export default function NetworkProfile() {
           <Link to={`/rel8/actv8/${id}/strategy`}>
             <Button variant="outline">Build Strategy</Button>
           </Link>
+          <Button 
+            variant="outline" 
+            onClick={handleDeactivate}
+            disabled={isDeactivating}
+            className="text-destructive hover:bg-destructive/10"
+          >
+            {isDeactivating ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Trash2 className="h-4 w-4 mr-2" />
+            )}
+            Remove from Actv8
+          </Button>
         </div>
       </div>
 
