@@ -77,7 +77,7 @@ export function InsightCards() {
             {dormantContacts.slice(0, 4).map(contact => (
               <Link 
                 key={contact.id}
-                to={`/rel8/network/${contact.id}/profile`}
+                to={`/rel8/actv8/${contact.id}/profile`}
                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-card/60 transition-colors"
               >
                 <Avatar className="h-8 w-8">
@@ -118,7 +118,7 @@ export function InsightCards() {
             {gainingMomentum.slice(0, 4).map(contact => (
               <Link 
                 key={contact.id}
-                to={`/rel8/network/${contact.id}/profile`}
+                to={`/rel8/actv8/${contact.id}/profile`}
                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-card/60 transition-colors"
               >
                 <Avatar className="h-8 w-8">
@@ -159,7 +159,7 @@ export function InsightCards() {
             {highValueContacts.slice(0, 4).map(contact => (
               <Link 
                 key={contact.id}
-                to={`/rel8/network/${contact.id}/profile`}
+                to={`/rel8/actv8/${contact.id}/profile`}
                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-card/60 transition-colors"
               >
                 <Avatar className="h-8 w-8">
@@ -192,7 +192,7 @@ export function InsightCards() {
             {contactsWithStrategies.map(contact => (
               <Link 
                 key={contact.id}
-                to={`/rel8/network/${contact.id}/strategy`}
+                to={`/rel8/actv8/${contact.id}/strategy`}
                 className="p-4 rounded-lg bg-card/40 hover:bg-card/60 transition-colors"
               >
                 <div className="flex items-center gap-3 mb-3">

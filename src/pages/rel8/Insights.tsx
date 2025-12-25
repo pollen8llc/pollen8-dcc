@@ -12,8 +12,8 @@ export default function Insights() {
       <div className="container max-w-7xl mx-auto px-4 py-6 pb-24">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <Link to="/rel8/network" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-2">
-              <ArrowLeft className="h-4 w-4" />Back to Network
+            <Link to="/rel8/actv8" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-2">
+              <ArrowLeft className="h-4 w-4" />Back to Actv8
             </Link>
             <h1 className="text-3xl font-bold">Relationship Insights</h1>
             <p className="text-muted-foreground">Understand and nurture your professional network</p>

@@ -44,13 +44,13 @@ export default function NetworkStrategy() {
 
   const handleSave = () => {
     toast({ title: "Strategy Saved!", description: `Your relationship strategy for ${contact.name} has been created.` });
-    navigate(`/rel8/network/${id}/timeline`);
+    navigate(`/rel8/actv8/${id}/timeline`);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
       <div className="container max-w-3xl mx-auto px-4 py-6 pb-24">
-        <Link to={`/rel8/network/${id}/profile`} className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+        <Link to={`/rel8/actv8/${id}/profile`} className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" />Back to Profile
         </Link>
 

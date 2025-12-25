@@ -23,7 +23,7 @@ export function NetworkContactCard({ contact, viewMode }: NetworkContactCardProp
 
   if (viewMode === 'list') {
     return (
-      <Link to={`/rel8/network/${contact.id}/profile`}>
+      <Link to={`/rel8/actv8/${contact.id}/profile`}>
         <div className="glass-card p-4 flex items-center gap-4 hover:border-primary/30 transition-all cursor-pointer">
           <Avatar className="h-12 w-12">
             <AvatarImage src={contact.avatar} alt={contact.name} />
@@ -59,7 +59,7 @@ export function NetworkContactCard({ contact, viewMode }: NetworkContactCardProp
   }
 
   return (
-    <Link to={`/rel8/network/${contact.id}/profile`}>
+    <Link to={`/rel8/actv8/${contact.id}/profile`}>
       <div className="glass-card p-0 hover:border-primary/30 transition-all cursor-pointer h-full flex flex-col">
         {/* Section 1: Identity */}
         <div className="p-4 flex items-start gap-3 border-b border-border/30">
