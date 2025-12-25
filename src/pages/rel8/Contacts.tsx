@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import ContactList from "@/components/rel8t/ContactList";
-import { Heart, Trash2, CheckSquare, Square, Search, Filter, Users, Zap } from "lucide-react";
+import { Heart, Trash2, CheckSquare, Square, Search, Filter, Users, Zap, Loader2 } from "lucide-react";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,9 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { getContacts, deleteMultipleContacts, updateMultipleContacts, getCategories } from "@/services/rel8t/contactService";
+import { activateContact } from "@/services/actv8Service";
 import { toast } from "@/hooks/use-toast";
 import { BulkCategorizeDialog } from "@/components/rel8t/BulkCategorizeDialog";
-import { ActivateContactModal } from "@/components/rel8t/network/ActivateContactModal";
 
 const Contacts = () => {
   const navigate = useNavigate();
@@ -24,11 +24,7 @@ const Contacts = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [isCategorizeDialogOpen, setIsCategorizeDialogOpen] = useState(false);
-  
-  // Activation modal state
-  const [activateModalOpen, setActivateModalOpen] = useState(false);
-  const [activateContactId, setActivateContactId] = useState<string>("");
-  const [activateContactName, setActivateContactName] = useState<string>("");
+  const [isActivating, setIsActivating] = useState(false);
 
   // Fetch contacts
   const { data: contacts = [], isLoading } = useQuery({
@@ -173,22 +169,35 @@ const Contacts = () => {
     navigate("/rel8/wizard");
   };
 
-  const handleActivateSelected = () => {
-    if (selectedContacts.length === 1) {
-      const contact = contacts.find(c => c.id === selectedContacts[0]);
-      if (contact) {
-        setActivateContactId(contact.id);
-        setActivateContactName(contact.name || 'Contact');
-        setActivateModalOpen(true);
+  const handleActivateSelected = async () => {
+    if (selectedContacts.length === 0) return;
+    
+    setIsActivating(true);
+    try {
+      // Activate all selected contacts
+      for (const contactId of selectedContacts) {
+        await activateContact(contactId);
       }
-    } else if (selectedContacts.length > 1) {
-      // For multiple contacts, activate first one and show a message
-      const contact = contacts.find(c => c.id === selectedContacts[0]);
-      if (contact) {
-        setActivateContactId(contact.id);
-        setActivateContactName(contact.name || 'Contact');
-        setActivateModalOpen(true);
-      }
+      
+      queryClient.invalidateQueries({ queryKey: ['actv8-contacts'] });
+      
+      toast({
+        title: "Contacts activated",
+        description: `${selectedContacts.length} contact(s) added to Actv8`,
+      });
+      
+      setSelectedContacts([]);
+      setIsSelectionMode(false);
+      navigate('/rel8/actv8');
+    } catch (error) {
+      console.error('Failed to activate contacts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to activate contacts. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsActivating(false);
     }
   };
 
@@ -245,11 +254,21 @@ const Contacts = () => {
                     <Button
                       variant="default"
                       onClick={handleActivateSelected}
+                      disabled={isActivating}
                       className="flex items-center justify-center gap-2 w-full sm:w-auto"
                       size="sm"
                     >
-                      <Zap className="h-4 w-4" />
-                      <span>Activate</span>
+                      {isActivating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Adding...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="h-4 w-4" />
+                          <span>Activate</span>
+                        </>
+                      )}
                     </Button>
                     
                     <Button
@@ -386,13 +405,6 @@ const Contacts = () => {
           onOpenChange={setIsCategorizeDialogOpen}
           selectedCount={selectedContacts.length}
           onSubmit={handleBulkCategorize}
-        />
-
-        <ActivateContactModal
-          open={activateModalOpen}
-          onOpenChange={setActivateModalOpen}
-          contactId={activateContactId}
-          contactName={activateContactName}
         />
       </div>
 
