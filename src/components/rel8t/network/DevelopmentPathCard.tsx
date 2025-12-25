@@ -130,12 +130,7 @@ export function DevelopmentPathCard({
       {/* Path Complete State */}
       {isComplete && (
         <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-center">
-          <p className="font-medium text-emerald-600 dark:text-emerald-400 mb-2">Path Complete!</p>
-          <div className="flex gap-2 justify-center">
-            <Button size="sm" variant="outline" onClick={onChangePath}>
-              Choose New Path
-            </Button>
-          </div>
+          <p className="font-medium text-emerald-600 dark:text-emerald-400">Path Complete!</p>
         </div>
       )}
     </div>
