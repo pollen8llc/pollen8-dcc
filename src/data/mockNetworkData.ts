@@ -68,6 +68,106 @@ export const actionTemplates = [
   { id: 'co_create', label: 'Co-create something small', icon: 'Lightbulb', description: 'Collaborate on a project' },
 ];
 
+// Development Path Step Interface
+export interface DevelopmentPathStep {
+  id: string;
+  name: string;
+  description: string;
+  suggestedAction: string;
+  suggestedChannel: string;
+  suggestedTone: string;
+}
+
+// Development Path Interface
+export interface DevelopmentPath {
+  id: string;
+  name: string;
+  description: string;
+  steps: DevelopmentPathStep[];
+  targetStrength: 'growing' | 'solid' | 'thick';
+}
+
+// Development Paths
+export const developmentPaths: DevelopmentPath[] = [
+  {
+    id: 'new_connection',
+    name: 'New Connection',
+    description: 'Build rapport with someone new',
+    steps: [
+      { id: 'nc_1', name: 'Initial Outreach', description: 'Send a warm intro message', suggestedAction: 'soft_checkin', suggestedChannel: 'dm', suggestedTone: 'friendly' },
+      { id: 'nc_2', name: 'Follow-up Message', description: 'Share a resource or insight', suggestedAction: 'send_resource', suggestedChannel: 'dm', suggestedTone: 'friendly' },
+      { id: 'nc_3', name: 'Deeper Connection', description: 'Meet in person or have a call', suggestedAction: 'coffee', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
+      { id: 'nc_4', name: 'Establish Rhythm', description: 'Set up regular check-ins', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'friendly' },
+    ],
+    targetStrength: 'growing'
+  },
+  {
+    id: 'strengthen_bond',
+    name: 'Strengthen Bond',
+    description: 'Deepen an existing relationship',
+    steps: [
+      { id: 'sb_1', name: 'Share Resource', description: 'Send something valuable', suggestedAction: 'send_resource', suggestedChannel: 'email', suggestedTone: 'professional' },
+      { id: 'sb_2', name: 'Schedule Call', description: 'Have a deeper conversation', suggestedAction: 'coffee', suggestedChannel: 'call', suggestedTone: 'friendly' },
+      { id: 'sb_3', name: 'Meet In-Person', description: 'Face-to-face connection', suggestedAction: 'coffee', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
+      { id: 'sb_4', name: 'Plan Collaboration', description: 'Explore working together', suggestedAction: 'co_create', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
+    ],
+    targetStrength: 'solid'
+  },
+  {
+    id: 'professional_growth',
+    name: 'Professional Growth',
+    description: 'Build strategic career connections',
+    steps: [
+      { id: 'pg_1', name: 'Industry Insights', description: 'Share market knowledge', suggestedAction: 'send_resource', suggestedChannel: 'email', suggestedTone: 'professional' },
+      { id: 'pg_2', name: 'Expertise Share', description: 'Offer your expertise', suggestedAction: 'soft_checkin', suggestedChannel: 'call', suggestedTone: 'professional' },
+      { id: 'pg_3', name: 'Joint Opportunity', description: 'Explore collaboration', suggestedAction: 'co_create', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
+      { id: 'pg_4', name: 'Referral Exchange', description: 'Introduce to valuable contacts', suggestedAction: 'introduce', suggestedChannel: 'email', suggestedTone: 'professional' },
+    ],
+    targetStrength: 'solid'
+  },
+  {
+    id: 'mentorship_track',
+    name: 'Mentorship Track',
+    description: 'Build a mentor-mentee relationship',
+    steps: [
+      { id: 'mt_1', name: 'Initial Ask', description: 'Request mentorship', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'aspirational' },
+      { id: 'mt_2', name: 'First Session', description: 'Have first mentoring call', suggestedAction: 'coffee', suggestedChannel: 'call', suggestedTone: 'professional' },
+      { id: 'mt_3', name: 'Regular Check-ins', description: 'Establish recurring meetings', suggestedAction: 'coffee', suggestedChannel: 'in_person', suggestedTone: 'friendly' },
+      { id: 'mt_4', name: 'Goal Review', description: 'Assess progress and next steps', suggestedAction: 'soft_checkin', suggestedChannel: 'call', suggestedTone: 'professional' },
+    ],
+    targetStrength: 'thick'
+  },
+  {
+    id: 'reconnect',
+    name: 'Reconnect',
+    description: 'Revive a dormant relationship',
+    steps: [
+      { id: 'rc_1', name: 'Warm Reintro', description: 'Send a friendly reconnection message', suggestedAction: 'soft_checkin', suggestedChannel: 'dm', suggestedTone: 'friendly' },
+      { id: 'rc_2', name: 'Catch Up', description: 'Have a catch-up conversation', suggestedAction: 'coffee', suggestedChannel: 'call', suggestedTone: 'friendly' },
+      { id: 'rc_3', name: 'Rebuild Rapport', description: 'Meet and reconnect properly', suggestedAction: 'coffee', suggestedChannel: 'in_person', suggestedTone: 'friendly' },
+      { id: 'rc_4', name: 'Future Plans', description: 'Set intentions for staying in touch', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'collaborative' },
+    ],
+    targetStrength: 'growing'
+  },
+  {
+    id: 'event_networking',
+    name: 'Event Networking',
+    description: 'Connect through events and gatherings',
+    steps: [
+      { id: 'en_1', name: 'Pre-Event Connect', description: 'Reach out before the event', suggestedAction: 'soft_checkin', suggestedChannel: 'dm', suggestedTone: 'friendly' },
+      { id: 'en_2', name: 'Event Meetup', description: 'Connect at the event', suggestedAction: 'attend_event', suggestedChannel: 'in_person', suggestedTone: 'friendly' },
+      { id: 'en_3', name: 'Post-Event Follow-up', description: 'Follow up after meeting', suggestedAction: 'post_event', suggestedChannel: 'email', suggestedTone: 'professional' },
+      { id: 'en_4', name: 'Nurture', description: 'Continue building the relationship', suggestedAction: 'send_resource', suggestedChannel: 'dm', suggestedTone: 'friendly' },
+    ],
+    targetStrength: 'growing'
+  },
+];
+
+// Helper to get development path
+export const getDevelopmentPath = (id: string) => {
+  return developmentPaths.find(path => path.id === id);
+};
+
 export interface MockInteraction {
   id: string;
   date: string;
@@ -116,6 +216,11 @@ export interface MockNetworkContact {
   phone?: string;
   strategy?: MockStrategy;
   interactions: MockInteraction[];
+  // Development path fields
+  developmentPathId?: string;
+  currentStepIndex?: number;
+  completedSteps?: string[];
+  pathStartedAt?: string;
 }
 
 export const mockNetworkContacts: MockNetworkContact[] = [
@@ -149,7 +254,11 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     interactions: [
       { id: 'i1', date: '2024-01-15', location: 'Coffee at Blue Bottle', topics: 'Career growth, AI trends', warmth: 'warm', strengthened: true },
       { id: 'i2', date: '2023-11-20', location: 'TechCrunch Disrupt', topics: 'Initial meeting, product strategy', warmth: 'enthusiastic', strengthened: true },
-    ]
+    ],
+    developmentPathId: 'strengthen_bond',
+    currentStepIndex: 2,
+    completedSteps: ['sb_1', 'sb_2'],
+    pathStartedAt: '2023-12-01'
   },
   {
     id: '2',

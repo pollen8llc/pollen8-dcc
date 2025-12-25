@@ -1,0 +1,47 @@
+import { getConnectionStrength } from "@/data/mockNetworkData";
+
+interface ConnectionStrengthBarProps {
+  strength: 'thin' | 'growing' | 'solid' | 'thick';
+  showLabel?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+export function ConnectionStrengthBar({ strength, showLabel = true, size = 'md' }: ConnectionStrengthBarProps) {
+  const strengthData = getConnectionStrength(strength);
+  
+  const heights = {
+    sm: 'h-1.5',
+    md: 'h-2',
+    lg: 'h-3'
+  };
+
+  const strengthColors: Record<string, string> = {
+    thin: 'bg-destructive',
+    growing: 'bg-amber-500',
+    solid: 'bg-primary',
+    thick: 'bg-emerald-500'
+  };
+
+  return (
+    <div className="w-full">
+      {showLabel && (
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="text-xs text-muted-foreground">Connection Strength</span>
+          <span className="text-xs font-medium">{strengthData?.label}</span>
+        </div>
+      )}
+      <div className={`w-full bg-muted/50 rounded-full ${heights[size]} overflow-hidden`}>
+        <div 
+          className={`${heights[size]} rounded-full transition-all duration-500 ${strengthColors[strength]}`}
+          style={{ width: `${strengthData?.percentage || 25}%` }}
+        />
+      </div>
+      {showLabel && (
+        <div className="flex justify-between mt-1">
+          <span className="text-[10px] text-muted-foreground/60">Weak</span>
+          <span className="text-[10px] text-muted-foreground/60">Strong</span>
+        </div>
+      )}
+    </div>
+  );
+}
