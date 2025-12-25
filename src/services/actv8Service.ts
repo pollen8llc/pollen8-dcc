@@ -142,9 +142,12 @@ export async function getDevelopmentPath(pathId: string): Promise<DevelopmentPat
 // Actv8 Contacts
 // =====================================================
 
+// Default path ID - uses "new_connection" as the default starting path
+const DEFAULT_PATH_ID = "new_connection";
+
 export async function activateContact(
   contactId: string,
-  pathId: string,
+  pathId?: string,
   options?: {
     connectionStrength?: string;
     relationshipType?: string;
@@ -162,7 +165,7 @@ export async function activateContact(
     .insert({
       user_id: user.id,
       contact_id: contactId,
-      development_path_id: pathId,
+      development_path_id: pathId || DEFAULT_PATH_ID,
       current_step_index: 0,
       completed_steps: [],
       connection_strength: options?.connectionStrength || null,
