@@ -45,6 +45,35 @@ export function SmartLists() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
+      {/* Geographic Distribution */}
+      <Card className="glass-card md:col-span-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5 text-primary" />
+            Geographic Distribution
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {locationData.map((loc, index) => (
+              <div 
+                key={loc.location}
+                className="p-4 rounded-lg bg-card/40 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-2 h-8 rounded-full"
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  />
+                  <span className="text-sm">{loc.location}</span>
+                </div>
+                <span className="text-2xl font-bold text-primary">{loc.count}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Industry Distribution */}
       <Card className="glass-card">
         <CardHeader>
@@ -104,35 +133,6 @@ export function SmartLists() {
                   <span className="text-sm">{item.label}</span>
                 </div>
                 <Badge variant="secondary">{item.count}</Badge>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Geographic Distribution */}
-      <Card className="glass-card md:col-span-2">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5 text-primary" />
-            Geographic Distribution
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {locationData.map((loc, index) => (
-              <div 
-                key={loc.location}
-                className="p-4 rounded-lg bg-card/40 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-2 h-8 rounded-full"
-                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                  />
-                  <span className="text-sm">{loc.location}</span>
-                </div>
-                <span className="text-2xl font-bold text-primary">{loc.count}</span>
               </div>
             ))}
           </div>
