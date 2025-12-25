@@ -8,18 +8,23 @@ import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathC
 import { DevelopmentTimeline } from "@/components/rel8t/network/DevelopmentTimeline";
 import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModal";
 import { InteractionLogModal } from "@/components/rel8t/network/InteractionLogModal";
+import { StepInterfaceRouter } from "@/components/rel8t/touchpoint";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ArrowLeft } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
+import { toast } from "sonner";
 
 export default function NetworkProfile() {
   const { id } = useParams();
   const [showLogModal, setShowLogModal] = useState(false);
   const [showPathModal, setShowPathModal] = useState(false);
+  const [showTouchpointSheet, setShowTouchpointSheet] = useState(false);
+  const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
   const [contactState, setContactState] = useState(() => {
     return mockNetworkContacts.find(c => c.id === id);
   });
@@ -59,8 +64,15 @@ export default function NetworkProfile() {
   };
 
   const handlePlanTouchpoint = (stepIndex: number) => {
-    // Navigate to timeline with pre-filled form
-    window.location.href = `/rel8/network/${id}/timeline`;
+    setActiveStepIndex(stepIndex);
+    setShowTouchpointSheet(true);
+  };
+
+  const handleTouchpointComplete = (data: any) => {
+    console.log('Touchpoint planned:', data);
+    setShowTouchpointSheet(false);
+    setActiveStepIndex(null);
+    toast.success('Touchpoint saved successfully');
   };
 
   return (
@@ -207,9 +219,9 @@ export default function NetworkProfile() {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-3">
-          <Link to={`/rel8/network/${id}/timeline`}>
-            <Button>Plan Touchpoint</Button>
-          </Link>
+          <Button onClick={() => handlePlanTouchpoint(contact.currentStepIndex ?? 0)}>
+            Plan Touchpoint
+          </Button>
           <Button variant="outline" onClick={() => setShowLogModal(true)}>
             Log Interaction
           </Button>
@@ -226,6 +238,23 @@ export default function NetworkProfile() {
         onSelectPath={handleSelectPath}
         currentPathId={contact.developmentPathId}
       />
+
+      {/* Touchpoint Planning Sheet */}
+      <Sheet open={showTouchpointSheet} onOpenChange={setShowTouchpointSheet}>
+        <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
+          <SheetHeader className="mb-4">
+            <SheetTitle>Plan Touchpoint</SheetTitle>
+          </SheetHeader>
+          {activeStepIndex !== null && (
+            <StepInterfaceRouter
+              contact={contact}
+              stepIndex={activeStepIndex}
+              onComplete={handleTouchpointComplete}
+              onCancel={() => setShowTouchpointSheet(false)}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
 
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl">
         <Rel8OnlyNavigation />
