@@ -66,7 +66,7 @@ const BuildRapport = lazy(() => import("@/pages/rel8/BuildRapport"));
 const Network = lazy(() => import("@/pages/rel8/Network"));
 const NetworkProfile = lazy(() => import("@/pages/rel8/NetworkProfile"));
 const NetworkStrategy = lazy(() => import("@/pages/rel8/NetworkStrategy"));
-const NetworkTimeline = lazy(() => import("@/pages/rel8/NetworkTimeline"));
+// NetworkTimeline - deleted for rebuild
 const NetworkInsights = lazy(() => import("@/pages/rel8/Insights"));
 const Notifications = lazy(() => import("@/pages/rel8/Notifications"));
 
@@ -472,13 +472,7 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/rel8/network/:id/timeline" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <NetworkTimeline />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
+          {/* NetworkTimeline route - deleted for rebuild */}
           <Route path="/rel8/insights" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
