@@ -1,22 +1,30 @@
 import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
-import { mockNetworkContacts } from "@/data/mockNetworkData";
-import { ConnectionStrengthGauge } from "@/components/rel8t/network/ConnectionStrengthGauge";
-import { RelationshipTypeBadge } from "@/components/rel8t/network/RelationshipTypeBadge";
+import { mockNetworkContacts, getRelationshipType } from "@/data/mockNetworkData";
+import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
+import { TrustRatingBar } from "@/components/rel8t/network/TrustRatingBar";
+import { StatusDot } from "@/components/rel8t/network/StatusDot";
+import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathCard";
+import { DevelopmentTimeline } from "@/components/rel8t/network/DevelopmentTimeline";
+import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModal";
 import { InteractionLogModal } from "@/components/rel8t/network/InteractionLogModal";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, MapPin, Mail, Phone, Users, Star, Target, Clock, Calendar, Trophy, Edit } from "lucide-react";
-import { format, parseISO, formatDistanceToNow } from "date-fns";
+import { ArrowLeft } from "lucide-react";
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 export default function NetworkProfile() {
   const { id } = useParams();
   const [showLogModal, setShowLogModal] = useState(false);
+  const [showPathModal, setShowPathModal] = useState(false);
+  const [contactState, setContactState] = useState(() => {
+    return mockNetworkContacts.find(c => c.id === id);
+  });
   
-  const contact = mockNetworkContacts.find(c => c.id === id);
+  const contact = contactState;
   
   if (!contact) {
     return (
@@ -27,9 +35,32 @@ export default function NetworkProfile() {
   }
 
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('');
+  const relationshipType = getRelationshipType(contact.relationshipType);
 
-  const influenceLabels: Record<string, string> = {
-    low: 'Low', medium: 'Medium', high: 'High', very_high: 'Very High'
+  const handleSelectPath = (pathId: string) => {
+    setContactState(prev => prev ? {
+      ...prev,
+      developmentPathId: pathId,
+      currentStepIndex: 0,
+      completedSteps: [],
+      pathStartedAt: new Date().toISOString().split('T')[0]
+    } : prev);
+  };
+
+  const handleAdvanceStep = () => {
+    setContactState(prev => {
+      if (!prev) return prev;
+      const currentIndex = prev.currentStepIndex ?? 0;
+      return {
+        ...prev,
+        currentStepIndex: currentIndex + 1
+      };
+    });
+  };
+
+  const handlePlanTouchpoint = (stepIndex: number) => {
+    // Navigate to timeline with pre-filled form
+    window.location.href = `/rel8/network/${id}/timeline`;
   };
 
   return (
@@ -59,77 +90,142 @@ export default function NetworkProfile() {
               </div>
               
               <div className="flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{contact.location}</span>
-                {contact.email && <span className="flex items-center gap-1"><Mail className="h-4 w-4" />{contact.email}</span>}
-                {contact.phone && <span className="flex items-center gap-1"><Phone className="h-4 w-4" />{contact.phone}</span>}
+                <span>{contact.location}</span>
+                {contact.email && <span>{contact.email}</span>}
+                {contact.phone && <span>{contact.phone}</span>}
               </div>
               
               <div className="mt-4">
-                <RelationshipTypeBadge type={contact.relationshipType} />
+                <Badge variant="outline">{relationshipType?.label}</Badge>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Social Capital Metrics */}
+        {/* Connection Metrics - No Icons */}
         <div className="grid gap-4 md:grid-cols-2 mb-6">
           <Card className="glass-card">
-            <CardHeader><CardTitle className="text-base flex items-center gap-2"><Target className="h-4 w-4 text-primary" />Connection Strength</CardTitle></CardHeader>
-            <CardContent>
-              <ConnectionStrengthGauge strength={contact.connectionStrength} />
-              <div className="mt-4 flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className={`h-4 w-4 ${i < contact.trustRating ? 'text-amber-400 fill-amber-400' : 'text-muted'}`} />
-                  ))}
-                </div>
-                <span className="text-sm text-muted-foreground">Trust Rating</span>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Connection Strength</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ConnectionStrengthBar strength={contact.connectionStrength} size="lg" />
+              <div className="pt-2">
+                <TrustRatingBar rating={contact.trustRating} size="md" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="glass-card">
-            <CardHeader><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-primary" />Network Influence</CardTitle></CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary mb-2">{influenceLabels[contact.networkInfluence]}</div>
-              <p className="text-sm text-muted-foreground mb-4">{contact.mutualConnections} mutual connections</p>
-              <div className="text-sm"><Clock className="h-4 w-4 inline mr-1" />Last: {formatDistanceToNow(parseISO(contact.lastInteraction), { addSuffix: true })}</div>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Network Influence</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Influence Level</span>
+                <StatusDot status={contact.networkInfluence} pulse={true} />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Mutual Connections</span>
+                <span className="font-medium">{contact.mutualConnections}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Last Contact</span>
+                <span className="text-sm">{formatDistanceToNow(parseISO(contact.lastInteraction), { addSuffix: true })}</span>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* How We Met & Vibe */}
+        {/* About This Relationship */}
         <Card className="glass-card mb-6">
-          <CardHeader><CardTitle className="text-base">About This Relationship</CardTitle></CardHeader>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">About This Relationship</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
-            <div><p className="text-sm text-muted-foreground mb-1">How we met</p><p>{contact.howWeMet}</p></div>
-            <div><p className="text-sm text-muted-foreground mb-1">Vibe notes</p><p>{contact.vibeNotes}</p></div>
+            <div className="border-b border-border/30 pb-3">
+              <p className="text-xs text-muted-foreground mb-1">How we met</p>
+              <p className="text-sm">{contact.howWeMet}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Vibe notes</p>
+              <p className="text-sm">{contact.vibeNotes}</p>
+            </div>
           </CardContent>
         </Card>
 
         {/* Recent Achievements */}
-        {contact.recentAchievements.length > 0 && (
-          <Card className="glass-card mb-6">
-            <CardHeader><CardTitle className="text-base flex items-center gap-2"><Trophy className="h-4 w-4 text-amber-400" />Recent Achievements</CardTitle></CardHeader>
-            <CardContent>
+        <Card className="glass-card mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Recent Achievements</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {contact.recentAchievements.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {contact.recentAchievements.map((achievement, i) => (
                   <Badge key={i} variant="secondary">{achievement}</Badge>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <p className="text-sm text-muted-foreground">No recent achievements recorded</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Relationship Development */}
+        <Card className="glass-card mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Relationship Development</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DevelopmentPathCard
+              pathId={contact.developmentPathId}
+              currentStepIndex={contact.currentStepIndex}
+              completedSteps={contact.completedSteps}
+              onPlanTouchpoint={handlePlanTouchpoint}
+              onAdvanceStep={handleAdvanceStep}
+              onChangePath={() => setShowPathModal(true)}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Relationship Timeline */}
+        <Card className="glass-card mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Relationship Timeline</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DevelopmentTimeline
+              interactions={contact.interactions}
+              pathId={contact.developmentPathId}
+              currentStepIndex={contact.currentStepIndex}
+              completedSteps={contact.completedSteps}
+              pathStartedAt={contact.pathStartedAt}
+            />
+          </CardContent>
+        </Card>
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-3">
-          <Link to={`/rel8/network/${id}/strategy`}><Button className="gap-2"><Target className="h-4 w-4" />Build Strategy</Button></Link>
-          <Link to={`/rel8/network/${id}/timeline`}><Button variant="outline" className="gap-2"><Calendar className="h-4 w-4" />View Timeline</Button></Link>
-          <Button variant="outline" className="gap-2" onClick={() => setShowLogModal(true)}><Edit className="h-4 w-4" />Log Interaction</Button>
+          <Link to={`/rel8/network/${id}/timeline`}>
+            <Button>Plan Touchpoint</Button>
+          </Link>
+          <Button variant="outline" onClick={() => setShowLogModal(true)}>
+            Log Interaction
+          </Button>
+          <Link to={`/rel8/network/${id}/strategy`}>
+            <Button variant="outline">Build Strategy</Button>
+          </Link>
         </div>
       </div>
 
       <InteractionLogModal open={showLogModal} onOpenChange={setShowLogModal} contactName={contact.name} />
+      <PathSelectionModal 
+        open={showPathModal} 
+        onOpenChange={setShowPathModal} 
+        onSelectPath={handleSelectPath}
+        currentPathId={contact.developmentPathId}
+      />
 
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl">
         <Rel8OnlyNavigation />
