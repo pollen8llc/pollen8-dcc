@@ -27,12 +27,11 @@ export const warmthLevels = [
 ];
 
 export const touchpointChannels = [
-  { id: 'dm', label: 'Direct Message', icon: 'MessageSquare', description: 'Social platforms DM' },
   { id: 'email', label: 'Email', icon: 'Mail', description: 'Email communication' },
+  { id: 'phone', label: 'Phone', icon: 'Phone', description: 'Phone call' },
   { id: 'in_person', label: 'In-Person', icon: 'Users', description: 'Face-to-face meeting' },
-  { id: 'social_reply', label: 'Social Reply', icon: 'MessageCircle', description: 'Engage with content' },
+  { id: 'call', label: 'Video Call', icon: 'Video', description: 'Video chat' },
   { id: 'invite', label: 'Calendar Invite', icon: 'Calendar', description: 'Event invitation' },
-  { id: 'call', label: 'Phone/Video Call', icon: 'Phone', description: 'Voice or video chat' },
 ];
 
 export const touchpointTones = [
@@ -94,8 +93,8 @@ export const developmentPaths: DevelopmentPath[] = [
     name: 'New Connection',
     description: 'Build rapport with someone new',
     steps: [
-      { id: 'nc_1', name: 'Initial Outreach', description: 'Send a warm intro message', suggestedAction: 'soft_checkin', suggestedChannel: 'dm', suggestedTone: 'friendly' },
-      { id: 'nc_2', name: 'Follow-up Message', description: 'Share a resource or insight', suggestedAction: 'send_resource', suggestedChannel: 'dm', suggestedTone: 'friendly' },
+      { id: 'nc_1', name: 'Initial Outreach', description: 'Send a warm intro message', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'friendly' },
+      { id: 'nc_2', name: 'Follow-up Message', description: 'Share a resource or insight', suggestedAction: 'send_resource', suggestedChannel: 'email', suggestedTone: 'friendly' },
       { id: 'nc_3', name: 'Deeper Connection', description: 'Meet in person or have a call', suggestedAction: 'coffee', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
       { id: 'nc_4', name: 'Establish Rhythm', description: 'Set up regular check-ins', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'friendly' },
     ],
@@ -142,7 +141,7 @@ export const developmentPaths: DevelopmentPath[] = [
     name: 'Reconnect',
     description: 'Revive a dormant relationship',
     steps: [
-      { id: 'rc_1', name: 'Warm Reintro', description: 'Send a friendly reconnection message', suggestedAction: 'soft_checkin', suggestedChannel: 'dm', suggestedTone: 'friendly' },
+      { id: 'rc_1', name: 'Warm Reintro', description: 'Send a friendly reconnection message', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'friendly' },
       { id: 'rc_2', name: 'Catch Up', description: 'Have a catch-up conversation', suggestedAction: 'coffee', suggestedChannel: 'call', suggestedTone: 'friendly' },
       { id: 'rc_3', name: 'Rebuild Rapport', description: 'Meet and reconnect properly', suggestedAction: 'coffee', suggestedChannel: 'in_person', suggestedTone: 'friendly' },
       { id: 'rc_4', name: 'Future Plans', description: 'Set intentions for staying in touch', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'collaborative' },
@@ -154,10 +153,10 @@ export const developmentPaths: DevelopmentPath[] = [
     name: 'Event Networking',
     description: 'Connect through events and gatherings',
     steps: [
-      { id: 'en_1', name: 'Pre-Event Connect', description: 'Reach out before the event', suggestedAction: 'soft_checkin', suggestedChannel: 'dm', suggestedTone: 'friendly' },
+      { id: 'en_1', name: 'Pre-Event Connect', description: 'Reach out before the event', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'friendly' },
       { id: 'en_2', name: 'Event Meetup', description: 'Connect at the event', suggestedAction: 'attend_event', suggestedChannel: 'in_person', suggestedTone: 'friendly' },
       { id: 'en_3', name: 'Post-Event Follow-up', description: 'Follow up after meeting', suggestedAction: 'post_event', suggestedChannel: 'email', suggestedTone: 'professional' },
-      { id: 'en_4', name: 'Nurture', description: 'Continue building the relationship', suggestedAction: 'send_resource', suggestedChannel: 'dm', suggestedTone: 'friendly' },
+      { id: 'en_4', name: 'Nurture', description: 'Continue building the relationship', suggestedAction: 'send_resource', suggestedChannel: 'email', suggestedTone: 'friendly' },
     ],
     targetStrength: 'growing'
   },
