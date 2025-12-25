@@ -2148,6 +2148,77 @@ export type Database = {
         }
         Relationships: []
       }
+      rms_actv8_contacts: {
+        Row: {
+          activated_at: string | null
+          completed_steps: string[] | null
+          connection_strength: string | null
+          contact_id: string
+          created_at: string | null
+          current_step_index: number | null
+          development_path_id: string
+          id: string
+          intention_id: string | null
+          intention_notes: string | null
+          last_touchpoint_at: string | null
+          path_started_at: string | null
+          relationship_type: string | null
+          status: string | null
+          target_completion_date: string | null
+          updated_at: string | null
+          user_id: string
+          warmth_level: string | null
+        }
+        Insert: {
+          activated_at?: string | null
+          completed_steps?: string[] | null
+          connection_strength?: string | null
+          contact_id: string
+          created_at?: string | null
+          current_step_index?: number | null
+          development_path_id: string
+          id?: string
+          intention_id?: string | null
+          intention_notes?: string | null
+          last_touchpoint_at?: string | null
+          path_started_at?: string | null
+          relationship_type?: string | null
+          status?: string | null
+          target_completion_date?: string | null
+          updated_at?: string | null
+          user_id: string
+          warmth_level?: string | null
+        }
+        Update: {
+          activated_at?: string | null
+          completed_steps?: string[] | null
+          connection_strength?: string | null
+          contact_id?: string
+          created_at?: string | null
+          current_step_index?: number | null
+          development_path_id?: string
+          id?: string
+          intention_id?: string | null
+          intention_notes?: string | null
+          last_touchpoint_at?: string | null
+          path_started_at?: string | null
+          relationship_type?: string | null
+          status?: string | null
+          target_completion_date?: string | null
+          updated_at?: string | null
+          user_id?: string
+          warmth_level?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_actv8_contacts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rms_contact_affiliations: {
         Row: {
           affiliated_community_id: string | null
