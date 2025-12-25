@@ -28,6 +28,7 @@ export const warmthLevels = [
 
 export const touchpointChannels = [
   { id: 'email', label: 'Email', icon: 'Mail', description: 'Email communication' },
+  { id: 'text', label: 'Text', icon: 'MessageSquare', description: 'SMS/Text message' },
   { id: 'phone', label: 'Phone', icon: 'Phone', description: 'Phone call' },
   { id: 'in_person', label: 'In-Person', icon: 'Users', description: 'Face-to-face meeting' },
   { id: 'call', label: 'Video Call', icon: 'Video', description: 'Video chat' },

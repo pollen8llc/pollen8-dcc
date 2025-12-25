@@ -19,6 +19,7 @@ export interface Actv8ContactDisplay {
   completedSteps: string[];
   pathStartedAt?: string;
   totalSteps?: number;
+  status?: string;
 }
 
 export function useActv8Contacts() {
@@ -43,6 +44,7 @@ export function useActv8Contacts() {
         completedSteps: ac.completed_steps || [],
         pathStartedAt: ac.path_started_at || undefined,
         totalSteps: ac.path?.steps?.length,
+        status: ac.status,
       }));
     },
   });
