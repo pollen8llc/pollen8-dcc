@@ -63,6 +63,11 @@ const TriggerWizard = lazy(() => import("@/pages/rel8/TriggerWizard"));
 const EmailTest = lazy(() => import("@/pages/rel8/EmailTest"));
 const Triggers = lazy(() => import("@/pages/rel8/Triggers"));
 const BuildRapport = lazy(() => import("@/pages/rel8/BuildRapport"));
+const Network = lazy(() => import("@/pages/rel8/Network"));
+const NetworkProfile = lazy(() => import("@/pages/rel8/NetworkProfile"));
+const NetworkStrategy = lazy(() => import("@/pages/rel8/NetworkStrategy"));
+const NetworkTimeline = lazy(() => import("@/pages/rel8/NetworkTimeline"));
+const NetworkInsights = lazy(() => import("@/pages/rel8/Insights"));
 const Notifications = lazy(() => import("@/pages/rel8/Notifications"));
 
 // REL8 Connect pages
