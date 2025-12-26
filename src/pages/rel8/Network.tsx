@@ -148,10 +148,7 @@ export default function Network() {
         </p>
 
         {/* Contact Grid/List */}
-        <div className={viewMode === 'grid' 
-          ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3" 
-          : "space-y-3"
-        }>
+        <div className="space-y-3">
           {filteredContacts.map(contact => (
             <NetworkContactCard 
               key={contact.id} 
