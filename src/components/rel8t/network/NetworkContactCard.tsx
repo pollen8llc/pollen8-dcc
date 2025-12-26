@@ -203,6 +203,7 @@ export function NetworkContactCard({ contact, viewMode }: NetworkContactCardProp
     <>
       <Link to={`/rel8/actv8/${contact.id}/profile`}>
         <div className="glass-card p-3 hover:border-primary/30 transition-all cursor-pointer group relative">
+          {/* Row 1: Identity & Info */}
           <div className="flex items-center gap-3">
             {/* Avatar */}
             <Avatar className="h-10 w-10 ring-2 ring-primary/20 shrink-0">
@@ -231,36 +232,33 @@ export function NetworkContactCard({ contact, viewMode }: NetworkContactCardProp
               </p>
             </div>
 
-            {/* Connection Strength */}
-            <div className="hidden lg:block w-28">
-              <ConnectionStrengthBar strength={contact.connectionStrength} showLabel={false} size="sm" />
-            </div>
-
-            {/* Development Path */}
-            <div className="hidden xl:block w-32">
-              {contact.developmentPathName ? (
-                <div>
-                  <p className="text-xs font-medium truncate">{contact.developmentPathName}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Progress value={pathProgress} className="h-1 flex-1" />
-                    <span className="text-[10px] text-muted-foreground">
-                      {currentStep}/{totalSteps}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground/60">No path</p>
-              )}
-            </div>
-
-            {/* Last Interaction */}
-            <div className="text-xs text-muted-foreground text-right hidden sm:block">
-              {formatLastInteraction(contact.lastInteraction)}
-            </div>
-
             {/* Menu */}
             <div onClick={handleMenuClick}>
               <MenuButton />
+            </div>
+          </div>
+
+          {/* Row 2: Progress Bars */}
+          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border/30">
+            {/* Connection Strength */}
+            <div className="flex-1">
+              <ConnectionStrengthBar strength={contact.connectionStrength} showLabel={true} size="sm" />
+            </div>
+
+            {/* Development Path */}
+            <div className="flex-1">
+              <span className="text-xs text-muted-foreground">Development Path</span>
+              {contact.developmentPathName ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-xs font-medium truncate max-w-[100px]">{contact.developmentPathName}</p>
+                  <Progress value={pathProgress} className="h-1.5 flex-1" />
+                  <span className="text-[10px] text-muted-foreground">
+                    {currentStep}/{totalSteps}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground/60 mt-1">No path assigned</p>
+              )}
             </div>
           </div>
         </div>
