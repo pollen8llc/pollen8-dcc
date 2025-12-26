@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO, isPast, isToday } from "date-fns";
-import { Calendar, ExternalLink } from "lucide-react";
+import { Calendar, ExternalLink, Link2 } from "lucide-react";
 import { Outreach } from "@/services/rel8t/outreachService";
 
 interface LinkedOutreach {
@@ -17,7 +17,10 @@ interface DevelopmentPathCardProps {
   currentStepIndex?: number;
   completedSteps?: string[];
   linkedOutreaches?: LinkedOutreach[];
+  availableOutreaches?: Outreach[];
+  actv8ContactId?: string;
   onPlanTouchpoint?: (stepIndex: number) => void;
+  onLinkOutreach?: (stepIndex: number) => void;
   onAdvanceStep?: () => void;
   onChangePath?: () => void;
 }
@@ -27,7 +30,10 @@ export function DevelopmentPathCard({
   currentStepIndex,
   completedSteps,
   linkedOutreaches = [],
+  availableOutreaches = [],
+  actv8ContactId,
   onPlanTouchpoint,
+  onLinkOutreach,
   onAdvanceStep,
   onChangePath
 }: DevelopmentPathCardProps) {
@@ -172,7 +178,7 @@ export function DevelopmentPathCard({
                   
                   {/* Current Step Actions - Only show if no linked outreach */}
                   {isCurrent && !linkedOutreach && (
-                    <div className="mt-2">
+                    <div className="mt-2 flex gap-2">
                       <Button 
                         size="sm" 
                         variant="default"
@@ -181,6 +187,17 @@ export function DevelopmentPathCard({
                       >
                         Plan Touchpoint
                       </Button>
+                      {availableOutreaches.length > 0 && onLinkOutreach && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="h-7 text-xs gap-1"
+                          onClick={() => onLinkOutreach(index)}
+                        >
+                          <Link2 className="h-3 w-3" />
+                          Link Existing
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>

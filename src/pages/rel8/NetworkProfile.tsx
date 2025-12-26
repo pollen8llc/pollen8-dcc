@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath } from "@/services/actv8Service";
-import { getOutreachesByActv8Contact } from "@/services/rel8t/outreachService";
+import { getOutreachesByActv8Contact, getOutreachesForContact } from "@/services/rel8t/outreachService";
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { TrustRatingBar } from "@/components/rel8t/network/TrustRatingBar";
@@ -10,6 +10,7 @@ import { StatusDot } from "@/components/rel8t/network/StatusDot";
 import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathCard";
 import { DevelopmentTimeline } from "@/components/rel8t/network/DevelopmentTimeline";
 import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModal";
+import { LinkOutreachDialog } from "@/components/rel8t/network/LinkOutreachDialog";
 
 import { StepInterfaceRouter } from "@/components/rel8t/touchpoint";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
@@ -38,6 +39,8 @@ export default function NetworkProfile() {
   
   const [showPathModal, setShowPathModal] = useState(false);
   const [showTouchpointSheet, setShowTouchpointSheet] = useState(false);
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [linkStepIndex, setLinkStepIndex] = useState<number>(0);
   const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
 
   // Fetch actv8 contact from database
@@ -60,7 +63,15 @@ export default function NetworkProfile() {
     enabled: !!id,
   });
 
-  // Mutation to update development path - must be before any conditional returns
+  // Fetch available (orphan) outreaches for this contact that can be linked
+  const { data: availableOutreaches = [], refetch: refetchAvailable } = useQuery({
+    queryKey: ['contact-outreaches', actv8Contact?.contact_id],
+    queryFn: async () => {
+      if (!actv8Contact?.contact_id) return [];
+      return getOutreachesForContact(actv8Contact.contact_id);
+    },
+    enabled: !!actv8Contact?.contact_id,
+  });
   const updatePathMutation = useMutation({
     mutationFn: async (pathId: string) => {
       if (!actv8Contact) throw new Error('No contact loaded');
@@ -204,6 +215,17 @@ export default function NetworkProfile() {
     toast.success('Touchpoint saved successfully');
   };
 
+  const handleLinkOutreach = (stepIndex: number) => {
+    setLinkStepIndex(stepIndex);
+    setShowLinkDialog(true);
+  };
+
+  const handleOutreachLinked = () => {
+    queryClient.invalidateQueries({ queryKey: ['actv8-outreaches', id] });
+    queryClient.invalidateQueries({ queryKey: ['contact-outreaches', actv8Contact?.contact_id] });
+    refetchAvailable();
+  };
+
 
   // Map relationship type
   const relationshipTypeLabels: Record<string, string> = {
@@ -317,7 +339,10 @@ export default function NetworkProfile() {
               currentStepIndex={contact.currentStepIndex}
               completedSteps={contact.completedSteps}
               linkedOutreaches={linkedOutreaches}
+              availableOutreaches={availableOutreaches}
+              actv8ContactId={actv8Contact.id}
               onPlanTouchpoint={handlePlanTouchpoint}
+              onLinkOutreach={handleLinkOutreach}
               onAdvanceStep={handleAdvanceStep}
               onChangePath={() => setShowPathModal(true)}
             />
@@ -376,6 +401,17 @@ export default function NetworkProfile() {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Link Existing Outreach Dialog */}
+      <LinkOutreachDialog
+        open={showLinkDialog}
+        onOpenChange={setShowLinkDialog}
+        outreaches={availableOutreaches}
+        actv8ContactId={actv8Contact.id}
+        stepIndex={linkStepIndex}
+        stepName={actv8Contact.path?.steps?.[linkStepIndex]?.name || `Step ${linkStepIndex + 1}`}
+        onLinked={handleOutreachLinked}
+      />
 
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl">
         <Rel8OnlyNavigation />
