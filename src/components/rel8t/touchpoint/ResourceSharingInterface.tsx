@@ -121,7 +121,7 @@ export function ResourceSharingInterface({ contact, step, onSave, onCancel }: Re
       {/* Resource Type */}
       <div>
         <Label className="text-sm mb-2 block">Resource Type</Label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {resourceTypes.map((type) => (
             <button
               key={type.id}
@@ -134,7 +134,7 @@ export function ResourceSharingInterface({ contact, step, onSave, onCancel }: Re
               )}
             >
               <span className="text-sm font-medium block">{type.label}</span>
-              <span className="text-xs text-muted-foreground">{type.description}</span>
+              <span className="text-xs text-muted-foreground hidden sm:block">{type.description}</span>
             </button>
           ))}
         </div>
