@@ -11,13 +11,14 @@ import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModa
 import { LinkOutreachDialog } from "@/components/rel8t/network/LinkOutreachDialog";
 
 import { StepInterfaceRouter } from "@/components/rel8t/touchpoint";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ArrowLeft, Loader2, Mail, Phone, MapPin, Calendar, TrendingUp, Users, MoreVertical, Settings, MessageCircle } from "lucide-react";
+import { Loader2, Mail, Phone, Calendar, TrendingUp, Settings, MessageCircle, Edit, Heart, Zap } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { toast } from "sonner";
 
@@ -118,11 +119,11 @@ export default function NetworkProfile() {
   if (error || !actv8Contact) {
     return (
       <div className="min-h-screen bg-background">
+        <Rel8Header />
         <div className="empty-state h-[60vh]">
           <p className="text-muted-foreground mb-4">Contact not found</p>
           <Link to="/rel8/actv8">
-            <Button variant="outline" className="gap-2 rounded-xl">
-              <ArrowLeft className="h-4 w-4" />
+            <Button variant="outline" className="gap-2">
               Back to Actv8
             </Button>
           </Link>
@@ -242,118 +243,182 @@ export default function NetworkProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      {/* Header - Android style with back button */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/30">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <Link to="/rel8/actv8" className="icon-button">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-semibold truncate">{contact.name}</h1>
-          </div>
-          <button className="icon-button">
-            <MoreVertical className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 pb-32">
+      <Rel8Header />
+      
+      <div className="container mx-auto max-w-6xl px-4 py-6 space-y-6 animate-fade-in">
+        {/* Profile Header Card - Same style as ContactProfile */}
+        <Card className="relative overflow-hidden">
+          <div className="p-4 md:p-6">
+            {/* Mobile Layout */}
+            <div className="md:hidden space-y-4">
+              {/* Avatar Row */}
+              <div className="flex items-center justify-center">
+                <div className="relative">
+                  <Avatar className="h-24 w-24 ring-2 ring-primary/20">
+                    <AvatarImage src={contact.avatar} />
+                    <AvatarFallback className="text-2xl bg-secondary">{getInitials(contact.name)}</AvatarFallback>
+                  </Avatar>
+                  {/* Strength indicator */}
+                  <div className={`absolute bottom-1 right-1 w-6 h-6 rounded-full border-2 border-background flex items-center justify-center ${
+                    contact.connectionStrength === 'thick' ? 'bg-primary' :
+                    contact.connectionStrength === 'solid' ? 'bg-emerald-500' :
+                    contact.connectionStrength === 'growing' ? 'bg-amber-500' : 'bg-red-500'
+                  }`}>
+                    <TrendingUp className="h-3 w-3 text-white" />
+                  </div>
+                </div>
+              </div>
 
-      {/* Profile Hero - Material Design style */}
-      <div className="px-4 py-6">
-        <div className="flex flex-col items-center text-center">
-          {/* Avatar */}
-          <div className="relative mb-4">
-            <Avatar className="h-24 w-24 ring-4 ring-primary/20">
-              <AvatarImage src={contact.avatar} />
-              <AvatarFallback className="text-2xl bg-secondary">{getInitials(contact.name)}</AvatarFallback>
-            </Avatar>
-            {/* Strength indicator */}
-            <div className={`absolute bottom-1 right-1 w-6 h-6 rounded-full border-3 border-background flex items-center justify-center ${
-              contact.connectionStrength === 'thick' ? 'bg-primary' :
-              contact.connectionStrength === 'solid' ? 'bg-emerald-500' :
-              contact.connectionStrength === 'growing' ? 'bg-amber-500' : 'bg-red-500'
-            }`}>
-              <TrendingUp className="h-3 w-3 text-white" />
+              {/* Name Row */}
+              <div className="text-center">
+                <h1 className="text-2xl font-bold">{contact.name}</h1>
+                <p className="text-muted-foreground">{contact.role} at {contact.company}</p>
+              </div>
+
+              {/* Glowing Separator */}
+              <div className="relative h-px w-full">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-sm" />
+              </div>
+
+              {/* Action Buttons Grid */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button onClick={() => handlePlanTouchpoint(contact.currentStepIndex ?? 0)} variant="default" size="sm" className="gap-2">
+                  <Heart className="h-4 w-4" />
+                  Plan Touchpoint
+                </Button>
+                <Link to={`/rel8/actv8/${id}/strategy`} className="w-full">
+                  <Button variant="default" size="sm" className="gap-2 w-full">
+                    <Zap className="h-4 w-4" />
+                    Strategy
+                  </Button>
+                </Link>
+                <Link to={`/rel8/contacts/${contact.contactId}/edit`} className="w-full">
+                  <Button variant="outline" size="sm" className="gap-2 w-full">
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Button>
+                </Link>
+                <Button 
+                  onClick={() => setShowPathModal(true)}
+                  variant="outline" 
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  Change Path
+                </Button>
+              </div>
+            </div>
+
+            {/* Desktop Layout */}
+            <div className="hidden md:block">
+              {/* Contact Info Section */}
+              <div className="flex items-start gap-6 mb-6">
+                <div className="relative">
+                  <Avatar className="h-20 w-20 ring-2 ring-primary/20">
+                    <AvatarImage src={contact.avatar} />
+                    <AvatarFallback className="text-xl bg-secondary">{getInitials(contact.name)}</AvatarFallback>
+                  </Avatar>
+                  {/* Strength indicator */}
+                  <div className={`absolute bottom-0 right-0 w-6 h-6 rounded-full border-2 border-background flex items-center justify-center ${
+                    contact.connectionStrength === 'thick' ? 'bg-primary' :
+                    contact.connectionStrength === 'solid' ? 'bg-emerald-500' :
+                    contact.connectionStrength === 'growing' ? 'bg-amber-500' : 'bg-red-500'
+                  }`}>
+                    <TrendingUp className="h-3 w-3 text-white" />
+                  </div>
+                </div>
+                
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold">{contact.name}</h1>
+                  <p className="text-muted-foreground">{contact.role} at {contact.company}</p>
+                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="h-4 w-4" />
+                      <span>{formatDistanceToNow(parseISO(contact.lastInteraction), { addSuffix: true })}</span>
+                    </div>
+                    <div className={`flex items-center gap-1.5 ${strengthColors[contact.connectionStrength]}`}>
+                      <TrendingUp className="h-4 w-4" />
+                      <span>{strengthLabels[contact.connectionStrength]}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Glowing Separator */}
+              <div className="relative h-px w-full mb-6">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-sm" />
+              </div>
+
+              {/* Action Buttons Bar */}
+              <div className="flex items-center gap-3">
+                <Button onClick={() => handlePlanTouchpoint(contact.currentStepIndex ?? 0)} variant="default" className="flex-1 gap-2">
+                  <Heart className="h-4 w-4" />
+                  Plan Touchpoint
+                </Button>
+                <Link to={`/rel8/actv8/${id}/strategy`} className="flex-1">
+                  <Button variant="default" className="gap-2 w-full">
+                    <Zap className="h-4 w-4" />
+                    Strategy
+                  </Button>
+                </Link>
+                <Link to={`/rel8/contacts/${contact.contactId}/edit`} className="flex-1">
+                  <Button variant="outline" className="gap-2 w-full">
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Button>
+                </Link>
+                <Button 
+                  onClick={() => setShowPathModal(true)}
+                  variant="outline" 
+                  className="flex-1 gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  Change Path
+                </Button>
+              </div>
             </div>
           </div>
+        </Card>
 
-          {/* Name & Role */}
-          <h2 className="text-xl font-bold mb-1">{contact.name}</h2>
-          <p className="text-muted-foreground mb-3">{contact.role} at {contact.company}</p>
-
-          {/* Badges */}
-          <div className="flex flex-wrap justify-center gap-2 mb-4">
-            <Badge variant="secondary" className="rounded-lg">{contact.industry}</Badge>
-            <Badge variant="outline" className="rounded-lg">
-              {relationshipTypeLabels[contact.relationshipType] || contact.relationshipType}
-            </Badge>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
-              <span>{formatDistanceToNow(parseISO(contact.lastInteraction), { addSuffix: true })}</span>
-            </div>
-            <div className={`flex items-center gap-1.5 ${strengthColors[contact.connectionStrength]}`}>
-              <TrendingUp className="h-4 w-4" />
-              <span>{strengthLabels[contact.connectionStrength]}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="flex justify-center gap-3 mt-6">
-          <Button 
-            onClick={() => handlePlanTouchpoint(contact.currentStepIndex ?? 0)}
-            className="rounded-xl gap-2"
-          >
-            <MessageCircle className="h-4 w-4" />
-            Plan Touchpoint
-          </Button>
-          <Link to={`/rel8/actv8/${id}/strategy`}>
-            <Button variant="outline" className="rounded-xl gap-2">
-              <Settings className="h-4 w-4" />
-              Strategy
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Sections - Android Settings style */}
-      <div className="px-4 space-y-4">
-        
         {/* Contact Info Section */}
         {(contact.email || contact.phone) && (
-          <div className="md-surface-1 overflow-hidden">
-            <div className="section-header">Contact</div>
-            {contact.email && (
-              <div className="settings-item">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">Email</p>
-                  <p className="text-xs text-muted-foreground truncate">{contact.email}</p>
-                </div>
+          <Card className="overflow-hidden">
+            <div className="p-4">
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">Contact</h3>
+              <div className="space-y-3">
+                {contact.email && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">Email</p>
+                      <p className="text-xs text-muted-foreground truncate">{contact.email}</p>
+                    </div>
+                  </div>
+                )}
+                {contact.phone && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">Phone</p>
+                      <p className="text-xs text-muted-foreground">{contact.phone}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-            {contact.phone && (
-              <div className="settings-item">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">Phone</p>
-                  <p className="text-xs text-muted-foreground">{contact.phone}</p>
-                </div>
-              </div>
-            )}
-          </div>
+            </div>
+          </Card>
         )}
 
         {/* Connection Strength Section */}
-        <div className="md-surface-1 p-4">
+        <Card className="p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium">Connection Strength</h3>
             <span className={`text-sm font-medium ${strengthColors[contact.connectionStrength]}`}>
@@ -361,16 +426,16 @@ export default function NetworkProfile() {
             </span>
           </div>
           <ConnectionStrengthBar strength={contact.connectionStrength} size="lg" />
-        </div>
+        </Card>
 
         {/* Notes Section */}
-        <div className="md-surface-1 p-4">
+        <Card className="p-4">
           <h3 className="text-sm font-medium mb-2">Notes</h3>
           <p className="text-sm text-muted-foreground">{contact.vibeNotes}</p>
-        </div>
+        </Card>
 
         {/* Development Path Section */}
-        <div className="md-surface-1 p-4">
+        <Card className="p-4">
           <h3 className="text-sm font-medium mb-3">Relationship Development</h3>
           <DevelopmentPathCard
             pathId={contact.developmentPathId}
@@ -384,10 +449,10 @@ export default function NetworkProfile() {
             onAdvanceStep={handleAdvanceStep}
             onChangePath={() => setShowPathModal(true)}
           />
-        </div>
+        </Card>
 
         {/* Timeline Section */}
-        <div className="md-surface-1 p-4">
+        <Card className="p-4">
           <h3 className="text-sm font-medium mb-3">Timeline</h3>
           <DevelopmentTimeline
             interactions={contact.interactions}
@@ -397,7 +462,7 @@ export default function NetworkProfile() {
             pathStartedAt={contact.pathStartedAt}
             linkedOutreaches={linkedOutreaches}
           />
-        </div>
+        </Card>
       </div>
 
       {/* Modals */}
@@ -435,9 +500,6 @@ export default function NetworkProfile() {
         onLinked={handleOutreachLinked}
       />
 
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl">
-        <Rel8OnlyNavigation />
-      </div>
     </div>
   );
 }
