@@ -41,6 +41,9 @@ export interface Outreach {
   channel_details?: Record<string, any> | null;
   contacts_notified_at?: string | null;
   trigger_id?: string | null;
+  // Actv8 Build Rapport integration
+  actv8_contact_id?: string | null;
+  actv8_step_index?: number | null;
 }
 
 export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> => {
@@ -270,12 +273,82 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
 
 export const updateOutreachStatus = async (id: string, status: OutreachStatus): Promise<boolean> => {
   try {
+    // First, get the outreach to check for actv8 linkage
+    const { data: outreach, error: fetchError } = await supabase
+      .from("rms_outreach")
+      .select("actv8_contact_id, actv8_step_index")
+      .eq("id", id)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    
+    // Update the status
     const { error } = await supabase
       .from("rms_outreach")
       .update({ status })
       .eq("id", id);
 
     if (error) throw error;
+    
+    // If completed and linked to actv8 contact, advance the step
+    if (status === 'completed' && outreach?.actv8_contact_id) {
+      try {
+        // Import the service dynamically to avoid circular imports
+        const { updateContactProgress, getActv8Contact, updateActv8Contact } = await import("@/services/actv8Service");
+        
+        // Get current actv8 contact data
+        const actv8Contact = await getActv8Contact(outreach.actv8_contact_id);
+        if (actv8Contact) {
+          const currentStepIndex = actv8Contact.current_step_index || 0;
+          const completedSteps = actv8Contact.completed_steps || [];
+          
+          // Only advance if this is the current step
+          if (outreach.actv8_step_index === currentStepIndex) {
+            const newCompletedSteps = [...completedSteps, String(currentStepIndex)];
+            const newStepIndex = currentStepIndex + 1;
+            
+            // Update step progress
+            await updateContactProgress(outreach.actv8_contact_id, newStepIndex, newCompletedSteps);
+            
+            // Upgrade connection strength based on completed steps
+            const strengthProgression = ['thin', 'growing', 'solid', 'thick'];
+            const currentStrengthIndex = strengthProgression.indexOf(actv8Contact.connection_strength || 'thin');
+            const stepsCompleted = newCompletedSteps.length;
+            
+            // Upgrade strength every 2 completed steps
+            const targetStrengthIndex = Math.min(Math.floor(stepsCompleted / 2), 3);
+            if (targetStrengthIndex > currentStrengthIndex) {
+              await updateActv8Contact(outreach.actv8_contact_id, {
+                connection_strength: strengthProgression[targetStrengthIndex]
+              });
+            }
+            
+            // Create a notification for step completion
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              await supabase
+                .from("cross_platform_notifications")
+                .insert({
+                  user_id: user.id,
+                  title: "Build Rapport Progress",
+                  message: `Completed step ${currentStepIndex + 1} with ${actv8Contact.contact?.name || 'contact'}`,
+                  notification_type: "actv8_step_complete",
+                  is_read: false,
+                  metadata: {
+                    actv8ContactId: outreach.actv8_contact_id,
+                    stepIndex: currentStepIndex,
+                    newStepIndex: newStepIndex,
+                    contactName: actv8Contact.contact?.name
+                  }
+                });
+            }
+          }
+        }
+      } catch (actv8Error) {
+        console.error("Error updating actv8 progress:", actv8Error);
+        // Don't fail the status update if actv8 update fails
+      }
+    }
     
     toast({
       title: "Status updated",
@@ -431,7 +504,10 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
         scheduled_at: outreach.due_date,
         outreach_channel: outreach.outreach_channel || null,
         channel_details: outreach.channel_details || null,
-        trigger_id: outreach.trigger_id || null
+        trigger_id: outreach.trigger_id || null,
+        // Actv8 Build Rapport linkage
+        actv8_contact_id: outreach.actv8_contact_id || null,
+        actv8_step_index: outreach.actv8_step_index ?? null
       }])
       .select()
       .single();

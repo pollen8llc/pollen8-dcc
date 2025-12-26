@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { getActv8Contact, deactivateContact, updateContactProgress } from "@/services/actv8Service";
+import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath } from "@/services/actv8Service";
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { TrustRatingBar } from "@/components/rel8t/network/TrustRatingBar";
@@ -12,6 +12,7 @@ import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModa
 
 import { StepInterfaceRouter } from "@/components/rel8t/touchpoint";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,6 +26,14 @@ export default function NetworkProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  
+  // Get wizard context for Build Rapport integration
+  const { 
+    setActv8ContactId, 
+    setActv8StepIndex, 
+    setActv8StepData,
+    setPreSelectedContacts 
+  } = useRelationshipWizard();
   
   const [showPathModal, setShowPathModal] = useState(false);
   const [showTouchpointSheet, setShowTouchpointSheet] = useState(false);
@@ -132,7 +141,44 @@ export default function NetworkProfile() {
     }
   };
 
-  const handlePlanTouchpoint = (stepIndex: number) => {
+  // Check if path is Build Rapport
+  const isBuildRapportPath = actv8Contact?.path?.id === 'build_rapport';
+
+  const handlePlanTouchpoint = async (stepIndex: number) => {
+    // For Build Rapport path, redirect to wizard with pre-populated data
+    if (isBuildRapportPath && actv8Contact?.path?.steps) {
+      const step = actv8Contact.path.steps[stepIndex];
+      if (step && actv8Contact.contact) {
+        // Set wizard context with Actv8 data
+        setActv8ContactId(actv8Contact.id);
+        setActv8StepIndex(stepIndex);
+        setActv8StepData({
+          stepName: step.name,
+          stepDescription: step.description,
+          suggestedChannel: step.suggested_channel,
+          suggestedAction: step.suggested_action,
+          suggestedTone: step.suggested_tone,
+          pathName: actv8Contact.path.name,
+        });
+        
+        // Pre-select the contact for the wizard (only include required fields)
+        setPreSelectedContacts([{
+          id: actv8Contact.contact.id,
+          name: actv8Contact.contact.name,
+          email: actv8Contact.contact.email || undefined,
+          organization: actv8Contact.contact.organization || undefined,
+          user_id: '', // Will be filled by wizard
+          created_at: '',
+          updated_at: '',
+        }]);
+        
+        // Navigate to wizard
+        navigate(`/rel8/wizard?actv8Id=${actv8Contact.id}&stepIndex=${stepIndex}`);
+        return;
+      }
+    }
+    
+    // For other paths, use the existing sheet interface
     setActiveStepIndex(stepIndex);
     setShowTouchpointSheet(true);
   };

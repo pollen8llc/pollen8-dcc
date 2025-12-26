@@ -6,7 +6,8 @@ import {
   CircleCheck, 
   Loader2,
   Flag,
-  AlertCircle
+  AlertCircle,
+  Users
 } from "lucide-react";
 import { 
   createOutreach, 
@@ -17,12 +18,17 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { addDays, format } from "date-fns";
 import { Trigger, createTrigger } from "@/services/rel8t/triggerService";
+import { Actv8StepData } from "@/contexts/RelationshipWizardContext";
 
 interface ReviewSubmitStepProps {
   wizardData: {
     contacts: Contact[];
     triggers: Trigger[];
     priority: OutreachPriority;
+    // Actv8 Build Rapport data
+    actv8ContactId?: string | null;
+    actv8StepIndex?: number | null;
+    actv8StepData?: Actv8StepData | null;
   };
   onSubmit: (trigger?: Trigger, icsContent?: string) => void;
   onPrevious?: () => void;
@@ -74,7 +80,8 @@ export const ReviewSubmitStep = ({
   >("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { contacts, triggers, priority } = wizardData;
+  const { contacts, triggers, priority, actv8ContactId, actv8StepIndex, actv8StepData } = wizardData;
+  const isActv8Mode = !!actv8ContactId;
 
   const handleSubmit = async () => {
     // Synchronous guard to prevent double submission (before any state updates)
@@ -103,17 +110,25 @@ export const ReviewSubmitStep = ({
         // Get the due date from the trigger with proper fallbacks
         const dueDate = getDueDateFromTrigger(trigger);
         
+        // Build outreach title - include actv8 step name if available
+        const titlePrefix = isActv8Mode && actv8StepData 
+          ? `${actv8StepData.stepName}: ` 
+          : '';
+        
         const outreach = {
-          title: contacts.length === 1 
+          title: titlePrefix + (contacts.length === 1 
             ? `Follow up with ${contacts[0].name}`
-            : `Follow up with ${contacts.map(c => c.name).join(', ')}`,
+            : `Follow up with ${contacts.map(c => c.name).join(', ')}`),
           description: trigger.description || `Reminder for ${contacts.map(c => c.name).join(', ')}`,
           priority: priority,
           status: 'pending' as OutreachStatus,
           due_date: dueDate.toISOString(),
-          outreach_channel: trigger.outreach_channel,
+          outreach_channel: trigger.outreach_channel || (isActv8Mode && actv8StepData ? actv8StepData.suggestedChannel : null),
           channel_details: trigger.channel_details,
-          trigger_id: trigger.id
+          trigger_id: trigger.id,
+          // Actv8 Build Rapport linkage for step tracking
+          actv8_contact_id: actv8ContactId || null,
+          actv8_step_index: actv8StepIndex ?? null,
         };
         
         return await createOutreach(outreach, contactIds);
@@ -210,6 +225,21 @@ export const ReviewSubmitStep = ({
 
   return (
     <div className="space-y-6">
+      {/* Actv8 Build Rapport Mode Indicator */}
+      {isActv8Mode && actv8StepData && (
+        <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+              Build Rapport: {actv8StepData.stepName}
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {actv8StepData.stepDescription}
+          </p>
+        </div>
+      )}
+
       {/* Compact Header with Stats */}
       <div className="flex flex-wrap items-center gap-2">
         <Badge 

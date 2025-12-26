@@ -2814,6 +2814,8 @@ export type Database = {
       }
       rms_outreach: {
         Row: {
+          actv8_contact_id: string | null
+          actv8_step_index: number | null
           calendar_event_sequence: number | null
           calendar_sync_enabled: boolean | null
           channel_details: Json | null
@@ -2838,6 +2840,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          actv8_contact_id?: string | null
+          actv8_step_index?: number | null
           calendar_event_sequence?: number | null
           calendar_sync_enabled?: boolean | null
           channel_details?: Json | null
@@ -2862,6 +2866,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          actv8_contact_id?: string | null
+          actv8_step_index?: number | null
           calendar_event_sequence?: number | null
           calendar_sync_enabled?: boolean | null
           channel_details?: Json | null
@@ -2886,6 +2892,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "rms_outreach_actv8_contact_id_fkey"
+            columns: ["actv8_contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_actv8_contacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "rms_outreach_trigger_id_fkey"
             columns: ["trigger_id"]

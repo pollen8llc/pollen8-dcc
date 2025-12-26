@@ -11,7 +11,7 @@ import { ReviewEditStep } from "@/components/rel8t/wizard/ReviewEditStep";
 import { Contact } from "@/services/rel8t/contactService";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { Trigger } from "@/services/rel8t/triggerService";
-import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
+import { useRelationshipWizard, Actv8StepData } from "@/contexts/RelationshipWizardContext";
 import { TriggerCreatedDialog } from "@/components/rel8t/TriggerCreatedDialog";
 import { getOutreachById, Outreach } from "@/services/rel8t/outreachService";
 import { useQuery } from "@tanstack/react-query";
@@ -31,6 +31,10 @@ type WizardData = {
   triggers: Trigger[];
   importedContacts: any[];
   priority: 'low' | 'medium' | 'high';
+  // Actv8 Build Rapport data
+  actv8ContactId?: string | null;
+  actv8StepIndex?: number | null;
+  actv8StepData?: Actv8StepData | null;
 };
 
 type EditWizardData = {
@@ -47,6 +51,9 @@ const initialData: WizardData = {
   triggers: [],
   importedContacts: [],
   priority: 'medium',
+  actv8ContactId: null,
+  actv8StepIndex: null,
+  actv8StepData: null,
 };
 
 const RelationshipWizard = () => {
@@ -54,7 +61,10 @@ const RelationshipWizard = () => {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode');
   const outreachId = searchParams.get('id');
+  const actv8IdParam = searchParams.get('actv8Id');
+  const stepIndexParam = searchParams.get('stepIndex');
   const isEditMode = mode === 'edit' && outreachId;
+  const isActv8Mode = !!actv8IdParam;
 
   const { 
     selectedTrigger, 
@@ -63,11 +73,19 @@ const RelationshipWizard = () => {
     workingContacts,
     setWizardStep,
     setWorkingContacts,
-    clearWizardData 
+    clearWizardData,
+    // Actv8 Build Rapport context
+    actv8ContactId,
+    actv8StepIndex,
+    actv8StepData,
+    setActv8ContactId,
+    setActv8StepIndex,
+    setActv8StepData,
   } = useRelationshipWizard();
   
+  // For Actv8 mode, skip to review step since contact is pre-selected
   const [step, setStep] = useState<WizardStep | EditWizardStep>(
-    isEditMode ? "edit-details" : "select-contacts"
+    isEditMode ? "edit-details" : isActv8Mode ? "select-triggers" : "select-contacts"
   );
   const [data, setData] = useState<WizardData>(initialData);
   const [editData, setEditData] = useState<EditWizardData | null>(null);
@@ -93,7 +111,7 @@ const RelationshipWizard = () => {
       setWizardStep(null);
       setWorkingContacts([]);
     } else if (preSelectedContacts.length > 0) {
-      // Initial load from Contacts page
+      // Initial load from Contacts page or Actv8
       setData(prev => ({ ...prev, contacts: preSelectedContacts }));
     }
   }, [wizardStep, workingContacts, preSelectedContacts, setWizardStep, setWorkingContacts]);
@@ -110,6 +128,19 @@ const RelationshipWizard = () => {
       setStep("select-contacts");
     }
   }, [selectedTrigger]);
+
+  // Initialize Actv8 Build Rapport mode from context
+  useEffect(() => {
+    if (isActv8Mode && actv8ContactId && actv8StepData && preSelectedContacts.length > 0) {
+      setData(prev => ({
+        ...prev,
+        contacts: preSelectedContacts,
+        actv8ContactId,
+        actv8StepIndex: actv8StepIndex,
+        actv8StepData,
+      }));
+    }
+  }, [isActv8Mode, actv8ContactId, actv8StepIndex, actv8StepData, preSelectedContacts]);
 
   const handleSelectContactsNext = (stepData: { contacts: Contact[] }) => {
     setData(prev => ({ ...prev, contacts: stepData.contacts }));
@@ -154,6 +185,9 @@ const RelationshipWizard = () => {
   };
 
   const getStepTitle = () => {
+    if (isActv8Mode && actv8StepData) {
+      return `Schedule: ${actv8StepData.stepName}`;
+    }
     switch (step) {
       case "select-contacts":
         return "Select Contacts";
@@ -214,8 +248,17 @@ const RelationshipWizard = () => {
             </p>
           </div>
           
+          {/* Display Actv8 Build Rapport info */}
+          {isActv8Mode && actv8StepData && (
+            <div className="ml-auto">
+              <Badge variant="outline" className="px-3 py-1 bg-emerald-500/10 border-emerald-500 border-2 text-emerald-600 dark:text-emerald-400">
+                Build Rapport: {actv8StepData.pathName}
+              </Badge>
+            </div>
+          )}
+          
           {/* Display trigger info if we have a selected trigger */}
-          {selectedTrigger && (
+          {selectedTrigger && !isActv8Mode && (
             <div className="ml-auto">
               <Badge variant="outline" className="px-3 py-1 bg-primary/5 border-[#00eada] border-2">
                 Using selected trigger: {selectedTrigger.name}
