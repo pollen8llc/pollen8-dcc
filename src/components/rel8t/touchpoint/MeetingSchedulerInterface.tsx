@@ -4,11 +4,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { 
   MockNetworkContact,
   DevelopmentPathStep 
 } from "@/data/mockNetworkData";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { createOutreach } from "@/services/rel8t/outreachService";
+import { toast } from "@/hooks/use-toast";
+import { Loader2, Calendar, Users } from "lucide-react";
 
 interface MeetingSchedulerInterfaceProps {
   contact: MockNetworkContact;
@@ -27,6 +32,8 @@ export interface MeetingData {
   agenda: string;
   talkingPoints: string[];
   sendCalendarInvite: boolean;
+  createAsOutreach?: boolean;
+  outreachId?: string;
 }
 
 const meetingTypes = [
@@ -110,6 +117,14 @@ function getRapportTips(contact: MockNetworkContact): string[] {
   return tips.slice(0, 3);
 }
 
+function getMeetingTypeLabel(typeId: string): string {
+  return meetingTypes.find(t => t.id === typeId)?.label || typeId;
+}
+
+function getPlatformLabel(platformId: string): string {
+  return videoPlatforms.find(p => p.id === platformId)?.label || platformId;
+}
+
 export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: MeetingSchedulerInterfaceProps) {
   const [meetingType, setMeetingType] = useState(
     step.suggestedChannel === 'call' ? 'call' : 
@@ -125,11 +140,14 @@ export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: M
   const [agenda, setAgenda] = useState("");
   const [selectedPoints, setSelectedPoints] = useState<string[]>([]);
   const [sendCalendarInvite, setSendCalendarInvite] = useState(true);
+  const [createAsOutreach, setCreateAsOutreach] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
   
   const talkingPointSuggestions = getTalkingPointSuggestions(contact, step);
   const rapportTips = getRapportTips(contact);
   
   const isVirtual = ['call', 'video'].includes(meetingType);
+  const hasEmail = !!contact.email;
 
   const togglePoint = (point: string) => {
     setSelectedPoints(prev => 
@@ -139,7 +157,100 @@ export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: M
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    let outreachId: string | undefined;
+    
+    // Create as outreach task if enabled
+    if (createAsOutreach) {
+      setIsCreating(true);
+      try {
+        // Build meeting datetime
+        const meetingDateTime = new Date(`${date}T${time}`);
+        
+        // Build description from agenda and talking points
+        const description = [
+          agenda,
+          selectedPoints.length > 0 ? `\n\nTalking Points:\n${selectedPoints.map(p => `• ${p}`).join('\n')}` : ''
+        ].filter(Boolean).join('');
+        
+        // Determine location string
+        const meetingLocation = isVirtual 
+          ? getPlatformLabel(platform)
+          : location || 'TBD';
+        
+        // Create outreach with meeting details
+        outreachId = await createOutreach(
+          {
+            title: `${getMeetingTypeLabel(meetingType)} with ${contact.name}`,
+            description,
+            priority: 'medium',
+            status: 'pending',
+            due_date: meetingDateTime.toISOString(),
+            outreach_channel: meetingType,
+            channel_details: {
+              meetingType,
+              duration: parseInt(duration),
+              location: meetingLocation,
+              platform: isVirtual ? platform : undefined,
+              talkingPoints: selectedPoints,
+              contactEmail: contact.email,
+              contactName: contact.name,
+            }
+          },
+          [contact.id]
+        );
+
+        if (outreachId) {
+          // If calendar invite is enabled and contact has email, send calendar update
+          if (sendCalendarInvite && hasEmail) {
+            try {
+              const { data: { user } } = await supabase.auth.getUser();
+              if (user) {
+                const { data: profile } = await supabase
+                  .from("profiles")
+                  .select("email")
+                  .eq("user_id", user.id)
+                  .single();
+                
+                const userEmail = profile?.email || user.email;
+                
+                if (userEmail) {
+                  // Send calendar update to include contacts as attendees
+                  await supabase.functions.invoke('send-calendar-update', {
+                    body: {
+                      outreachId,
+                      updateType: 'update',
+                      userEmail,
+                      includeContactsAsAttendees: true
+                    }
+                  });
+                }
+              }
+            } catch (calendarError) {
+              console.error('Failed to send calendar invite:', calendarError);
+              // Don't fail the whole operation if calendar invite fails
+            }
+          }
+          
+          toast({
+            title: "Meeting scheduled!",
+            description: `Created as outreach task. ${sendCalendarInvite && hasEmail ? 'Calendar invite sent.' : ''}`,
+          });
+        }
+      } catch (error: any) {
+        console.error('Error creating outreach:', error);
+        toast({
+          title: "Error creating meeting",
+          description: error.message || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+        setIsCreating(false);
+        return;
+      } finally {
+        setIsCreating(false);
+      }
+    }
+    
     onSave({
       meetingType,
       date,
@@ -149,7 +260,9 @@ export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: M
       platform: isVirtual ? platform : undefined,
       agenda,
       talkingPoints: selectedPoints,
-      sendCalendarInvite
+      sendCalendarInvite,
+      createAsOutreach,
+      outreachId,
     });
   };
 
@@ -312,39 +425,66 @@ export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: M
         />
       </div>
 
-      {/* Calendar Invite Toggle */}
-      <div className="flex items-center justify-between p-3 rounded-lg border border-border/40">
-        <div>
-          <span className="text-sm font-medium">Send Calendar Invite</span>
-          <p className="text-xs text-muted-foreground">
-            {contact.email ? `To: ${contact.email}` : 'No email on file'}
-          </p>
+      {/* Create as Outreach Toggle */}
+      <Card className="p-4 border-primary/30 bg-primary/5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Users className="h-5 w-5 text-primary" />
+            <div>
+              <span className="text-sm font-medium">Track as Build Rapport Task</span>
+              <p className="text-xs text-muted-foreground">
+                Creates an outreach task for tracking and reminders
+              </p>
+            </div>
+          </div>
+          <Switch
+            checked={createAsOutreach}
+            onCheckedChange={setCreateAsOutreach}
+          />
         </div>
-        <button
-          onClick={() => setSendCalendarInvite(!sendCalendarInvite)}
-          className={cn(
-            "h-6 w-11 rounded-full transition-colors",
-            sendCalendarInvite ? "bg-primary" : "bg-muted"
-          )}
-        >
-          <div className={cn(
-            "h-5 w-5 rounded-full bg-white shadow transition-transform",
-            sendCalendarInvite ? "translate-x-5" : "translate-x-0.5"
-          )} />
-        </button>
+      </Card>
+
+      {/* Calendar Invite Toggle */}
+      <div className={cn(
+        "flex items-center justify-between p-3 rounded-lg border",
+        hasEmail && createAsOutreach ? "border-border/40" : "border-border/20 opacity-60"
+      )}>
+        <div className="flex items-center gap-3">
+          <Calendar className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <span className="text-sm font-medium">Send Calendar Invite</span>
+            <p className="text-xs text-muted-foreground">
+              {hasEmail ? `To: ${contact.email}` : 'No email on file'}
+            </p>
+          </div>
+        </div>
+        <Switch
+          checked={sendCalendarInvite && hasEmail && createAsOutreach}
+          onCheckedChange={setSendCalendarInvite}
+          disabled={!hasEmail || !createAsOutreach}
+        />
       </div>
 
       {/* Actions */}
       <div className="flex gap-3 pt-4 border-t border-border/40">
-        <Button variant="outline" onClick={onCancel} className="flex-1">
+        <Button variant="outline" onClick={onCancel} className="flex-1" disabled={isCreating}>
           Cancel
         </Button>
         <Button 
           onClick={handleSave} 
-          disabled={!date || !time} 
+          disabled={!date || !time || isCreating} 
           className="flex-1"
         >
-          {sendCalendarInvite ? 'Schedule & Send Invite' : 'Save Meeting'}
+          {isCreating ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Creating...
+            </>
+          ) : createAsOutreach ? (
+            sendCalendarInvite && hasEmail ? 'Schedule & Send Invite' : 'Create Outreach Task'
+          ) : (
+            'Save Meeting'
+          )}
         </Button>
       </div>
     </div>
