@@ -774,6 +774,73 @@ export const getOutreachesByActv8Contact = async (actv8ContactId: string): Promi
   }
 };
 
+// Get outreaches linked to a specific contact (by contact_id, not actv8_contact_id)
+// This helps find "orphan" outreaches that can be linked to an Actv8 step
+export const getOutreachesForContact = async (contactId: string): Promise<Outreach[]> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    
+    // Find outreaches that are linked to this contact via rms_outreach_contacts
+    // and are NOT already linked to an actv8 step (or are pending)
+    const { data, error } = await supabase
+      .from("rms_outreach")
+      .select(`
+        *,
+        rms_outreach_contacts!inner(
+          contact_id,
+          rms_contacts(
+            id,
+            name,
+            email,
+            organization
+          )
+        )
+      `)
+      .eq("user_id", user.id)
+      .eq("rms_outreach_contacts.contact_id", contactId)
+      .eq("status", "pending")
+      .order("due_date", { ascending: true });
+    
+    if (error) throw error;
+    
+    // Process data to format contacts  
+    const formattedData = (data as any)?.map((item: any) => {
+      const contacts = Array.isArray(item.rms_outreach_contacts) 
+        ? item.rms_outreach_contacts
+            .map((oc: any) => oc.rms_contacts)
+            .filter((c: any) => c)
+        : [];
+      
+      const priority = (item.priority || 'medium') as OutreachPriority;
+      
+      return {
+        id: item.id,
+        user_id: item.user_id,
+        title: item.title,
+        description: item.message || item.description,
+        priority: priority,
+        status: item.status as OutreachStatus,
+        due_date: item.due_date || item.created_at,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        outreach_channel: item.outreach_channel,
+        actv8_contact_id: item.actv8_contact_id,
+        actv8_step_index: item.actv8_step_index,
+        contacts
+      } as Outreach;
+    });
+    
+    return formattedData || [];
+  } catch (error: any) {
+    console.error("Error fetching outreaches for contact:", error);
+    return [];
+  }
+};
+
 export const linkOutreachToActv8 = async (
   outreachId: string,
   actv8ContactId: string,
