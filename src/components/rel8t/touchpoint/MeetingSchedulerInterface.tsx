@@ -177,7 +177,7 @@ export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: M
       {/* Meeting Type */}
       <div>
         <Label className="text-sm mb-2 block">Meeting Type</Label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {meetingTypes.map((type) => (
             <button
               key={type.id}
@@ -193,7 +193,7 @@ export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: M
               )}
             >
               <span className="text-sm font-medium block">{type.label}</span>
-              <span className="text-xs text-muted-foreground">{type.description}</span>
+              <span className="text-xs text-muted-foreground hidden sm:block">{type.description}</span>
             </button>
           ))}
         </div>
@@ -222,13 +222,13 @@ export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: M
       {/* Duration */}
       <div>
         <Label className="text-sm mb-2 block">Duration</Label>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {durationOptions.map((d) => (
             <button
               key={d}
               onClick={() => setDuration(d)}
               className={cn(
-                "flex-1 py-2 rounded-lg border text-sm transition-all",
+                "flex-1 min-w-[60px] py-2 rounded-lg border text-sm transition-all",
                 duration === d
                   ? "border-primary bg-primary/10 text-primary font-medium"
                   : "border-border/40 hover:border-border"
@@ -244,13 +244,13 @@ export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: M
       {isVirtual ? (
         <div>
           <Label className="text-sm mb-2 block">Platform</Label>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 sm:flex gap-2">
             {videoPlatforms.map((p) => (
               <button
                 key={p.id}
                 onClick={() => setPlatform(p.id)}
                 className={cn(
-                  "flex-1 py-2 rounded-lg border text-sm transition-all",
+                  "sm:flex-1 py-2 rounded-lg border text-sm transition-all",
                   platform === p.id
                     ? "border-primary bg-primary/10 text-primary font-medium"
                     : "border-border/40 hover:border-border"

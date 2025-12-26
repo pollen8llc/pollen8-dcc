@@ -178,20 +178,20 @@ export function MessagingInterface({ contact, step, onSave, onCancel }: Messagin
       {/* Tone Selection */}
       <div>
         <Label className="text-sm mb-2 block">Tone</Label>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {touchpointTones.map((t) => (
             <button
               key={t.id}
               onClick={() => setTone(t.id)}
               className={cn(
-                "flex-1 p-3 rounded-lg border text-center transition-all",
+                "p-3 rounded-lg border text-center transition-all",
                 tone === t.id
                   ? "border-primary bg-primary/10"
                   : "border-border/40 hover:border-border"
               )}
             >
               <span className="text-sm font-medium">{t.label}</span>
-              <p className="text-xs text-muted-foreground mt-1">{t.description}</p>
+              <p className="text-xs text-muted-foreground mt-1 hidden sm:block">{t.description}</p>
             </button>
           ))}
         </div>
