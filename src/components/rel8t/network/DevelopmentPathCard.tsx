@@ -1,10 +1,9 @@
-import { getDevelopmentPath, DevelopmentPath } from "@/data/mockNetworkData";
+import { getDevelopmentPath } from "@/data/mockNetworkData";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO, isPast, isToday } from "date-fns";
-import { Calendar, ExternalLink, Link2 } from "lucide-react";
+import { Calendar, ExternalLink, Link2, Check, ChevronRight, Play } from "lucide-react";
 import { Outreach } from "@/services/rel8t/outreachService";
 
 interface LinkedOutreach {
@@ -31,10 +30,8 @@ export function DevelopmentPathCard({
   completedSteps,
   linkedOutreaches = [],
   availableOutreaches = [],
-  actv8ContactId,
   onPlanTouchpoint,
   onLinkOutreach,
-  onAdvanceStep,
   onChangePath
 }: DevelopmentPathCardProps) {
   const navigate = useNavigate();
@@ -42,10 +39,15 @@ export function DevelopmentPathCard({
 
   if (!path) {
     return (
-      <div className="border border-border/40 rounded-lg p-4">
-        <p className="text-sm text-muted-foreground mb-3">No development path assigned</p>
-        <Button variant="outline" size="sm" onClick={onChangePath}>
-          Start Development Path
+      <div className="py-6 text-center">
+        <p className="text-sm text-muted-foreground mb-4">No development path assigned</p>
+        <Button 
+          variant="outline" 
+          onClick={onChangePath}
+          className="rounded-xl gap-2"
+        >
+          <Play className="h-4 w-4" />
+          Start a Path
         </Button>
       </div>
     );
@@ -56,26 +58,24 @@ export function DevelopmentPathCard({
   const progress = ((stepIndex) / path.steps.length) * 100;
   const isComplete = stepIndex >= path.steps.length;
 
-  // Helper to find linked outreach for a step
   const getLinkedOutreach = (index: number) => {
     return linkedOutreaches.find(lo => lo.stepIndex === index);
   };
 
-  // Helper to get outreach status badge
   const getOutreachStatusBadge = (outreach: Outreach) => {
     const dueDate = parseISO(outreach.due_date);
     const isOverdue = outreach.status === 'pending' && isPast(dueDate) && !isToday(dueDate);
     
     if (outreach.status === 'completed') {
-      return <Badge className="bg-emerald-500 text-[10px] h-5">Done</Badge>;
+      return <Badge className="bg-emerald-500 text-white text-[10px] h-5 rounded-md">Done</Badge>;
     }
     if (isOverdue) {
-      return <Badge variant="destructive" className="text-[10px] h-5">Overdue</Badge>;
+      return <Badge variant="destructive" className="text-[10px] h-5 rounded-md">Overdue</Badge>;
     }
     if (isToday(dueDate)) {
-      return <Badge className="bg-amber-500 text-[10px] h-5">Today</Badge>;
+      return <Badge className="bg-amber-500 text-white text-[10px] h-5 rounded-md">Today</Badge>;
     }
-    return <Badge variant="secondary" className="text-[10px] h-5">Scheduled</Badge>;
+    return <Badge variant="secondary" className="text-[10px] h-5 rounded-md">Scheduled</Badge>;
   };
 
   return (
@@ -83,92 +83,90 @@ export function DevelopmentPathCard({
       {/* Path Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h4 className="font-medium">{path.name}</h4>
+          <h4 className="font-medium text-sm">{path.name}</h4>
           <p className="text-xs text-muted-foreground">{path.description}</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onChangePath} className="text-xs">
-          Change Path
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onChangePath} 
+          className="text-xs text-primary h-8 rounded-lg"
+        >
+          Change
         </Button>
       </div>
 
-      {/* Progress Bar */}
+      {/* Progress Bar - Android style */}
       <div>
-        <div className="flex justify-between text-xs text-muted-foreground mb-1">
+        <div className="flex justify-between text-xs text-muted-foreground mb-2">
           <span>Progress</span>
-          <span>Step {Math.min(stepIndex + 1, path.steps.length)} of {path.steps.length}</span>
+          <span className="font-medium">{Math.min(stepIndex + 1, path.steps.length)} of {path.steps.length}</span>
         </div>
-        <Progress value={progress} className="h-2" />
+        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-primary rounded-full transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
 
-      {/* Steps List */}
-      <div className="space-y-2">
+      {/* Steps List - Settings list style */}
+      <div className="space-y-1">
         {path.steps.map((step, index) => {
           const isCompleted = index < stepIndex || completed.includes(step.id);
           const isCurrent = index === stepIndex;
-          const isUpcoming = index > stepIndex;
           const linkedOutreach = getLinkedOutreach(index);
 
           return (
             <div
               key={step.id}
-              className={`p-3 rounded-lg border transition-all ${
+              className={`rounded-xl transition-all ${
                 isCurrent 
-                  ? 'border-primary/50 bg-primary/5' 
-                  : isCompleted 
-                    ? 'border-border/30 bg-muted/30' 
-                    : 'border-border/20 bg-background/50'
+                  ? 'bg-primary/10 border border-primary/30' 
+                  : isCompleted
+                    ? 'bg-secondary/30'
+                    : 'bg-secondary/10'
               }`}
             >
-              <div className="flex items-start gap-3">
+              <div className="p-3 flex items-start gap-3">
                 {/* Step Indicator */}
-                <div className={`mt-0.5 h-5 w-5 rounded-full flex items-center justify-center text-xs font-medium ${
+                <div className={`mt-0.5 h-6 w-6 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${
                   isCompleted 
                     ? 'bg-emerald-500 text-white' 
                     : isCurrent 
                       ? 'bg-primary text-primary-foreground' 
                       : 'bg-muted text-muted-foreground'
                 }`}>
-                  {isCompleted ? '✓' : index + 1}
+                  {isCompleted ? <Check className="h-3.5 w-3.5" /> : index + 1}
                 </div>
 
                 {/* Step Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`font-medium text-sm ${isUpcoming ? 'text-muted-foreground' : ''}`}>
+                    <span className={`font-medium text-sm ${!isCurrent && !isCompleted ? 'text-muted-foreground' : ''}`}>
                       {step.name}
                     </span>
-                    {isCompleted && !linkedOutreach && (
-                      <span className="text-[10px] text-emerald-500 font-medium">COMPLETED</span>
-                    )}
-                    {isCurrent && !linkedOutreach && (
-                      <span className="text-[10px] text-primary font-medium">CURRENT</span>
-                    )}
-                    {isUpcoming && !linkedOutreach && (
-                      <span className="text-[10px] text-muted-foreground">UPCOMING</span>
-                    )}
                     {linkedOutreach && getOutreachStatusBadge(linkedOutreach.outreach)}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{step.description}</p>
                   
                   {/* Linked Outreach Info */}
                   {linkedOutreach && (
-                    <div className="mt-2 p-2 rounded bg-muted/50 border border-border/30">
+                    <div className="mt-2 p-2 rounded-lg bg-background/50 border border-border/30">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 text-xs">
                           <Calendar className="h-3 w-3 text-muted-foreground" />
                           <span className="text-muted-foreground">
-                            {format(parseISO(linkedOutreach.outreach.due_date), 'MMM d, yyyy')}
+                            {format(parseISO(linkedOutreach.outreach.due_date), 'MMM d')}
                           </span>
                         </div>
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          className="h-6 text-xs gap-1"
+                        <button 
                           onClick={() => navigate(`/rel8/outreach/${linkedOutreach.outreach.id}`)}
+                          className="text-xs text-primary flex items-center gap-1 hover:underline"
                         >
-                          View Outreach
+                          View
                           <ExternalLink className="h-3 w-3" />
-                        </Button>
+                        </button>
                       </div>
                       <p className="text-xs text-foreground mt-1 truncate">
                         {linkedOutreach.outreach.title}
@@ -176,26 +174,26 @@ export function DevelopmentPathCard({
                     </div>
                   )}
                   
-                  {/* Current Step Actions - Only show if no linked outreach */}
+                  {/* Current Step Actions */}
                   {isCurrent && !linkedOutreach && (
-                    <div className="mt-2 flex gap-2">
+                    <div className="mt-3 flex gap-2">
                       <Button 
                         size="sm" 
-                        variant="default"
-                        className="h-7 text-xs"
                         onClick={() => onPlanTouchpoint?.(index)}
+                        className="h-8 text-xs rounded-lg gap-1"
                       >
                         Plan Touchpoint
+                        <ChevronRight className="h-3 w-3" />
                       </Button>
                       {availableOutreaches.length > 0 && onLinkOutreach && (
                         <Button 
                           size="sm" 
                           variant="outline"
-                          className="h-7 text-xs gap-1"
                           onClick={() => onLinkOutreach(index)}
+                          className="h-8 text-xs rounded-lg gap-1"
                         >
                           <Link2 className="h-3 w-3" />
-                          Link Existing
+                          Link
                         </Button>
                       )}
                     </div>
@@ -209,8 +207,11 @@ export function DevelopmentPathCard({
 
       {/* Path Complete State */}
       {isComplete && (
-        <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-center">
-          <p className="font-medium text-emerald-600 dark:text-emerald-400">Path Complete!</p>
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center">
+          <div className="flex items-center justify-center gap-2">
+            <Check className="h-5 w-5 text-emerald-500" />
+            <span className="font-medium text-emerald-500">Path Complete!</span>
+          </div>
         </div>
       )}
     </div>

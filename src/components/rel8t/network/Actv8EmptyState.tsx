@@ -1,41 +1,53 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Zap, Users, ArrowRight } from "lucide-react";
+import { Zap, Users, ArrowRight, Sparkles } from "lucide-react";
 
 export function Actv8EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-      <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+      {/* Icon */}
+      <div className="empty-state-icon mb-6">
         <Zap className="h-10 w-10 text-primary" />
       </div>
       
-      <h2 className="text-2xl font-bold mb-2">No Active Contacts Yet</h2>
-      <p className="text-muted-foreground max-w-md mb-8">
-        Actv8 helps you intentionally develop your professional relationships. 
-        Activate contacts to track your progress and build stronger connections.
+      {/* Title */}
+      <h2 className="text-xl font-bold mb-2">Start Building Relationships</h2>
+      <p className="text-muted-foreground max-w-sm mb-8">
+        Actv8 helps you intentionally develop your professional connections with guided steps.
       </p>
 
-      <div className="glass-card p-6 max-w-md mb-8">
-        <h3 className="font-semibold mb-3">How Actv8 Works</h3>
-        <ol className="text-sm text-left space-y-3">
-          <li className="flex items-start gap-3">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-medium">1</span>
-            <span>Choose a contact from your network to activate</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-medium">2</span>
-            <span>Select a development path that fits your relationship goals</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-medium">3</span>
-            <span>Follow guided steps to strengthen your connection over time</span>
-          </li>
-        </ol>
+      {/* How it works - Material card style */}
+      <div className="md-surface-1 p-5 max-w-sm w-full mb-6">
+        <h3 className="font-semibold text-sm mb-4 text-left flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          How it works
+        </h3>
+        <div className="space-y-4">
+          <div className="settings-item p-0">
+            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-semibold shrink-0">
+              1
+            </div>
+            <p className="text-sm text-left">Choose contacts to activate</p>
+          </div>
+          <div className="settings-item p-0">
+            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-semibold shrink-0">
+              2
+            </div>
+            <p className="text-sm text-left">Pick a development path</p>
+          </div>
+          <div className="settings-item p-0">
+            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-semibold shrink-0">
+              3
+            </div>
+            <p className="text-sm text-left">Follow guided touchpoints</p>
+          </div>
+        </div>
       </div>
 
+      {/* CTA */}
       <Link to="/rel8/contacts">
-        <Button className="gap-2">
-          <Users className="h-4 w-4" />
+        <Button className="rounded-xl gap-2 h-12 px-6">
+          <Users className="h-5 w-5" />
           Browse Contacts
           <ArrowRight className="h-4 w-4" />
         </Button>
