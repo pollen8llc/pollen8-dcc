@@ -239,10 +239,13 @@ export function NetworkContactCard({ contact, viewMode }: NetworkContactCardProp
           </div>
 
           {/* Row 2: Progress Bars */}
-          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border/30">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 mt-3 pt-3 border-t border-border/30">
             {/* Connection Strength */}
             <div className="flex-1">
-              <ConnectionStrengthBar strength={contact.connectionStrength} showLabel={true} size="sm" />
+              <span className="text-xs text-muted-foreground">Connection Strength</span>
+              <div className="mt-1">
+                <ConnectionStrengthBar strength={contact.connectionStrength} showLabel={false} size="sm" />
+              </div>
             </div>
 
             {/* Development Path */}
@@ -250,10 +253,9 @@ export function NetworkContactCard({ contact, viewMode }: NetworkContactCardProp
               <span className="text-xs text-muted-foreground">Development Path</span>
               {contact.developmentPathName ? (
                 <div className="flex items-center gap-2 mt-1">
-                  <p className="text-xs font-medium truncate max-w-[100px]">{contact.developmentPathName}</p>
                   <Progress value={pathProgress} className="h-1.5 flex-1" />
-                  <span className="text-[10px] text-muted-foreground">
-                    {currentStep}/{totalSteps}
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {currentStep}/{totalSteps} · {contact.developmentPathName}
                   </span>
                 </div>
               ) : (
