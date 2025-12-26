@@ -161,7 +161,7 @@ const ContactEdit = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Rel8Header showProfileBanner={false} />
       
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="container mx-auto px-4 py-8 pb-32 max-w-5xl">
         {/* Breadcrumb Navigation */}
         <div className="mb-6">
           <Breadcrumb>
