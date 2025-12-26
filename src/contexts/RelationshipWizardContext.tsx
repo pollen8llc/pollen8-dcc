@@ -5,6 +5,16 @@ import { Contact } from '@/services/rel8t/contactService';
 
 type WizardStep = "select-contacts" | "select-triggers" | "review";
 
+// Data passed from Actv8 for Build Rapport touchpoint scheduling
+export interface Actv8StepData {
+  stepName: string;
+  stepDescription: string;
+  suggestedChannel: string;
+  suggestedAction: string;
+  suggestedTone: string;
+  pathName: string;
+}
+
 interface RelationshipWizardContextType {
   selectedTrigger: Trigger | null;
   setSelectedTrigger: (trigger: Trigger | null) => void;
@@ -14,6 +24,13 @@ interface RelationshipWizardContextType {
   setWizardStep: (step: WizardStep | null) => void;
   workingContacts: Contact[];
   setWorkingContacts: (contacts: Contact[]) => void;
+  // Actv8 Build Rapport integration
+  actv8ContactId: string | null;
+  setActv8ContactId: (id: string | null) => void;
+  actv8StepIndex: number | null;
+  setActv8StepIndex: (index: number | null) => void;
+  actv8StepData: Actv8StepData | null;
+  setActv8StepData: (data: Actv8StepData | null) => void;
   clearWizardData: () => void;
 }
 
@@ -36,12 +53,20 @@ export const RelationshipWizardProvider: React.FC<RelationshipWizardProviderProp
   const [preSelectedContacts, setPreSelectedContacts] = useState<Contact[]>([]);
   const [wizardStep, setWizardStep] = useState<WizardStep | null>(null);
   const [workingContacts, setWorkingContacts] = useState<Contact[]>([]);
+  // Actv8 Build Rapport integration state
+  const [actv8ContactId, setActv8ContactId] = useState<string | null>(null);
+  const [actv8StepIndex, setActv8StepIndex] = useState<number | null>(null);
+  const [actv8StepData, setActv8StepData] = useState<Actv8StepData | null>(null);
 
   const clearWizardData = () => {
     setSelectedTrigger(null);
     setPreSelectedContacts([]);
     setWizardStep(null);
     setWorkingContacts([]);
+    // Clear actv8 data
+    setActv8ContactId(null);
+    setActv8StepIndex(null);
+    setActv8StepData(null);
   };
 
   return (
@@ -55,6 +80,12 @@ export const RelationshipWizardProvider: React.FC<RelationshipWizardProviderProp
         setWizardStep,
         workingContacts,
         setWorkingContacts,
+        actv8ContactId,
+        setActv8ContactId,
+        actv8StepIndex,
+        setActv8StepIndex,
+        actv8StepData,
+        setActv8StepData,
         clearWizardData,
       }}
     >
