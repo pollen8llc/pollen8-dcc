@@ -43,7 +43,27 @@ const meetingTypes = [
   { id: 'video', label: 'Video Call', description: 'Zoom, Meet, etc.', duration: '45' },
   { id: 'walk', label: 'Walk & Talk', description: 'Active conversation', duration: '45' },
   { id: 'event', label: 'Event Meetup', description: 'Connect at an event', duration: '30' },
+  { id: 'in_person', label: 'Working Session', description: 'Collaborative meeting', duration: '60' },
+  { id: 'recurring', label: 'Recurring Check-in', description: 'Regular cadence', duration: '30' },
 ];
+
+// Map step suggested_channel to meeting type
+function mapChannelToMeetingType(channel: string): string {
+  const channelMap: Record<string, string> = {
+    'coffee': 'coffee',
+    'lunch': 'lunch',
+    'video': 'video',
+    'call': 'call',
+    'in_person': 'in_person',
+    'recurring': 'recurring',
+  };
+  return channelMap[channel] || 'video';
+}
+
+// Check if this is a Build Rapport path step (all steps have suggested_action = 'meeting')
+function isBuildRapportStep(step: DevelopmentPathStep): boolean {
+  return step.suggestedAction === 'meeting';
+}
 
 const durationOptions = ['15', '30', '45', '60', '90'];
 
@@ -126,21 +146,28 @@ function getPlatformLabel(platformId: string): string {
 }
 
 export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: MeetingSchedulerInterfaceProps) {
-  const [meetingType, setMeetingType] = useState(
-    step.suggestedChannel === 'call' ? 'call' : 
-    step.suggestedChannel === 'in_person' ? 'coffee' : 'video'
-  );
+  // Check if this is a Build Rapport step (meeting-focused path)
+  const isBuildRapport = isBuildRapportStep(step);
+  
+  // For Build Rapport steps, use the mapped meeting type from suggested_channel
+  const initialMeetingType = isBuildRapport 
+    ? mapChannelToMeetingType(step.suggestedChannel)
+    : step.suggestedChannel === 'call' ? 'call' : 
+      step.suggestedChannel === 'in_person' ? 'coffee' : 'video';
+
+  const [meetingType, setMeetingType] = useState(initialMeetingType);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState(
-    meetingTypes.find(m => m.id === meetingType)?.duration || '30'
+    meetingTypes.find(m => m.id === initialMeetingType)?.duration || '30'
   );
   const [location, setLocation] = useState("");
   const [platform, setPlatform] = useState("zoom");
   const [agenda, setAgenda] = useState("");
   const [selectedPoints, setSelectedPoints] = useState<string[]>([]);
   const [sendCalendarInvite, setSendCalendarInvite] = useState(true);
-  const [createAsOutreach, setCreateAsOutreach] = useState(true);
+  // Auto-enable outreach creation for Build Rapport path steps
+  const [createAsOutreach, setCreateAsOutreach] = useState(isBuildRapport ? true : true);
   const [isCreating, setIsCreating] = useState(false);
   
   const talkingPointSuggestions = getTalkingPointSuggestions(contact, step);
@@ -270,7 +297,14 @@ export function MeetingSchedulerInterface({ contact, step, onSave, onCancel }: M
     <div className="space-y-6">
       {/* Step Context */}
       <div className="border-b border-border/40 pb-4">
-        <h3 className="font-semibold text-lg">{step.name}</h3>
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-semibold text-lg">{step.name}</h3>
+          {isBuildRapport && (
+            <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
+              Build Rapport Series
+            </span>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground">{step.description}</p>
       </div>
 

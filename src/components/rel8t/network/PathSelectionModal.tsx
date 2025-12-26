@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, Coffee, Users, Handshake, CalendarCheck } from "lucide-react";
 import { getDevelopmentPaths } from "@/services/actv8Service";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,15 @@ interface PathSelectionModalProps {
   onSelectPath: (pathId: string) => void;
   currentPathId?: string;
 }
+
+// Check if a path is the Build Rapport meeting-focused path
+const isBuildRapportPath = (pathId: string) => pathId === 'build_rapport';
+
+// Get icon for Build Rapport steps
+const getBuildRapportStepIcon = (index: number) => {
+  const icons = [Coffee, Users, Handshake, CalendarCheck];
+  return icons[index] || Coffee;
+};
 
 export function PathSelectionModal({
   open,
@@ -77,14 +86,28 @@ export function PathSelectionModal({
                     </div>
                     <p className="text-xs text-muted-foreground mb-2 sm:mb-3 line-clamp-2">{path.description}</p>
                     
-                    {/* Step indicators */}
+                    {/* Step indicators - show meeting icons for Build Rapport */}
                     <div className="flex items-center gap-0.5 sm:gap-1 mb-1.5 sm:mb-2">
-                      {path.steps?.map((_, index) => (
-                        <div
-                          key={index}
-                          className="h-1 sm:h-1.5 flex-1 rounded-full bg-muted max-w-8"
-                        />
-                      ))}
+                      {isBuildRapportPath(path.id) ? (
+                        path.steps?.map((_, index) => {
+                          const Icon = getBuildRapportStepIcon(index);
+                          return (
+                            <div
+                              key={index}
+                              className="h-5 sm:h-6 flex-1 rounded bg-primary/10 flex items-center justify-center max-w-8"
+                            >
+                              <Icon className="h-3 w-3 text-primary" />
+                            </div>
+                          );
+                        })
+                      ) : (
+                        path.steps?.map((_, index) => (
+                          <div
+                            key={index}
+                            className="h-1 sm:h-1.5 flex-1 rounded-full bg-muted max-w-8"
+                          />
+                        ))
+                      )}
                     </div>
                     
                     <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
