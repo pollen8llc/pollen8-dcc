@@ -29,13 +29,37 @@ export default function NetworkProfile() {
   const [showPathModal, setShowPathModal] = useState(false);
   const [showTouchpointSheet, setShowTouchpointSheet] = useState(false);
   const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
-  
 
   // Fetch actv8 contact from database
   const { data: actv8Contact, isLoading, error } = useQuery({
     queryKey: ['actv8-contact', id],
     queryFn: () => getActv8Contact(id!),
     enabled: !!id,
+  });
+
+  // Mutation to update development path - must be before any conditional returns
+  const updatePathMutation = useMutation({
+    mutationFn: async (pathId: string) => {
+      if (!actv8Contact) throw new Error('No contact loaded');
+      const { error } = await supabase
+        .from('rms_actv8_contacts')
+        .update({ 
+          development_path_id: pathId,
+          current_step_index: 0,
+          completed_steps: [],
+          path_started_at: new Date().toISOString()
+        })
+        .eq('id', actv8Contact.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['actv8-contact', id] });
+      toast.success('Development path updated');
+    },
+    onError: (error: any) => {
+      toast.error('Failed to update path: ' + error.message);
+    }
   });
 
   if (isLoading) {
@@ -90,30 +114,6 @@ export default function NetworkProfile() {
   };
 
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('');
-
-  // Mutation to update development path
-  const updatePathMutation = useMutation({
-    mutationFn: async (pathId: string) => {
-      const { error } = await supabase
-        .from('rms_actv8_contacts')
-        .update({ 
-          development_path_id: pathId,
-          current_step_index: 0,
-          completed_steps: [],
-          path_started_at: new Date().toISOString()
-        })
-        .eq('id', actv8Contact.id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['actv8-contact', id] });
-      toast.success('Development path updated');
-    },
-    onError: (error: any) => {
-      toast.error('Failed to update path: ' + error.message);
-    }
-  });
 
   const handleSelectPath = (pathId: string) => {
     updatePathMutation.mutate(pathId);
