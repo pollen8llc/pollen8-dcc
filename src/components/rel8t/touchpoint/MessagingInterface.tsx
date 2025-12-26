@@ -103,7 +103,7 @@ export function MessagingInterface({ contact, step, onSave, onCancel }: Messagin
   
   // Filter relevant channels for messaging
   const messagingChannels = touchpointChannels.filter(c => 
-    ['dm', 'email', 'social_reply'].includes(c.id)
+    ['email', 'text', 'phone'].includes(c.id)
   );
 
   const handleSave = () => {
