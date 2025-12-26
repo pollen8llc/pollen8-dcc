@@ -1,11 +1,22 @@
 import { getDevelopmentPath, DevelopmentPath } from "@/data/mockNetworkData";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { format, parseISO, isPast, isToday } from "date-fns";
+import { Calendar, ExternalLink } from "lucide-react";
+import { Outreach } from "@/services/rel8t/outreachService";
+
+interface LinkedOutreach {
+  stepIndex: number;
+  outreach: Outreach;
+}
 
 interface DevelopmentPathCardProps {
   pathId?: string;
   currentStepIndex?: number;
   completedSteps?: string[];
+  linkedOutreaches?: LinkedOutreach[];
   onPlanTouchpoint?: (stepIndex: number) => void;
   onAdvanceStep?: () => void;
   onChangePath?: () => void;
@@ -15,10 +26,12 @@ export function DevelopmentPathCard({
   pathId,
   currentStepIndex,
   completedSteps,
+  linkedOutreaches = [],
   onPlanTouchpoint,
   onAdvanceStep,
   onChangePath
 }: DevelopmentPathCardProps) {
+  const navigate = useNavigate();
   const path = pathId ? getDevelopmentPath(pathId) : null;
 
   if (!path) {
@@ -36,6 +49,28 @@ export function DevelopmentPathCard({
   const completed = completedSteps ?? [];
   const progress = ((stepIndex) / path.steps.length) * 100;
   const isComplete = stepIndex >= path.steps.length;
+
+  // Helper to find linked outreach for a step
+  const getLinkedOutreach = (index: number) => {
+    return linkedOutreaches.find(lo => lo.stepIndex === index);
+  };
+
+  // Helper to get outreach status badge
+  const getOutreachStatusBadge = (outreach: Outreach) => {
+    const dueDate = parseISO(outreach.due_date);
+    const isOverdue = outreach.status === 'pending' && isPast(dueDate) && !isToday(dueDate);
+    
+    if (outreach.status === 'completed') {
+      return <Badge className="bg-emerald-500 text-[10px] h-5">Done</Badge>;
+    }
+    if (isOverdue) {
+      return <Badge variant="destructive" className="text-[10px] h-5">Overdue</Badge>;
+    }
+    if (isToday(dueDate)) {
+      return <Badge className="bg-amber-500 text-[10px] h-5">Today</Badge>;
+    }
+    return <Badge variant="secondary" className="text-[10px] h-5">Scheduled</Badge>;
+  };
 
   return (
     <div className="space-y-4">
@@ -65,6 +100,7 @@ export function DevelopmentPathCard({
           const isCompleted = index < stepIndex || completed.includes(step.id);
           const isCurrent = index === stepIndex;
           const isUpcoming = index > stepIndex;
+          const linkedOutreach = getLinkedOutreach(index);
 
           return (
             <div
@@ -91,24 +127,51 @@ export function DevelopmentPathCard({
 
                 {/* Step Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className={`font-medium text-sm ${isUpcoming ? 'text-muted-foreground' : ''}`}>
                       {step.name}
                     </span>
-                    {isCompleted && (
+                    {isCompleted && !linkedOutreach && (
                       <span className="text-[10px] text-emerald-500 font-medium">COMPLETED</span>
                     )}
-                    {isCurrent && (
+                    {isCurrent && !linkedOutreach && (
                       <span className="text-[10px] text-primary font-medium">CURRENT</span>
                     )}
-                    {isUpcoming && (
+                    {isUpcoming && !linkedOutreach && (
                       <span className="text-[10px] text-muted-foreground">UPCOMING</span>
                     )}
+                    {linkedOutreach && getOutreachStatusBadge(linkedOutreach.outreach)}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
                   
-                  {/* Current Step Actions */}
-                  {isCurrent && (
+                  {/* Linked Outreach Info */}
+                  {linkedOutreach && (
+                    <div className="mt-2 p-2 rounded bg-muted/50 border border-border/30">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 text-xs">
+                          <Calendar className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-muted-foreground">
+                            {format(parseISO(linkedOutreach.outreach.due_date), 'MMM d, yyyy')}
+                          </span>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          className="h-6 text-xs gap-1"
+                          onClick={() => navigate(`/rel8/outreach/${linkedOutreach.outreach.id}`)}
+                        >
+                          View Outreach
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-foreground mt-1 truncate">
+                        {linkedOutreach.outreach.title}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Current Step Actions - Only show if no linked outreach */}
+                  {isCurrent && !linkedOutreach && (
                     <div className="mt-2">
                       <Button 
                         size="sm" 
@@ -116,7 +179,7 @@ export function DevelopmentPathCard({
                         className="h-7 text-xs"
                         onClick={() => onPlanTouchpoint?.(index)}
                       >
-                        Manage Plan
+                        Plan Touchpoint
                       </Button>
                     </div>
                   )}

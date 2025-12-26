@@ -702,3 +702,108 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     return null;
   }
 };
+
+export const getOutreachesByActv8Contact = async (actv8ContactId: string): Promise<Outreach[]> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    
+    const { data, error } = await supabase
+      .from("rms_outreach")
+      .select(`
+        *,
+        rms_outreach_contacts(
+          contact_id,
+          rms_contacts(
+            id,
+            name,
+            email,
+            organization
+          )
+        )
+      `)
+      .eq("user_id", user.id)
+      .eq("actv8_contact_id", actv8ContactId)
+      .order("actv8_step_index", { ascending: true });
+    
+    if (error) throw error;
+    
+    // Process data to format contacts  
+    const formattedData = (data as any)?.map((item: any) => {
+      const contacts = Array.isArray(item.rms_outreach_contacts) 
+        ? item.rms_outreach_contacts
+            .map((oc: any) => oc.rms_contacts)
+            .filter((c: any) => c)
+        : [];
+      
+      const priority = (item.priority || 'medium') as OutreachPriority;
+      
+      return {
+        id: item.id,
+        user_id: item.user_id,
+        title: item.title,
+        description: item.message || item.description,
+        priority: priority,
+        status: item.status as OutreachStatus,
+        due_date: item.due_date || item.created_at,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        system_email: item.system_email,
+        calendar_sync_enabled: item.calendar_sync_enabled || false,
+        ics_uid: item.ics_uid,
+        sequence: item.sequence,
+        last_calendar_update: item.last_calendar_update,
+        raw_ics: item.raw_ics,
+        outreach_channel: item.outreach_channel,
+        channel_details: item.channel_details,
+        contacts_notified_at: item.contacts_notified_at,
+        trigger_id: item.trigger_id,
+        actv8_contact_id: item.actv8_contact_id,
+        actv8_step_index: item.actv8_step_index,
+        contacts
+      } as Outreach;
+    });
+    
+    return formattedData || [];
+  } catch (error: any) {
+    console.error("Error fetching outreaches by actv8 contact:", error);
+    return [];
+  }
+};
+
+export const linkOutreachToActv8 = async (
+  outreachId: string,
+  actv8ContactId: string,
+  stepIndex: number
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from("rms_outreach")
+      .update({
+        actv8_contact_id: actv8ContactId,
+        actv8_step_index: stepIndex,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", outreachId);
+    
+    if (error) throw error;
+    
+    toast({
+      title: "Outreach linked",
+      description: "Outreach has been linked to the development path step.",
+    });
+    
+    return true;
+  } catch (error: any) {
+    console.error("Error linking outreach to actv8:", error);
+    toast({
+      title: "Error linking outreach",
+      description: error.message,
+      variant: "destructive",
+    });
+    return false;
+  }
+};

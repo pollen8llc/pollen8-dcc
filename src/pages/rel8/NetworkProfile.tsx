@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath } from "@/services/actv8Service";
+import { getOutreachesByActv8Contact } from "@/services/rel8t/outreachService";
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { TrustRatingBar } from "@/components/rel8t/network/TrustRatingBar";
@@ -43,6 +44,19 @@ export default function NetworkProfile() {
   const { data: actv8Contact, isLoading, error } = useQuery({
     queryKey: ['actv8-contact', id],
     queryFn: () => getActv8Contact(id!),
+    enabled: !!id,
+  });
+
+  // Fetch linked outreaches for this actv8 contact
+  const { data: linkedOutreaches = [] } = useQuery({
+    queryKey: ['actv8-outreaches', id],
+    queryFn: async () => {
+      const outreaches = await getOutreachesByActv8Contact(id!);
+      return outreaches.map(o => ({
+        stepIndex: o.actv8_step_index ?? 0,
+        outreach: o
+      }));
+    },
     enabled: !!id,
   });
 
@@ -302,6 +316,7 @@ export default function NetworkProfile() {
               pathId={contact.developmentPathId}
               currentStepIndex={contact.currentStepIndex}
               completedSteps={contact.completedSteps}
+              linkedOutreaches={linkedOutreaches}
               onPlanTouchpoint={handlePlanTouchpoint}
               onAdvanceStep={handleAdvanceStep}
               onChangePath={() => setShowPathModal(true)}
