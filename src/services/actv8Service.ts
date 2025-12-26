@@ -193,6 +193,7 @@ export async function getActiveContacts(): Promise<Actv8Contact[]> {
     .from("rms_actv8_contacts")
     .select("*")
     .eq("user_id", user.id)
+    .eq("status", "active")
     .order("activated_at", { ascending: false });
 
   if (actv8Error) throw actv8Error;
