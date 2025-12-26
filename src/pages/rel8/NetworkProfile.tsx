@@ -1,7 +1,8 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getActv8Contact, deactivateContact } from "@/services/actv8Service";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { getActv8Contact, deactivateContact, updateContactProgress } from "@/services/actv8Service";
+import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { TrustRatingBar } from "@/components/rel8t/network/TrustRatingBar";
 import { StatusDot } from "@/components/rel8t/network/StatusDot";
@@ -90,14 +91,45 @@ export default function NetworkProfile() {
 
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('');
 
+  // Mutation to update development path
+  const updatePathMutation = useMutation({
+    mutationFn: async (pathId: string) => {
+      const { error } = await supabase
+        .from('rms_actv8_contacts')
+        .update({ 
+          development_path_id: pathId,
+          current_step_index: 0,
+          completed_steps: [],
+          path_started_at: new Date().toISOString()
+        })
+        .eq('id', actv8Contact.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['actv8-contact', id] });
+      toast.success('Development path updated');
+    },
+    onError: (error: any) => {
+      toast.error('Failed to update path: ' + error.message);
+    }
+  });
+
   const handleSelectPath = (pathId: string) => {
-    // TODO: Update path in database
-    toast.success('Path updated');
+    updatePathMutation.mutate(pathId);
   };
 
-  const handleAdvanceStep = () => {
-    // TODO: Update step in database
-    toast.success('Step advanced');
+  const handleAdvanceStep = async () => {
+    const newStepIndex = contact.currentStepIndex + 1;
+    const newCompletedSteps = [...contact.completedSteps, String(contact.currentStepIndex)];
+    
+    try {
+      await updateContactProgress(actv8Contact.id, newStepIndex, newCompletedSteps);
+      queryClient.invalidateQueries({ queryKey: ['actv8-contact', id] });
+      toast.success('Step completed!');
+    } catch (error: any) {
+      toast.error('Failed to advance step: ' + error.message);
+    }
   };
 
   const handlePlanTouchpoint = (stepIndex: number) => {
