@@ -201,7 +201,7 @@ const RelationshipWizard = () => {
     <div className="min-h-screen bg-background">
       <Rel8Header showProfileBanner={false} />
       
-      <div className="container mx-auto max-w-6xl px-4 py-8">
+      <div className="container mx-auto max-w-6xl px-4 py-8 pb-32">
         <div className="flex flex-col md:flex-row gap-4 md:items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold">{getStepTitle()}</h1>

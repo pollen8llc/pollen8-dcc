@@ -9,7 +9,7 @@ import { ArrowLeft, BarChart3, PieChart } from "lucide-react";
 export default function Insights() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
-      <div className="container max-w-7xl mx-auto px-4 py-6 pb-24">
+      <div className="container max-w-7xl mx-auto px-4 py-6 pb-32">
         <div className="flex items-center justify-between mb-8">
           <div>
             <Link to="/rel8/actv8" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-2">

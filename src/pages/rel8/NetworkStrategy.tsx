@@ -49,7 +49,7 @@ export default function NetworkStrategy() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
-      <div className="container max-w-3xl mx-auto px-4 py-6 pb-24">
+      <div className="container max-w-3xl mx-auto px-4 py-6 pb-32">
         <Link to={`/rel8/actv8/${id}/profile`} className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" />Back to Profile
         </Link>
