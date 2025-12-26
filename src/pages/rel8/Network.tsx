@@ -148,7 +148,7 @@ export default function Network() {
         </p>
 
         {/* Contact Grid/List */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {filteredContacts.map(contact => (
             <NetworkContactCard 
               key={contact.id} 
