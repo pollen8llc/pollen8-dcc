@@ -126,14 +126,14 @@ export const developmentPaths: DevelopmentPath[] = [
     targetStrength: 'solid'
   },
   {
-    id: 'mentorship_track',
-    name: 'Mentorship Track',
-    description: 'Build a mentor-mentee relationship',
+    id: 'build_rapport',
+    name: 'Build Rapport',
+    description: 'Build deeper connections through a series of meaningful meetings',
     steps: [
-      { id: 'mt_1', name: 'Initial Ask', description: 'Request mentorship', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'aspirational' },
-      { id: 'mt_2', name: 'First Session', description: 'Have first mentoring call', suggestedAction: 'coffee', suggestedChannel: 'call', suggestedTone: 'professional' },
-      { id: 'mt_3', name: 'Regular Check-ins', description: 'Establish recurring meetings', suggestedAction: 'coffee', suggestedChannel: 'in_person', suggestedTone: 'friendly' },
-      { id: 'mt_4', name: 'Goal Review', description: 'Assess progress and next steps', suggestedAction: 'soft_checkin', suggestedChannel: 'call', suggestedTone: 'professional' },
+      { id: 'br_1', name: 'Casual Introduction', description: 'First informal meeting to get to know each other over coffee or a quick video call', suggestedAction: 'meeting', suggestedChannel: 'coffee', suggestedTone: 'friendly' },
+      { id: 'br_2', name: 'Deeper Conversation', description: 'Extended meeting to explore shared interests and build understanding', suggestedAction: 'meeting', suggestedChannel: 'lunch', suggestedTone: 'friendly' },
+      { id: 'br_3', name: 'Collaborative Meeting', description: 'Work on something together or share ideas in a working session', suggestedAction: 'meeting', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
+      { id: 'br_4', name: 'Ongoing Connection', description: 'Establish a regular meeting cadence to maintain the relationship', suggestedAction: 'meeting', suggestedChannel: 'recurring', suggestedTone: 'friendly' },
     ],
     targetStrength: 'thick'
   },
