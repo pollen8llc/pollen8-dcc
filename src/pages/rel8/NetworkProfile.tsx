@@ -8,7 +8,7 @@ import { StatusDot } from "@/components/rel8t/network/StatusDot";
 import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathCard";
 import { DevelopmentTimeline } from "@/components/rel8t/network/DevelopmentTimeline";
 import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModal";
-import { InteractionLogModal } from "@/components/rel8t/network/InteractionLogModal";
+
 import { StepInterfaceRouter } from "@/components/rel8t/touchpoint";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { toast } from "sonner";
 
@@ -24,11 +24,11 @@ export default function NetworkProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [showLogModal, setShowLogModal] = useState(false);
+  
   const [showPathModal, setShowPathModal] = useState(false);
   const [showTouchpointSheet, setShowTouchpointSheet] = useState(false);
   const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
-  const [isDeactivating, setIsDeactivating] = useState(false);
+  
 
   // Fetch actv8 contact from database
   const { data: actv8Contact, isLoading, error } = useQuery({
@@ -112,22 +112,6 @@ export default function NetworkProfile() {
     toast.success('Touchpoint saved successfully');
   };
 
-  const handleDeactivate = async () => {
-    if (!confirm(`Remove ${contact.name} from Actv8?`)) return;
-    
-    setIsDeactivating(true);
-    try {
-      await deactivateContact(actv8Contact.id);
-      queryClient.invalidateQueries({ queryKey: ['actv8-contacts'] });
-      toast.success(`${contact.name} removed from Actv8`);
-      navigate('/rel8/actv8');
-    } catch (error) {
-      console.error('Failed to deactivate:', error);
-      toast.error('Failed to remove contact');
-    } finally {
-      setIsDeactivating(false);
-    }
-  };
 
   // Map relationship type
   const relationshipTypeLabels: Record<string, string> = {
@@ -268,29 +252,13 @@ export default function NetworkProfile() {
           <Button onClick={() => handlePlanTouchpoint(contact.currentStepIndex ?? 0)}>
             Plan Touchpoint
           </Button>
-          <Button variant="outline" onClick={() => setShowLogModal(true)}>
-            Log Interaction
-          </Button>
           <Link to={`/rel8/actv8/${id}/strategy`}>
             <Button variant="outline">Build Strategy</Button>
           </Link>
-          <Button 
-            variant="outline" 
-            onClick={handleDeactivate}
-            disabled={isDeactivating}
-            className="text-destructive hover:bg-destructive/10"
-          >
-            {isDeactivating ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Trash2 className="h-4 w-4 mr-2" />
-            )}
-            Remove from Actv8
-          </Button>
         </div>
       </div>
 
-      <InteractionLogModal open={showLogModal} onOpenChange={setShowLogModal} contactName={contact.name} />
+      
       <PathSelectionModal 
         open={showPathModal} 
         onOpenChange={setShowPathModal} 
