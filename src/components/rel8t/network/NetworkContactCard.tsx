@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Actv8ContactDisplay, useDeactivateContact } from "@/hooks/useActv8Contacts";
-import { ConnectionStrengthBar } from "./ConnectionStrengthBar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -22,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreVertical, Pause, Play, Trash2 } from "lucide-react";
+import { MoreVertical, Pause, Play, Trash2, ChevronRight, TrendingUp } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { relationshipTypes } from "@/services/actv8Service";
 
@@ -31,7 +30,21 @@ interface NetworkContactCardProps {
   viewMode: 'grid' | 'list';
 }
 
-export function NetworkContactCard({ contact, viewMode }: NetworkContactCardProps) {
+const strengthColors: Record<string, string> = {
+  thin: 'bg-red-500',
+  growing: 'bg-amber-500',
+  solid: 'bg-emerald-500',
+  thick: 'bg-primary',
+};
+
+const strengthLabels: Record<string, string> = {
+  thin: 'New',
+  growing: 'Growing',
+  solid: 'Strong',
+  thick: 'Core',
+};
+
+export function NetworkContactCard({ contact }: NetworkContactCardProps) {
   const { deactivate } = useDeactivateContact();
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const [showPauseDialog, setShowPauseDialog] = useState(false);
@@ -60,7 +73,6 @@ export function NetworkContactCard({ contact, viewMode }: NetworkContactCardProp
   };
 
   const handlePauseResume = () => {
-    // TODO: Implement pause/resume in database
     setIsPaused(!isPaused);
     setShowPauseDialog(false);
   };
@@ -70,235 +82,153 @@ export function NetworkContactCard({ contact, viewMode }: NetworkContactCardProp
     e.stopPropagation();
   };
 
-  const MenuButton = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild onClick={handleMenuClick}>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-foreground"
-        >
-          <MoreVertical className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40 bg-popover border border-border z-50">
-        <DropdownMenuItem 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setShowPauseDialog(true);
-          }}
-          className="gap-2 cursor-pointer"
-        >
-          {isPaused ? (
-            <>
-              <Play className="h-4 w-4" />
-              Resume
-            </>
-          ) : (
-            <>
-              <Pause className="h-4 w-4" />
-              Pause
-            </>
-          )}
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setShowRemoveDialog(true);
-          }}
-          className="gap-2 cursor-pointer text-destructive focus:text-destructive"
-        >
-          <Trash2 className="h-4 w-4" />
-          Remove
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-
-  if (viewMode === 'list') {
-    return (
-      <>
-        <Link to={`/rel8/actv8/${contact.id}/profile`}>
-          <div className="glass-card p-4 flex items-center gap-4 hover:border-primary/30 transition-all cursor-pointer group">
-            <Avatar className="h-12 w-12">
-              <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium truncate">{contact.name}</h3>
-                {isPaused && <Badge variant="outline" className="text-[10px] text-orange-500 border-orange-500/50">Paused</Badge>}
-                <Badge variant="outline" className="text-[10px]">
-                  {relationshipType?.label || contact.relationshipType}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground truncate">
-                {contact.role} at {contact.company}
-              </p>
-            </div>
-            
-            <div className="hidden md:block w-32">
-              <ConnectionStrengthBar strength={contact.connectionStrength} showLabel={false} size="sm" />
-            </div>
-            
-            <Badge variant="secondary" className="hidden sm:inline-flex text-xs">
-              {contact.industry}
-            </Badge>
-            
-            <div className="text-xs text-muted-foreground">
-              {formatLastInteraction(contact.lastInteraction)}
-            </div>
-
-            <div onClick={handleMenuClick}>
-              <MenuButton />
-            </div>
-          </div>
-        </Link>
-
-        {/* Remove Confirmation Dialog */}
-        <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Remove from Actv8?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will remove {contact.name} from your Actv8 list. You can always add them back later from your contacts.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleRemove} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Remove
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Pause/Resume Confirmation Dialog */}
-        <AlertDialog open={showPauseDialog} onOpenChange={setShowPauseDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{isPaused ? 'Resume' : 'Pause'} development?</AlertDialogTitle>
-              <AlertDialogDescription>
-                {isPaused 
-                  ? `Resume tracking your relationship development with ${contact.name}.`
-                  : `Pause your relationship development with ${contact.name}. They will remain in your list but won't show in active tasks.`
-                }
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handlePauseResume}>
-                {isPaused ? 'Resume' : 'Pause'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </>
-    );
-  }
-
   return (
     <>
       <Link to={`/rel8/actv8/${contact.id}/profile`}>
-        <div className="glass-card p-3 hover:border-primary/30 transition-all cursor-pointer group relative">
-          {/* Row 1: Identity & Info */}
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
-            <Avatar className="h-10 w-10 ring-2 ring-primary/20 shrink-0">
-              <AvatarFallback className="text-sm">{getInitials(contact.name)}</AvatarFallback>
-            </Avatar>
+        <div className="notification-card group">
+          <div className="p-4">
+            {/* Top Row: Avatar + Name + Menu */}
+            <div className="flex items-start gap-3">
+              {/* Avatar with strength indicator */}
+              <div className="relative">
+                <Avatar className="h-12 w-12 ring-2 ring-background">
+                  <AvatarFallback className="bg-secondary text-foreground font-semibold">
+                    {getInitials(contact.name)}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Strength dot */}
+                <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-background ${strengthColors[contact.connectionStrength]}`} />
+              </div>
 
-            {/* Main Info */}
-            <div className="flex-1 min-w-0">
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-foreground truncate">
+                    {contact.name}
+                  </h3>
+                  {isPaused && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-amber-500 border-amber-500/50 shrink-0">
+                      Paused
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground truncate">
+                  {contact.role} · {contact.company}
+                </p>
+              </div>
+
+              {/* Menu + Chevron */}
+              <div className="flex items-center gap-1" onClick={handleMenuClick}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="icon-button h-8 w-8">
+                      <MoreVertical className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44 bg-popover border border-border">
+                    <DropdownMenuItem 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowPauseDialog(true);
+                      }}
+                      className="gap-2 cursor-pointer"
+                    >
+                      {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+                      {isPaused ? 'Resume' : 'Pause'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowRemoveDialog(true);
+                      }}
+                      className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remove
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </div>
+
+            {/* Bottom Row: Stats */}
+            <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border/30">
+              {/* Connection Strength */}
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold truncate">{contact.name}</h3>
-                {isPaused && <Badge variant="outline" className="text-[10px] text-orange-500 border-orange-500/50">Paused</Badge>}
-                <Badge variant="secondary" className="text-[10px] hidden sm:inline-flex">
-                  {contact.industry}
-                </Badge>
+                <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  {strengthLabels[contact.connectionStrength]}
+                </span>
               </div>
-              <p className="text-sm text-muted-foreground truncate">
-                {contact.role} at {contact.company}
-              </p>
-            </div>
 
-            {/* Relationship Type */}
-            <div className="hidden md:block text-right">
-              <span className="text-xs text-muted-foreground">Relationship</span>
-              <p className="text-sm font-medium">
-                {relationshipType?.label || contact.relationshipType || 'Not set'}
-              </p>
-            </div>
+              {/* Relationship Type */}
+              <Badge variant="secondary" className="text-[10px] px-2 py-0.5 h-5 bg-secondary/80">
+                {relationshipType?.label || contact.relationshipType}
+              </Badge>
 
-            {/* Menu */}
-            <div onClick={handleMenuClick}>
-              <MenuButton />
-            </div>
-          </div>
-
-          {/* Row 2: Progress Bars */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 mt-3 pt-3 border-t border-border/30">
-            {/* Connection Strength */}
-            <div className="flex-1">
-              <span className="text-xs text-muted-foreground">Connection Strength</span>
-              <div className="mt-1">
-                <ConnectionStrengthBar strength={contact.connectionStrength} showLabel={false} size="sm" />
-              </div>
-            </div>
-
-            {/* Development Path */}
-            <div className="flex-1">
-              <span className="text-xs text-muted-foreground">Development Path</span>
-              {contact.developmentPathName ? (
-                <div className="flex items-center gap-2 mt-1">
-                  <Progress value={pathProgress} className="h-1.5 flex-1" />
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {currentStep}/{totalSteps} · {contact.developmentPathName}
+              {/* Path Progress */}
+              {contact.developmentPathName && (
+                <div className="flex-1 flex items-center gap-2">
+                  <div className="flex-1 h-1 bg-secondary rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary rounded-full transition-all duration-500"
+                      style={{ width: `${pathProgress}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                    {currentStep}/{totalSteps}
                   </span>
                 </div>
-              ) : (
-                <p className="text-xs text-muted-foreground/60 mt-1">No path assigned</p>
               )}
+
+              {/* Last Interaction - Only on larger screens */}
+              <span className="text-[10px] text-muted-foreground hidden sm:block ml-auto">
+                {formatLastInteraction(contact.lastInteraction)}
+              </span>
             </div>
           </div>
         </div>
       </Link>
 
-      {/* Remove Confirmation Dialog */}
+      {/* Remove Dialog */}
       <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="md-surface-2 max-w-sm mx-4">
           <AlertDialogHeader>
             <AlertDialogTitle>Remove from Actv8?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove {contact.name} from your Actv8 list. You can always add them back later from your contacts.
+              This will remove {contact.name} from your active relationships. You can add them back anytime.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemove} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleRemove} 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+            >
               Remove
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Pause/Resume Confirmation Dialog */}
+      {/* Pause Dialog */}
       <AlertDialog open={showPauseDialog} onOpenChange={setShowPauseDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="md-surface-2 max-w-sm mx-4">
           <AlertDialogHeader>
-            <AlertDialogTitle>{isPaused ? 'Resume' : 'Pause'} development?</AlertDialogTitle>
+            <AlertDialogTitle>{isPaused ? 'Resume' : 'Pause'} Development?</AlertDialogTitle>
             <AlertDialogDescription>
               {isPaused 
-                ? `Resume tracking your relationship development with ${contact.name}.`
-                : `Pause your relationship development with ${contact.name}. They will remain in your list but won't show in active tasks.`
+                ? `Resume developing your relationship with ${contact.name}.`
+                : `Pause ${contact.name}. They'll stay in your list but won't appear in active tasks.`
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handlePauseResume}>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handlePauseResume} className="rounded-xl">
               {isPaused ? 'Resume' : 'Pause'}
             </AlertDialogAction>
           </AlertDialogFooter>

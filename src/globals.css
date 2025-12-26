@@ -192,6 +192,155 @@
   @apply hover:shadow-[#00eada]/10 hover:border-[#00eada]/20 transition-all duration-300;
 }
 
+/* ============================================
+   ANDROID / MATERIAL DESIGN 3 INSPIRED STYLES
+   ============================================ */
+
+/* Material surfaces with elevation levels */
+.md-surface {
+  @apply bg-card border-0 rounded-xl;
+  box-shadow: 0 1px 2px hsl(0 0% 0% / 0.3), 0 1px 3px 1px hsl(0 0% 0% / 0.15);
+}
+
+.md-surface-1 {
+  @apply bg-card border-0 rounded-xl;
+  box-shadow: 0 1px 3px hsl(0 0% 0% / 0.3), 0 4px 8px 3px hsl(0 0% 0% / 0.15);
+}
+
+.md-surface-2 {
+  @apply bg-card border-0 rounded-2xl;
+  box-shadow: 0 2px 6px hsl(0 0% 0% / 0.3), 0 8px 12px 6px hsl(0 0% 0% / 0.15);
+}
+
+.md-surface-3 {
+  @apply bg-card border-0 rounded-3xl;
+  box-shadow: 0 4px 8px hsl(0 0% 0% / 0.3), 0 12px 20px 8px hsl(0 0% 0% / 0.15);
+}
+
+/* Android notification card style */
+.notification-card {
+  @apply relative bg-secondary/50 rounded-2xl overflow-hidden;
+  @apply active:scale-[0.98] transition-transform duration-150;
+}
+
+.notification-card::before {
+  content: '';
+  @apply absolute inset-0 bg-primary/0 transition-colors duration-200;
+}
+
+.notification-card:active::before {
+  @apply bg-primary/10;
+}
+
+/* Android settings list item */
+.settings-item {
+  @apply flex items-center gap-4 px-4 py-3 min-h-[56px];
+  @apply rounded-xl transition-all duration-200;
+  @apply active:bg-primary/10;
+}
+
+.settings-item-lg {
+  @apply flex items-center gap-4 px-4 py-4 min-h-[72px];
+  @apply rounded-xl transition-all duration-200;
+  @apply active:bg-primary/10;
+}
+
+/* Android chip/filter style */
+.md-chip {
+  @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium;
+  @apply bg-secondary text-secondary-foreground;
+  @apply transition-all duration-200 active:scale-95;
+}
+
+.md-chip-selected {
+  @apply bg-primary text-primary-foreground;
+}
+
+.md-chip-outline {
+  @apply border border-border bg-transparent;
+}
+
+/* Android FAB style */
+.md-fab {
+  @apply fixed bottom-20 right-4 z-40;
+  @apply w-14 h-14 rounded-2xl;
+  @apply bg-primary text-primary-foreground;
+  @apply flex items-center justify-center;
+  @apply shadow-lg active:scale-95 transition-transform;
+}
+
+.md-fab-extended {
+  @apply fixed bottom-20 right-4 z-40;
+  @apply px-5 h-14 rounded-2xl gap-2;
+  @apply bg-primary text-primary-foreground;
+  @apply flex items-center justify-center;
+  @apply shadow-lg active:scale-95 transition-transform;
+}
+
+/* Section header - Android style */
+.section-header {
+  @apply text-xs font-medium uppercase tracking-wider text-primary px-4 py-2;
+}
+
+/* Android divider */
+.md-divider {
+  @apply h-px bg-border/50 my-1 mx-4;
+}
+
+/* Touch-friendly icon button */
+.icon-button {
+  @apply w-10 h-10 rounded-full flex items-center justify-center;
+  @apply text-muted-foreground hover:text-foreground;
+  @apply active:bg-primary/10 transition-colors;
+}
+
+/* Android-style progress indicator */
+.md-progress {
+  @apply h-1 bg-secondary rounded-full overflow-hidden;
+}
+
+.md-progress-bar {
+  @apply h-full bg-primary rounded-full transition-all duration-300;
+}
+
+/* Swipe indicator */
+.swipe-indicator {
+  @apply w-8 h-1 bg-muted-foreground/30 rounded-full mx-auto;
+}
+
+/* Bottom sheet handle */
+.sheet-handle {
+  @apply w-8 h-1 bg-muted-foreground/40 rounded-full mx-auto mt-2 mb-4;
+}
+
+/* Empty state container */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-12 px-6 text-center;
+}
+
+.empty-state-icon {
+  @apply w-20 h-20 rounded-full bg-secondary flex items-center justify-center mb-4;
+}
+
+/* Android-style header with large title */
+.page-header {
+  @apply sticky top-0 z-30 bg-background/95 backdrop-blur-sm;
+  @apply px-4 pt-4 pb-2;
+}
+
+.page-header-title {
+  @apply text-2xl font-bold mb-1;
+}
+
+.page-header-subtitle {
+  @apply text-sm text-muted-foreground;
+}
+
+/* Condensed header on scroll */
+.page-header-condensed {
+  @apply px-4 py-3 border-b border-border/50;
+}
+
 .text-with-shadow {
   text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
