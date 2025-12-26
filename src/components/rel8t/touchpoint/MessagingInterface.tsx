@@ -136,24 +136,6 @@ export function MessagingInterface({ contact, step, onSave, onCancel }: Messagin
         </ul>
       </Card>
 
-      {/* Message Templates */}
-      <div>
-        <Label className="text-sm mb-2 block">Quick Templates</Label>
-        <div className="flex flex-wrap gap-2">
-          {templates.map((template, idx) => (
-            <Button
-              key={idx}
-              variant="outline"
-              size="sm"
-              className="text-xs h-auto py-2 px-3 text-left whitespace-normal"
-              onClick={() => setMessage(template)}
-            >
-              {template.substring(0, 50)}...
-            </Button>
-          ))}
-        </div>
-      </div>
-
       {/* Channel Selection */}
       <div>
         <Label className="text-sm mb-2 block">Channel</Label>
@@ -193,6 +175,24 @@ export function MessagingInterface({ contact, step, onSave, onCancel }: Messagin
               <span className="text-sm font-medium">{t.label}</span>
               <p className="text-xs text-muted-foreground mt-1 hidden sm:block">{t.description}</p>
             </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Message Templates */}
+      <div>
+        <Label className="text-sm mb-2 block">Quick Templates</Label>
+        <div className="flex flex-wrap gap-2">
+          {templates.map((template, idx) => (
+            <Button
+              key={idx}
+              variant="outline"
+              size="sm"
+              className="text-xs h-auto py-2 px-3 text-left whitespace-normal"
+              onClick={() => setMessage(template)}
+            >
+              {template.substring(0, 50)}...
+            </Button>
           ))}
         </div>
       </div>
