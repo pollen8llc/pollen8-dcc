@@ -137,8 +137,6 @@ export default function Network() {
             onTypesChange={setSelectedTypes}
             selectedStrengths={selectedStrengths}
             onStrengthsChange={setSelectedStrengths}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
           />
         </div>
 

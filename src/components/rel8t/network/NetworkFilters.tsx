@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, X, Grid3X3, List } from "lucide-react";
+import { Search, Filter, X } from "lucide-react";
 import { industries, relationshipTypes, connectionStrengths } from "@/data/mockNetworkData";
 import { cn } from "@/lib/utils";
 
@@ -15,8 +15,6 @@ interface NetworkFiltersProps {
   onTypesChange: (types: string[]) => void;
   selectedStrengths: string[];
   onStrengthsChange: (strengths: string[]) => void;
-  viewMode: 'grid' | 'list';
-  onViewModeChange: (mode: 'grid' | 'list') => void;
 }
 
 export function NetworkFilters({
@@ -28,8 +26,6 @@ export function NetworkFilters({
   onTypesChange,
   selectedStrengths,
   onStrengthsChange,
-  viewMode,
-  onViewModeChange,
 }: NetworkFiltersProps) {
   const [showFilters, setShowFilters] = useState(false);
 
@@ -92,30 +88,6 @@ export function NetworkFilters({
           <Filter className="h-4 w-4" />
         </Button>
         
-        <div className="flex border border-border/30 rounded-lg overflow-hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onViewModeChange('grid')}
-            className={cn(
-              "rounded-none",
-              viewMode === 'grid' && "bg-primary/10"
-            )}
-          >
-            <Grid3X3 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onViewModeChange('list')}
-            className={cn(
-              "rounded-none",
-              viewMode === 'list' && "bg-primary/10"
-            )}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
 
       {/* Expandable Filters */}
