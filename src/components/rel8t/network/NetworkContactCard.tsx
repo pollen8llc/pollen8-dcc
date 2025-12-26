@@ -202,74 +202,65 @@ export function NetworkContactCard({ contact, viewMode }: NetworkContactCardProp
   return (
     <>
       <Link to={`/rel8/actv8/${contact.id}/profile`}>
-        <div className="glass-card p-0 hover:border-primary/30 transition-all cursor-pointer h-full flex flex-col group relative">
-          {/* Menu button */}
-          <div className="absolute top-2 right-2 z-10" onClick={handleMenuClick}>
-            <MenuButton />
-          </div>
-
-          {/* Section 1: Identity */}
-          <div className="p-4 flex items-start gap-3 border-b border-border/30">
-            <Avatar className="h-12 w-12 ring-2 ring-primary/20 shrink-0">
-              <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
+        <div className="glass-card p-3 hover:border-primary/30 transition-all cursor-pointer group relative">
+          <div className="flex items-center gap-3">
+            {/* Avatar */}
+            <Avatar className="h-10 w-10 ring-2 ring-primary/20 shrink-0">
+              <AvatarFallback className="text-sm">{getInitials(contact.name)}</AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0 pr-6">
+
+            {/* Main Info */}
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold truncate">{contact.name}</h3>
                 {isPaused && <Badge variant="outline" className="text-[10px] text-orange-500 border-orange-500/50">Paused</Badge>}
+                <Badge variant="secondary" className="text-[10px] hidden sm:inline-flex">
+                  {contact.industry}
+                </Badge>
               </div>
-              <Badge variant="secondary" className="text-[10px] mt-1">
-                {contact.industry}
-              </Badge>
+              <p className="text-sm text-muted-foreground truncate">
+                {contact.role} at {contact.company}
+              </p>
             </div>
-          </div>
 
-          {/* Section 2: Professional */}
-          <div className="px-4 py-3 border-b border-border/30">
-            <p className="text-sm text-muted-foreground truncate">
-              {contact.role}
-            </p>
-            <p className="text-sm font-medium truncate">
-              {contact.company}
-            </p>
-          </div>
+            {/* Relationship Type */}
+            <div className="hidden md:block text-right">
+              <span className="text-xs text-muted-foreground">Relationship</span>
+              <p className="text-sm font-medium">
+                {relationshipType?.label || contact.relationshipType || 'Not set'}
+              </p>
+            </div>
 
-          {/* Section 3: Relationship Type */}
-          <div className="px-4 py-3 border-b border-border/30">
-            <span className="text-xs text-muted-foreground">Relationship</span>
-            <p className="text-sm font-medium mt-0.5">
-              {relationshipType?.label || contact.relationshipType || 'Not set'}
-            </p>
-          </div>
+            {/* Connection Strength */}
+            <div className="hidden lg:block w-28">
+              <ConnectionStrengthBar strength={contact.connectionStrength} showLabel={false} size="sm" />
+            </div>
 
-          {/* Section 4: Connection Strength */}
-          <div className="px-4 py-3 border-b border-border/30">
-            <ConnectionStrengthBar strength={contact.connectionStrength} size="sm" />
-          </div>
-
-          {/* Section 5: Development Path */}
-          <div className="px-4 py-3 border-b border-border/30 flex-1">
-            <span className="text-xs text-muted-foreground">Development Path</span>
-            {contact.developmentPathName ? (
-              <div className="mt-1">
-                <p className="text-sm font-medium">{contact.developmentPathName}</p>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <Progress value={pathProgress} className="h-1.5 flex-1" />
-                  <span className="text-[10px] text-muted-foreground">
-                    {currentStep}/{totalSteps}
-                  </span>
+            {/* Development Path */}
+            <div className="hidden xl:block w-32">
+              {contact.developmentPathName ? (
+                <div>
+                  <p className="text-xs font-medium truncate">{contact.developmentPathName}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Progress value={pathProgress} className="h-1 flex-1" />
+                    <span className="text-[10px] text-muted-foreground">
+                      {currentStep}/{totalSteps}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground/60 mt-0.5">No path assigned</p>
-            )}
-          </div>
+              ) : (
+                <p className="text-xs text-muted-foreground/60">No path</p>
+              )}
+            </div>
 
-          {/* Section 6: Meta Info */}
-          <div className="px-4 py-3">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{contact.location}</span>
-              <span>{formatLastInteraction(contact.lastInteraction)}</span>
+            {/* Last Interaction */}
+            <div className="text-xs text-muted-foreground text-right hidden sm:block">
+              {formatLastInteraction(contact.lastInteraction)}
+            </div>
+
+            {/* Menu */}
+            <div onClick={handleMenuClick}>
+              <MenuButton />
             </div>
           </div>
         </div>
