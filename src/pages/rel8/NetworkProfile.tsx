@@ -336,6 +336,7 @@ export default function NetworkProfile() {
               currentStepIndex={contact.currentStepIndex}
               completedSteps={contact.completedSteps}
               pathStartedAt={contact.pathStartedAt}
+              linkedOutreaches={linkedOutreaches}
             />
           </CardContent>
         </Card>
