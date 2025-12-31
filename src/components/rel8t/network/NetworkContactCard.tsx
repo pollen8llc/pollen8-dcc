@@ -31,9 +31,9 @@ interface NetworkContactCardProps {
 }
 
 const strengthConfig: Record<string, { label: string; percentage: number; color: string }> = {
-  thin: { label: 'New', percentage: 25, color: 'from-red-500 to-orange-500' },
-  growing: { label: 'Growing', percentage: 50, color: 'from-amber-500 to-yellow-500' },
-  solid: { label: 'Strong', percentage: 75, color: 'from-emerald-500 to-teal-500' },
+  thin: { label: 'New', percentage: 10, color: 'from-rose-500 to-orange-500' },
+  growing: { label: 'Growing', percentage: 40, color: 'from-amber-500 to-yellow-500' },
+  solid: { label: 'Strong', percentage: 70, color: 'from-emerald-500 to-teal-500' },
   thick: { label: 'Core', percentage: 100, color: 'from-primary to-cyan-400' },
 };
 
@@ -43,23 +43,22 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
   const [showPauseDialog, setShowPauseDialog] = useState(false);
   const [isPaused, setIsPaused] = useState(contact.status === 'paused');
   const [animatedStrength, setAnimatedStrength] = useState(0);
-  const [animatedPath, setAnimatedPath] = useState(0);
+  const [animatedSegments, setAnimatedSegments] = useState(0);
   
   const relationshipType = relationshipTypes.find(rt => rt.id === contact.relationshipType);
   const currentStep = contact.currentStepIndex ?? 0;
-  const totalSteps = contact.totalSteps ?? 1;
-  const pathProgress = (currentStep / totalSteps) * 100;
+  const totalSteps = contact.totalSteps ?? 4; // Default to 4 steps for Build Rapport
   const strengthData = strengthConfig[contact.connectionStrength] || strengthConfig.thin;
 
   // Animate progress bars on mount
   useEffect(() => {
     const timer1 = setTimeout(() => setAnimatedStrength(strengthData.percentage), 100);
-    const timer2 = setTimeout(() => setAnimatedPath(pathProgress), 200);
+    const timer2 = setTimeout(() => setAnimatedSegments(currentStep), 200);
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
     };
-  }, [strengthData.percentage, pathProgress]);
+  }, [strengthData.percentage, currentStep]);
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -207,31 +206,50 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
                 </div>
               </div>
 
-              {/* Development Path Progress */}
+              {/* Development Path Progress - Segmented */}
               <div className="w-full">
                 <div className="flex justify-between items-center mb-1.5">
                   <div className="flex items-center gap-1.5">
                     <Route className="h-3 w-3 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground">
-                      {contact.developmentPathName || 'Development Path'}
+                      {contact.developmentPathName || 'Build Rapport'}
                     </span>
                   </div>
                   <span className="text-xs font-medium text-primary">{currentStep}/{totalSteps} steps</span>
                 </div>
-                <div className="relative h-2 w-full rounded-full overflow-hidden backdrop-blur-md bg-muted/30 border border-white/10">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 shadow-[0_0_10px_rgba(20,184,166,0.3)] transition-all duration-700 ease-out relative overflow-hidden"
-                    style={{ width: `${animatedPath}%` }}
-                  >
-                    {/* Animated shimmer */}
-                    <div 
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                      style={{
-                        animation: "shimmer 2s infinite",
-                        backgroundSize: "200% 100%"
-                      }}
-                    />
-                  </div>
+                {/* Segmented progress bar */}
+                <div className="flex gap-1 w-full">
+                  {Array.from({ length: totalSteps }).map((_, index) => {
+                    const isCompleted = index < animatedSegments;
+                    const isCurrent = index === currentStep;
+                    return (
+                      <div
+                        key={index}
+                        className={`
+                          relative h-2 flex-1 rounded-full overflow-hidden transition-all duration-500
+                          ${isCompleted 
+                            ? 'bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 shadow-[0_0_12px_rgba(20,184,166,0.5)]' 
+                            : 'bg-muted/30 border border-white/10 backdrop-blur-md'
+                          }
+                          ${isCurrent && !isCompleted ? 'border-primary/50' : ''}
+                        `}
+                        style={{
+                          transitionDelay: isCompleted ? `${index * 100}ms` : '0ms'
+                        }}
+                      >
+                        {/* Glow effect for completed segments */}
+                        {isCompleted && (
+                          <div 
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"
+                            style={{
+                              animation: "shimmer 2s infinite",
+                              backgroundSize: "200% 100%"
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
