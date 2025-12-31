@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Actv8ContactDisplay, useDeactivateContact } from "@/hooks/useActv8Contacts";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreVertical, Pause, Play, Trash2, ChevronRight, TrendingUp } from "lucide-react";
+import { MoreVertical, Pause, Play, Trash2, MapPin, TrendingUp, Route } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { relationshipTypes } from "@/services/actv8Service";
 
@@ -30,18 +30,11 @@ interface NetworkContactCardProps {
   viewMode: 'grid' | 'list';
 }
 
-const strengthColors: Record<string, string> = {
-  thin: 'bg-red-500',
-  growing: 'bg-amber-500',
-  solid: 'bg-emerald-500',
-  thick: 'bg-primary',
-};
-
-const strengthLabels: Record<string, string> = {
-  thin: 'New',
-  growing: 'Growing',
-  solid: 'Strong',
-  thick: 'Core',
+const strengthConfig: Record<string, { label: string; percentage: number; color: string }> = {
+  thin: { label: 'New', percentage: 25, color: 'from-red-500 to-orange-500' },
+  growing: { label: 'Growing', percentage: 50, color: 'from-amber-500 to-yellow-500' },
+  solid: { label: 'Strong', percentage: 75, color: 'from-emerald-500 to-teal-500' },
+  thick: { label: 'Core', percentage: 100, color: 'from-primary to-cyan-400' },
 };
 
 export function NetworkContactCard({ contact }: NetworkContactCardProps) {
@@ -49,11 +42,24 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const [showPauseDialog, setShowPauseDialog] = useState(false);
   const [isPaused, setIsPaused] = useState(contact.status === 'paused');
+  const [animatedStrength, setAnimatedStrength] = useState(0);
+  const [animatedPath, setAnimatedPath] = useState(0);
   
   const relationshipType = relationshipTypes.find(rt => rt.id === contact.relationshipType);
   const currentStep = contact.currentStepIndex ?? 0;
   const totalSteps = contact.totalSteps ?? 1;
   const pathProgress = (currentStep / totalSteps) * 100;
+  const strengthData = strengthConfig[contact.connectionStrength] || strengthConfig.thin;
+
+  // Animate progress bars on mount
+  useEffect(() => {
+    const timer1 = setTimeout(() => setAnimatedStrength(strengthData.percentage), 100);
+    const timer2 = setTimeout(() => setAnimatedPath(pathProgress), 200);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [strengthData.percentage, pathProgress]);
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -85,45 +91,65 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
   return (
     <>
       <Link to={`/rel8/actv8/${contact.id}/profile`}>
-        <div className="notification-card group">
-          <div className="p-4">
-            {/* Top Row: Avatar + Name + Menu */}
-            <div className="flex items-start gap-3">
-              {/* Avatar with strength indicator */}
-              <div className="relative">
-                <Avatar className="h-12 w-12 ring-2 ring-background">
-                  <AvatarFallback className="bg-secondary text-foreground font-semibold">
-                    {getInitials(contact.name)}
-                  </AvatarFallback>
-                </Avatar>
-                {/* Strength dot */}
-                <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-background ${strengthColors[contact.connectionStrength]}`} />
-              </div>
+        <Card className="cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm border-2 bg-gradient-to-br from-card/80 to-card/40 hover:border-primary/30 hover:shadow-primary/10 hover:shadow-2xl group relative overflow-hidden">
+          {/* Gradient border effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+          
+          {/* Paused overlay */}
+          {isPaused && (
+            <div className="absolute inset-0 bg-background/50 z-10 flex items-center justify-center">
+              <Badge variant="outline" className="bg-amber-500/20 border-amber-500/50 text-amber-500">
+                <Pause className="h-3 w-3 mr-1" />
+                Paused
+              </Badge>
+            </div>
+          )}
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-foreground truncate">
+          <CardContent className="p-5 relative z-10 flex flex-col">
+            {/* Top section: Avatar + Info + Menu */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                {/* Avatar with strength ring */}
+                <div className="relative flex-shrink-0">
+                  <Avatar className="h-12 w-12 ring-2 ring-offset-2 ring-offset-background ring-primary/30 group-hover:ring-primary/50 transition-all">
+                    <AvatarFallback className="bg-primary/10 text-foreground font-semibold group-hover:bg-primary/20 transition-colors">
+                      {getInitials(contact.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {/* Strength indicator dot */}
+                  <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-background bg-gradient-to-r ${strengthData.color}`} />
+                </div>
+
+                {/* Contact info */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-lg truncate group-hover:text-primary transition-colors">
                     {contact.name}
                   </h3>
-                  {isPaused && (
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-amber-500 border-amber-500/50 shrink-0">
-                      Paused
-                    </Badge>
+                  {(contact.role || contact.company) && (
+                    <p className="text-muted-foreground text-sm truncate">
+                      {contact.role}{contact.role && contact.company && ' · '}{contact.company}
+                    </p>
+                  )}
+                  {contact.location !== 'Not specified' && contact.location && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                      <p className="text-xs text-muted-foreground truncate">{contact.location}</p>
+                    </div>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground truncate">
-                  {contact.role} · {contact.company}
-                </p>
               </div>
 
-              {/* Menu + Chevron */}
-              <div className="flex items-center gap-1" onClick={handleMenuClick}>
+              {/* Menu */}
+              <div className="flex-shrink-0" onClick={handleMenuClick}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="icon-button h-8 w-8">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
                       <MoreVertical className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44 bg-popover border border-border">
                     <DropdownMenuItem 
@@ -150,47 +176,77 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </div>
 
-            {/* Bottom Row: Stats */}
-            <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border/30">
-              {/* Connection Strength */}
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  {strengthLabels[contact.connectionStrength]}
-                </span>
-              </div>
-
-              {/* Relationship Type */}
-              <Badge variant="secondary" className="text-[10px] px-2 py-0.5 h-5 bg-secondary/80">
-                {relationshipType?.label || contact.relationshipType}
-              </Badge>
-
-              {/* Path Progress */}
-              {contact.developmentPathName && (
-                <div className="flex-1 flex items-center gap-2">
-                  <div className="flex-1 h-1 bg-secondary rounded-full overflow-hidden">
+            {/* Progress bars section - replaces category badges */}
+            <div className="mt-4 pt-4 border-t border-border/50 min-h-[80px] flex flex-col gap-3">
+              {/* Connection Strength Progress */}
+              <div className="w-full">
+                <div className="flex justify-between items-center mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Connection Strength</span>
+                  </div>
+                  <span className="text-xs font-medium text-primary">{strengthData.label}</span>
+                </div>
+                <div className="relative h-2 w-full rounded-full overflow-hidden backdrop-blur-md bg-muted/30 border border-white/10">
+                  <div
+                    className={`h-full rounded-full bg-gradient-to-r ${strengthData.color} shadow-[0_0_10px_rgba(20,184,166,0.3)] transition-all duration-700 ease-out relative overflow-hidden`}
+                    style={{ width: `${animatedStrength}%` }}
+                  >
+                    {/* Animated shimmer */}
                     <div 
-                      className="h-full bg-primary rounded-full transition-all duration-500"
-                      style={{ width: `${pathProgress}%` }}
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      style={{
+                        animation: "shimmer 2s infinite",
+                        backgroundSize: "200% 100%"
+                      }}
                     />
                   </div>
-                  <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                    {currentStep}/{totalSteps}
-                  </span>
                 </div>
-              )}
+              </div>
 
-              {/* Last Interaction - Only on larger screens */}
-              <span className="text-[10px] text-muted-foreground hidden sm:block ml-auto">
-                {formatLastInteraction(contact.lastInteraction)}
-              </span>
+              {/* Development Path Progress */}
+              <div className="w-full">
+                <div className="flex justify-between items-center mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Route className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">
+                      {contact.developmentPathName || 'Development Path'}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium text-primary">{currentStep}/{totalSteps} steps</span>
+                </div>
+                <div className="relative h-2 w-full rounded-full overflow-hidden backdrop-blur-md bg-muted/30 border border-white/10">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 shadow-[0_0_10px_rgba(20,184,166,0.3)] transition-all duration-700 ease-out relative overflow-hidden"
+                    style={{ width: `${animatedPath}%` }}
+                  >
+                    {/* Animated shimmer */}
+                    <div 
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      style={{
+                        animation: "shimmer 2s infinite",
+                        backgroundSize: "200% 100%"
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom row: Relationship type + Last interaction */}
+              <div className="flex items-center justify-between mt-1">
+                <Badge variant="secondary" className="text-[10px] px-2 py-0.5 h-5 bg-secondary/50">
+                  {relationshipType?.label || contact.relationshipType}
+                </Badge>
+                <span className="text-[10px] text-muted-foreground">
+                  {formatLastInteraction(contact.lastInteraction)}
+                </span>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </Link>
 
       {/* Remove Dialog */}
