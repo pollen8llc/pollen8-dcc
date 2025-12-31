@@ -4,12 +4,15 @@ import { useActv8Contacts, Actv8ContactDisplay } from "@/hooks/useActv8Contacts"
 import { NetworkFilters } from "@/components/rel8t/network/NetworkFilters";
 import { NetworkContactCard } from "@/components/rel8t/network/NetworkContactCard";
 import { Actv8EmptyState } from "@/components/rel8t/network/Actv8EmptyState";
+import { OutreachSection } from "@/components/rel8t/dashboard/OutreachSection";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import Navbar from "@/components/Navbar";
-import { Plus, BarChart3, Loader2, Zap } from "lucide-react";
+import { Plus, BarChart3, Loader2, Zap, Users, CalendarCheck } from "lucide-react";
 
 export default function Network() {
+  const [activeTab, setActiveTab] = useState("contacts");
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -128,61 +131,85 @@ export default function Network() {
         </div>
       </div>
 
-      {/* Filters - Material style chips */}
-      <div className="px-4 py-3 border-b border-border/30">
-        <NetworkFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedIndustries={selectedIndustries}
-          onIndustriesChange={setSelectedIndustries}
-          selectedTypes={selectedTypes}
-          onTypesChange={setSelectedTypes}
-          selectedStrengths={selectedStrengths}
-          onStrengthsChange={setSelectedStrengths}
-        />
-      </div>
-
-      {/* Results count */}
-      {(searchQuery || selectedIndustries.length > 0 || selectedTypes.length > 0 || selectedStrengths.length > 0) && (
-        <div className="section-header">
-          {filteredContacts.length} of {contacts.length} contacts
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="px-4 pt-2 border-b border-border/30">
+          <TabsList className="w-full h-12 p-1 bg-muted/50">
+            <TabsTrigger value="contacts" className="flex-1 gap-2 data-[state=active]:bg-background">
+              <Users className="h-4 w-4" />
+              <span>Contacts</span>
+            </TabsTrigger>
+            <TabsTrigger value="outreach" className="flex-1 gap-2 data-[state=active]:bg-background">
+              <CalendarCheck className="h-4 w-4" />
+              <span>Outreach</span>
+            </TabsTrigger>
+          </TabsList>
         </div>
-      )}
 
-      {/* Contact List - Android notification style */}
-      <div className="px-4 py-2 pb-32 space-y-2">
-        {filteredContacts.map(contact => (
-          <NetworkContactCard 
-            key={contact.id} 
-            contact={contact} 
-            viewMode="grid"
-          />
-        ))}
-
-        {filteredContacts.length === 0 && (
-          <div className="empty-state py-16">
-            <p className="text-muted-foreground">No contacts match your filters</p>
-            <Button 
-              variant="ghost" 
-              className="mt-2 text-primary"
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedIndustries([]);
-                setSelectedTypes([]);
-                setSelectedStrengths([]);
-              }}
-            >
-              Clear filters
-            </Button>
+        <TabsContent value="contacts" className="mt-0">
+          {/* Filters - Material style chips */}
+          <div className="px-4 py-3 border-b border-border/30">
+            <NetworkFilters
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              selectedIndustries={selectedIndustries}
+              onIndustriesChange={setSelectedIndustries}
+              selectedTypes={selectedTypes}
+              onTypesChange={setSelectedTypes}
+              selectedStrengths={selectedStrengths}
+              onStrengthsChange={setSelectedStrengths}
+            />
           </div>
-        )}
-      </div>
 
-      {/* FAB - Add Contact */}
-      <Link to="/rel8/contacts" className="md-fab-extended">
-        <Plus className="h-5 w-5" />
-        <span className="text-sm font-medium">Add</span>
-      </Link>
+          {/* Results count */}
+          {(searchQuery || selectedIndustries.length > 0 || selectedTypes.length > 0 || selectedStrengths.length > 0) && (
+            <div className="section-header">
+              {filteredContacts.length} of {contacts.length} contacts
+            </div>
+          )}
+
+          {/* Contact List - Android notification style */}
+          <div className="px-4 py-2 pb-32 space-y-2">
+            {filteredContacts.map(contact => (
+              <NetworkContactCard 
+                key={contact.id} 
+                contact={contact} 
+                viewMode="grid"
+              />
+            ))}
+
+            {filteredContacts.length === 0 && (
+              <div className="empty-state py-16">
+                <p className="text-muted-foreground">No contacts match your filters</p>
+                <Button 
+                  variant="ghost" 
+                  className="mt-2 text-primary"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedIndustries([]);
+                    setSelectedTypes([]);
+                    setSelectedStrengths([]);
+                  }}
+                >
+                  Clear filters
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* FAB - Add Contact */}
+          <Link to="/rel8/contacts" className="md-fab-extended">
+            <Plus className="h-5 w-5" />
+            <span className="text-sm font-medium">Add</span>
+          </Link>
+        </TabsContent>
+
+        <TabsContent value="outreach" className="mt-0">
+          <div className="px-4 py-4 pb-32">
+            <OutreachSection />
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl">
