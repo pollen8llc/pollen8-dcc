@@ -154,8 +154,8 @@ export default function Network() {
                   </p>
                 )}
 
-                {/* Contact List */}
-                <div className="space-y-3">
+                {/* Contact Grid - 2 columns on desktop, 1 on mobile */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {filteredContacts.map(contact => (
                     <NetworkContactCard 
                       key={contact.id} 
