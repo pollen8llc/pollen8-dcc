@@ -95,10 +95,10 @@ function getTalkingPointSuggestions(contact: MockNetworkContact, step: Developme
   }
   
   // Based on connection strength
-  if (contact.connectionStrength === 'thin') {
+  if (contact.connectionStrength === 'spark') {
     points.push("Learn more about their background");
     points.push("Find common ground and shared interests");
-  } else if (contact.connectionStrength === 'thick') {
+  } else if (contact.connectionStrength === 'star') {
     points.push("Check in on personal life updates");
     points.push("Discuss deeper professional topics");
   }
@@ -120,11 +120,11 @@ function getRapportTips(contact: MockNetworkContact): string[] {
     tips.push(contact.vibeNotes);
   }
   
-  if (contact.connectionStrength === 'thin') {
+  if (contact.connectionStrength === 'spark') {
     tips.push("This is still a new connection - focus on listening and learning");
   }
   
-  if (contact.connectionStrength === 'thin') {
+  if (contact.connectionStrength === 'spark') {
     tips.push("Keep it professional and don't overstay");
   }
   

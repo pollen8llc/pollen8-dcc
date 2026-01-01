@@ -2,7 +2,7 @@ import { connectionStrengths } from "@/data/mockNetworkData";
 import { cn } from "@/lib/utils";
 
 interface ConnectionStrengthGaugeProps {
-  strength: 'thin' | 'growing' | 'solid' | 'thick';
+  strength: 'spark' | 'ember' | 'flame' | 'star';
   showLabel?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }

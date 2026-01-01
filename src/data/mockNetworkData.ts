@@ -13,10 +13,10 @@ export const relationshipTypes = [
 ];
 
 export const connectionStrengths = [
-  { id: 'thin', label: 'Thin', color: 'hsl(0, 84%, 60%)', description: 'New or weak connection', percentage: 25 },
-  { id: 'growing', label: 'Growing', color: 'hsl(48, 96%, 53%)', description: 'Developing relationship', percentage: 50 },
-  { id: 'solid', label: 'Solid', color: 'hsl(217, 91%, 60%)', description: 'Established connection', percentage: 75 },
-  { id: 'thick', label: 'Thick', color: 'hsl(142, 71%, 45%)', description: 'Strong, trusted relationship', percentage: 100 },
+  { id: 'spark', label: 'Spark', color: 'hsl(0, 84%, 60%)', description: 'New or weak connection', percentage: 25 },
+  { id: 'ember', label: 'Ember', color: 'hsl(48, 96%, 53%)', description: 'Developing relationship', percentage: 50 },
+  { id: 'flame', label: 'Flame', color: 'hsl(217, 91%, 60%)', description: 'Established connection', percentage: 75 },
+  { id: 'star', label: 'Star', color: 'hsl(142, 71%, 45%)', description: 'Strong, trusted relationship', percentage: 100 },
 ];
 
 export const warmthLevels = [
@@ -84,7 +84,7 @@ export interface DevelopmentPath {
   name: string;
   description: string;
   steps: DevelopmentPathStep[];
-  targetStrength: 'growing' | 'solid' | 'thick';
+  targetStrength: 'ember' | 'flame' | 'star';
 }
 
 // Development Paths
@@ -99,7 +99,7 @@ export const developmentPaths: DevelopmentPath[] = [
       { id: 'nc_3', name: 'Deeper Connection', description: 'Meet in person or have a call', suggestedAction: 'coffee', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
       { id: 'nc_4', name: 'Establish Rhythm', description: 'Set up regular check-ins', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'friendly' },
     ],
-    targetStrength: 'growing'
+    targetStrength: 'ember'
   },
   {
     id: 'strengthen_bond',
@@ -111,7 +111,7 @@ export const developmentPaths: DevelopmentPath[] = [
       { id: 'sb_3', name: 'Meet In-Person', description: 'Face-to-face connection', suggestedAction: 'coffee', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
       { id: 'sb_4', name: 'Plan Collaboration', description: 'Explore working together', suggestedAction: 'co_create', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
     ],
-    targetStrength: 'solid'
+    targetStrength: 'flame'
   },
   {
     id: 'professional_growth',
@@ -123,7 +123,7 @@ export const developmentPaths: DevelopmentPath[] = [
       { id: 'pg_3', name: 'Joint Opportunity', description: 'Explore collaboration', suggestedAction: 'co_create', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
       { id: 'pg_4', name: 'Referral Exchange', description: 'Introduce to valuable contacts', suggestedAction: 'introduce', suggestedChannel: 'email', suggestedTone: 'professional' },
     ],
-    targetStrength: 'solid'
+    targetStrength: 'flame'
   },
   {
     id: 'build_rapport',
@@ -135,7 +135,7 @@ export const developmentPaths: DevelopmentPath[] = [
       { id: 'br_3', name: 'Collaborative Meeting', description: 'Work on something together or share ideas in a working session', suggestedAction: 'meeting', suggestedChannel: 'in_person', suggestedTone: 'collaborative' },
       { id: 'br_4', name: 'Ongoing Connection', description: 'Establish a regular meeting cadence to maintain the relationship', suggestedAction: 'meeting', suggestedChannel: 'recurring', suggestedTone: 'friendly' },
     ],
-    targetStrength: 'thick'
+    targetStrength: 'star'
   },
   {
     id: 'reconnect',
@@ -147,7 +147,7 @@ export const developmentPaths: DevelopmentPath[] = [
       { id: 'rc_3', name: 'Rebuild Rapport', description: 'Meet and reconnect properly', suggestedAction: 'coffee', suggestedChannel: 'in_person', suggestedTone: 'friendly' },
       { id: 'rc_4', name: 'Future Plans', description: 'Set intentions for staying in touch', suggestedAction: 'soft_checkin', suggestedChannel: 'email', suggestedTone: 'collaborative' },
     ],
-    targetStrength: 'growing'
+    targetStrength: 'ember'
   },
   {
     id: 'event_networking',
@@ -159,7 +159,7 @@ export const developmentPaths: DevelopmentPath[] = [
       { id: 'en_3', name: 'Post-Event Follow-up', description: 'Follow up after meeting', suggestedAction: 'post_event', suggestedChannel: 'email', suggestedTone: 'professional' },
       { id: 'en_4', name: 'Nurture', description: 'Continue building the relationship', suggestedAction: 'send_resource', suggestedChannel: 'email', suggestedTone: 'friendly' },
     ],
-    targetStrength: 'growing'
+    targetStrength: 'ember'
   },
 ];
 
@@ -203,7 +203,7 @@ export interface MockNetworkContact {
   location: string;
   avatar: string;
   relationshipType: string;
-  connectionStrength: 'thin' | 'growing' | 'solid' | 'thick';
+  connectionStrength: 'spark' | 'ember' | 'flame' | 'star';
   trustRating: number;
   networkInfluence: 'low' | 'medium' | 'high' | 'very_high';
   howWeMet: string;
@@ -233,7 +233,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'San Francisco, CA',
     avatar: 'https://i.pravatar.cc/150?img=1',
     relationshipType: 'thought_partner',
-    connectionStrength: 'solid',
+    connectionStrength: 'flame',
     trustRating: 4,
     networkInfluence: 'high',
     howWeMet: 'Met at TechCrunch Disrupt 2023, connected over product strategy',
@@ -269,7 +269,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'Menlo Park, CA',
     avatar: 'https://i.pravatar.cc/150?img=3',
     relationshipType: 'career_ally',
-    connectionStrength: 'growing',
+    connectionStrength: 'ember',
     trustRating: 3,
     networkInfluence: 'very_high',
     howWeMet: 'Introduction through mutual friend at a dinner party',
@@ -299,7 +299,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'New York, NY',
     avatar: 'https://i.pravatar.cc/150?img=5',
     relationshipType: 'creative_peer',
-    connectionStrength: 'thick',
+    connectionStrength: 'star',
     trustRating: 5,
     networkInfluence: 'high',
     howWeMet: 'Collaborated on a brand campaign 2 years ago',
@@ -332,7 +332,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'Los Angeles, CA',
     avatar: 'https://i.pravatar.cc/150?img=8',
     relationshipType: 'influencer',
-    connectionStrength: 'thin',
+    connectionStrength: 'spark',
     trustRating: 2,
     networkInfluence: 'very_high',
     howWeMet: 'Brief intro at Sundance Film Festival',
@@ -355,7 +355,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'Washington, DC',
     avatar: 'https://i.pravatar.cc/150?img=9',
     relationshipType: 'mentor',
-    connectionStrength: 'solid',
+    connectionStrength: 'flame',
     trustRating: 5,
     networkInfluence: 'medium',
     howWeMet: 'Met through a leadership program 5 years ago',
@@ -386,7 +386,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'New York, NY',
     avatar: 'https://i.pravatar.cc/150?img=12',
     relationshipType: 'socialite',
-    connectionStrength: 'growing',
+    connectionStrength: 'ember',
     trustRating: 3,
     networkInfluence: 'high',
     howWeMet: 'Met at a rooftop party through a mutual friend',
@@ -416,7 +416,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'Boston, MA',
     avatar: 'https://i.pravatar.cc/150?img=16',
     relationshipType: 'future_opportunity',
-    connectionStrength: 'thin',
+    connectionStrength: 'spark',
     trustRating: 2,
     networkInfluence: 'medium',
     howWeMet: 'Connected on LinkedIn after reading her article',
@@ -439,7 +439,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'Miami, FL',
     avatar: 'https://i.pravatar.cc/150?img=18',
     relationshipType: 'collaborator',
-    connectionStrength: 'solid',
+    connectionStrength: 'flame',
     trustRating: 4,
     networkInfluence: 'high',
     howWeMet: 'Met at Art Basel 2022, instant connection',
@@ -470,7 +470,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'New York, NY',
     avatar: 'https://i.pravatar.cc/150?img=20',
     relationshipType: 'career_ally',
-    connectionStrength: 'growing',
+    connectionStrength: 'ember',
     trustRating: 3,
     networkInfluence: 'very_high',
     howWeMet: 'College alumni event, same graduating class',
@@ -493,7 +493,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'Atlanta, GA',
     avatar: 'https://i.pravatar.cc/150?img=22',
     relationshipType: 'collaborator',
-    connectionStrength: 'solid',
+    connectionStrength: 'flame',
     trustRating: 4,
     networkInfluence: 'high',
     howWeMet: 'Introduced by a mutual investor friend',
@@ -524,7 +524,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'Seattle, WA',
     avatar: 'https://i.pravatar.cc/150?img=25',
     relationshipType: 'mentee',
-    connectionStrength: 'thick',
+    connectionStrength: 'star',
     trustRating: 5,
     networkInfluence: 'medium',
     howWeMet: 'Met at a women in tech conference, became friends',
@@ -555,7 +555,7 @@ export const mockNetworkContacts: MockNetworkContact[] = [
     location: 'Los Angeles, CA',
     avatar: 'https://i.pravatar.cc/150?img=28',
     relationshipType: 'creative_peer',
-    connectionStrength: 'growing',
+    connectionStrength: 'ember',
     trustRating: 3,
     networkInfluence: 'medium',
     howWeMet: 'Met at a film screening, talked for hours after',

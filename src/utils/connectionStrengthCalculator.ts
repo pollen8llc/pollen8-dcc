@@ -1,7 +1,7 @@
 // Connection Strength Calculator
 // Formula: Engagement (40%) + Origin (30%) + Network (30%) = Total Score (0-100)
 
-export type ConnectionStrength = 'thin' | 'growing' | 'solid' | 'thick';
+export type ConnectionStrength = 'spark' | 'ember' | 'flame' | 'star';
 
 export interface EngagementFactors {
   // Positive factors
@@ -109,10 +109,10 @@ export function calculateNetworkScore(factors: NetworkFactors): number {
   
   // Inviter strength bonus (0-12 points)
   const inviterBonus: Record<ConnectionStrength, number> = {
-    thick: 12,
-    solid: 9,
-    growing: 5,
-    thin: 2
+    star: 12,
+    flame: 9,
+    ember: 5,
+    spark: 2
   };
   if (factors.inviterStrength) {
     score += inviterBonus[factors.inviterStrength];
@@ -132,10 +132,10 @@ export function calculateNetworkScore(factors: NetworkFactors): number {
 
 // Map score to strength category
 export function mapScoreToStrength(score: number): ConnectionStrength {
-  if (score >= 75) return 'thick';
-  if (score >= 50) return 'solid';
-  if (score >= 25) return 'growing';
-  return 'thin';
+  if (score >= 75) return 'star';
+  if (score >= 50) return 'flame';
+  if (score >= 25) return 'ember';
+  return 'spark';
 }
 
 // Calculate complete score breakdown
@@ -182,10 +182,10 @@ export function calculateResponseTimeCategory(hoursToRespond: number): { categor
 // Get strength color for UI
 export function getStrengthColor(strength: ConnectionStrength): string {
   const colors: Record<ConnectionStrength, string> = {
-    thin: 'hsl(var(--muted-foreground))',
-    growing: 'hsl(var(--primary))',
-    solid: 'hsl(142 76% 36%)', // Green
-    thick: 'hsl(45 93% 47%)'   // Gold
+    spark: 'hsl(var(--muted-foreground))',
+    ember: 'hsl(var(--primary))',
+    flame: 'hsl(142 76% 36%)', // Green
+    star: 'hsl(45 93% 47%)'   // Gold
   };
   return colors[strength];
 }
@@ -193,10 +193,10 @@ export function getStrengthColor(strength: ConnectionStrength): string {
 // Get strength badge variant
 export function getStrengthBadgeClass(strength: ConnectionStrength): string {
   const classes: Record<ConnectionStrength, string> = {
-    thin: 'bg-muted text-muted-foreground',
-    growing: 'bg-primary/20 text-primary',
-    solid: 'bg-green-500/20 text-green-400',
-    thick: 'bg-yellow-500/20 text-yellow-400'
+    spark: 'bg-muted text-muted-foreground',
+    ember: 'bg-primary/20 text-primary',
+    flame: 'bg-green-500/20 text-green-400',
+    star: 'bg-yellow-500/20 text-yellow-400'
   };
   return classes[strength];
 }

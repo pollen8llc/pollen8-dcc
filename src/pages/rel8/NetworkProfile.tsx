@@ -23,17 +23,17 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import { toast } from "sonner";
 
 const strengthLabels: Record<string, string> = {
-  thin: 'New Connection',
-  growing: 'Growing',
-  solid: 'Strong Bond',
-  thick: 'Core Relationship',
+  spark: 'New Connection',
+  ember: 'Growing',
+  flame: 'Strong Bond',
+  star: 'Core Relationship',
 };
 
 const strengthColors: Record<string, string> = {
-  thin: 'text-red-500',
-  growing: 'text-amber-500',
-  solid: 'text-emerald-500',
-  thick: 'text-primary',
+  spark: 'text-red-500',
+  ember: 'text-amber-500',
+  flame: 'text-emerald-500',
+  star: 'text-primary',
 };
 
 export default function NetworkProfile() {
@@ -132,6 +132,12 @@ export default function NetworkProfile() {
     );
   }
 
+  // Map old database values to new terminology
+  const strengthMap: Record<string, 'spark' | 'ember' | 'flame' | 'star'> = {
+    thin: 'spark', growing: 'ember', solid: 'flame', thick: 'star',
+    spark: 'spark', ember: 'ember', flame: 'flame', star: 'star'
+  };
+
   const contact = {
     id: actv8Contact.id,
     contactId: actv8Contact.contact_id,
@@ -143,7 +149,7 @@ export default function NetworkProfile() {
     phone: actv8Contact.contact?.phone,
     location: '',
     avatar: '',
-    connectionStrength: (actv8Contact.connection_strength as 'thin' | 'growing' | 'solid' | 'thick') || 'thin',
+    connectionStrength: strengthMap[actv8Contact.connection_strength || 'thin'] || 'spark',
     relationshipType: actv8Contact.relationship_type || 'collaborator',
     trustRating: 3,
     networkInfluence: 'medium' as const,
@@ -261,9 +267,9 @@ export default function NetworkProfile() {
                   </Avatar>
                   {/* Strength indicator */}
                   <div className={`absolute bottom-1 right-1 w-6 h-6 rounded-full border-2 border-background flex items-center justify-center ${
-                    contact.connectionStrength === 'thick' ? 'bg-primary' :
-                    contact.connectionStrength === 'solid' ? 'bg-emerald-500' :
-                    contact.connectionStrength === 'growing' ? 'bg-amber-500' : 'bg-red-500'
+                    contact.connectionStrength === 'star' ? 'bg-primary' :
+                    contact.connectionStrength === 'flame' ? 'bg-emerald-500' :
+                    contact.connectionStrength === 'ember' ? 'bg-amber-500' : 'bg-red-500'
                   }`}>
                     <TrendingUp className="h-3 w-3 text-white" />
                   </div>
@@ -323,9 +329,9 @@ export default function NetworkProfile() {
                   </Avatar>
                   {/* Strength indicator */}
                   <div className={`absolute bottom-0 right-0 w-6 h-6 rounded-full border-2 border-background flex items-center justify-center ${
-                    contact.connectionStrength === 'thick' ? 'bg-primary' :
-                    contact.connectionStrength === 'solid' ? 'bg-emerald-500' :
-                    contact.connectionStrength === 'growing' ? 'bg-amber-500' : 'bg-red-500'
+                    contact.connectionStrength === 'star' ? 'bg-primary' :
+                    contact.connectionStrength === 'flame' ? 'bg-emerald-500' :
+                    contact.connectionStrength === 'ember' ? 'bg-amber-500' : 'bg-red-500'
                   }`}>
                     <TrendingUp className="h-3 w-3 text-white" />
                   </div>

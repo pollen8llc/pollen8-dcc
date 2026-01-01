@@ -18,13 +18,13 @@ export function InsightCards() {
   );
   
   const gainingMomentum = mockNetworkContacts.filter(c => 
-    c.connectionStrength === 'growing' && 
+    c.connectionStrength === 'ember' && 
     differenceInDays(now, parseISO(c.lastInteraction)) < 30
   );
   
   const highValueContacts = mockNetworkContacts.filter(c => 
     (c.networkInfluence === 'high' || c.networkInfluence === 'very_high') &&
-    c.connectionStrength !== 'thick'
+    c.connectionStrength !== 'star'
   );
 
   const contactsWithStrategies = mockNetworkContacts.filter(c => c.strategy);

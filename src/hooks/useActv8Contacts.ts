@@ -11,7 +11,7 @@ export interface Actv8ContactDisplay {
   company: string;
   location: string;
   relationshipType: string;
-  connectionStrength: 'thin' | 'growing' | 'solid' | 'thick';
+  connectionStrength: 'spark' | 'ember' | 'flame' | 'star';
   lastInteraction: string;
   developmentPathId?: string;
   developmentPathName?: string;
@@ -27,6 +27,10 @@ export function useActv8Contacts() {
     queryKey: ['actv8-contacts'],
     queryFn: async () => {
       const contacts = await getActiveContacts();
+      const strengthMap: Record<string, 'spark' | 'ember' | 'flame' | 'star'> = {
+        thin: 'spark', growing: 'ember', solid: 'flame', thick: 'star',
+        spark: 'spark', ember: 'ember', flame: 'flame', star: 'star'
+      };
       return contacts.map((ac): Actv8ContactDisplay => ({
         id: ac.id,
         contactId: ac.contact_id,
@@ -36,7 +40,7 @@ export function useActv8Contacts() {
         company: ac.contact?.organization || 'Independent',
         location: 'Not specified',
         relationshipType: ac.relationship_type || 'collaborator',
-        connectionStrength: (ac.connection_strength as 'thin' | 'growing' | 'solid' | 'thick') || 'thin',
+        connectionStrength: strengthMap[ac.connection_strength || 'thin'] || 'spark',
         lastInteraction: ac.last_touchpoint_at || ac.activated_at || new Date().toISOString(),
         developmentPathId: ac.development_path_id,
         developmentPathName: ac.path?.name,
