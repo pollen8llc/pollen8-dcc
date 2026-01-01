@@ -8,7 +8,7 @@ import { getContactCount, getCategories } from "@/services/rel8t/contactService"
 import { Users, Building2, Clock, CheckCircle, Globe, ChevronDown } from "lucide-react";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import NetworkMapGlobe from "@/components/rel8t/NetworkMapGlobe";
-import { SetupProgress } from "@/components/rel8t/SetupProgress";
+import SetupProgress from "@/components/rel8t/SetupProgress";
 
 const Dashboard = () => {
   const [isNetworkMapOpen, setIsNetworkMapOpen] = useState(false);
