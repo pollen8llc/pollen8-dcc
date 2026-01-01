@@ -51,6 +51,7 @@ export interface Actv8Contact {
     tags: string[] | null;
   };
   path?: DevelopmentPath;
+  affiliatedUserId?: string | null;
 }
 
 export interface Actv8Strategy {
@@ -244,6 +245,15 @@ export async function getActv8Contact(actv8ContactId: string): Promise<Actv8Cont
 
   if (contactError && contactError.code !== "PGRST116") throw contactError;
 
+  // Fetch affiliated user ID from contact affiliations
+  const { data: affiliation } = await supabase
+    .from("rms_contact_affiliations")
+    .select("affiliated_user_id")
+    .eq("contact_id", actv8Contact.contact_id)
+    .eq("affiliation_type", "user")
+    .not("affiliated_user_id", "is", null)
+    .maybeSingle();
+
   // Fetch path with steps
   const path = await getDevelopmentPath(actv8Contact.development_path_id);
 
@@ -251,6 +261,7 @@ export async function getActv8Contact(actv8ContactId: string): Promise<Actv8Cont
     ...actv8Contact,
     contact: contact || undefined,
     path: path || undefined,
+    affiliatedUserId: affiliation?.affiliated_user_id || null,
   };
 }
 
