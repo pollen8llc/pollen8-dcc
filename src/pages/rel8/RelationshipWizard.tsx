@@ -170,7 +170,7 @@ const RelationshipWizard = () => {
     } else {
       // Clear wizard data and redirect to actv8 outreach tab
       clearWizardData();
-      navigate("/rel8/actv8");
+      navigate("/rel8/actv8?tab=outreach");
     }
   };
 
@@ -351,7 +351,7 @@ const RelationshipWizard = () => {
             setShowSuccessDialog(open);
             if (!open) {
               clearWizardData();
-              navigate("/rel8/actv8");
+              navigate("/rel8/actv8?tab=outreach");
             }
           }}
           trigger={createdTrigger}

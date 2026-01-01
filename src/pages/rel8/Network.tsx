@@ -1,10 +1,12 @@
-import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useActv8Contacts, Actv8ContactDisplay } from "@/hooks/useActv8Contacts";
 import { NetworkFilters } from "@/components/rel8t/network/NetworkFilters";
 import { NetworkContactCard } from "@/components/rel8t/network/NetworkContactCard";
 import { Actv8EmptyState } from "@/components/rel8t/network/Actv8EmptyState";
 import OutreachList from "@/components/rel8t/OutreachList";
+import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +15,9 @@ import Navbar from "@/components/Navbar";
 import { Plus, BarChart3, Loader2, Zap, Users, Calendar, CalendarCheck } from "lucide-react";
 
 export default function Network() {
-  const [activeTab, setActiveTab] = useState("contacts");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'contacts';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -21,6 +25,22 @@ export default function Network() {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const { data: contacts = [], isLoading, error } = useActv8Contacts();
+  
+  // Get outreach counts for notification dot
+  const { data: outreachCounts = { today: 0, upcoming: 0, overdue: 0, completed: 0 } } = useQuery({
+    queryKey: ["outreach-counts"],
+    queryFn: getOutreachStatusCounts,
+    staleTime: 1000 * 60,
+  });
+  
+  const pendingOutreachCount = outreachCounts.today + outreachCounts.overdue;
+  
+  // Update tab when URL param changes
+  useEffect(() => {
+    if (searchParams.get('tab') === 'outreach') {
+      setActiveTab('outreach');
+    }
+  }, [searchParams]);
 
   const filteredContacts = useMemo(() => {
     return contacts.filter(contact => {
@@ -120,9 +140,17 @@ export default function Network() {
               <Users className="h-4 w-4" />
               <span>Connects</span>
             </TabsTrigger>
-            <TabsTrigger value="outreach" className="flex-1 gap-2 data-[state=active]:bg-background">
+            <TabsTrigger value="outreach" className="flex-1 gap-2 data-[state=active]:bg-background relative">
               <CalendarCheck className="h-4 w-4" />
               <span>Outreach</span>
+              {pendingOutreachCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 w-5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-5 w-5 bg-primary text-primary-foreground text-xs items-center justify-center font-medium">
+                    {pendingOutreachCount > 9 ? '9+' : pendingOutreachCount}
+                  </span>
+                </span>
+              )}
             </TabsTrigger>
           </TabsList>
 
