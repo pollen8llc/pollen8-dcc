@@ -34,10 +34,10 @@ const ConnectionStrengthAnalytics: React.FC = () => {
   
   // Chart data
   const pieData = [
-    { name: 'Thick', value: distribution.thick, color: 'hsl(45 93% 47%)' },
-    { name: 'Solid', value: distribution.solid, color: 'hsl(142 76% 36%)' },
-    { name: 'Growing', value: distribution.growing, color: 'hsl(var(--primary))' },
-    { name: 'Thin', value: distribution.thin, color: 'hsl(var(--muted-foreground))' }
+    { name: 'Star', value: distribution.star, color: 'hsl(45 93% 47%)' },
+    { name: 'Flame', value: distribution.flame, color: 'hsl(142 76% 36%)' },
+    { name: 'Ember', value: distribution.ember, color: 'hsl(var(--primary))' },
+    { name: 'Spark', value: distribution.spark, color: 'hsl(var(--muted-foreground))' }
   ].filter(d => d.value > 0);
   
   // Sorted contacts for table
@@ -123,17 +123,17 @@ const ConnectionStrengthAnalytics: React.FC = () => {
           <div className="mt-6 pt-6 border-t border-primary/10">
             <p className="text-sm text-muted-foreground mb-3">Score → Strength Mapping</p>
             <div className="flex flex-wrap gap-3">
-              <Badge className={`${getStrengthBadgeClass('thick')} px-3 py-1`}>
-                Thick: 75-100
+              <Badge className={`${getStrengthBadgeClass('star')} px-3 py-1`}>
+                Star: 75-100
               </Badge>
-              <Badge className={`${getStrengthBadgeClass('solid')} px-3 py-1`}>
-                Solid: 50-74
+              <Badge className={`${getStrengthBadgeClass('flame')} px-3 py-1`}>
+                Flame: 50-74
               </Badge>
-              <Badge className={`${getStrengthBadgeClass('growing')} px-3 py-1`}>
-                Growing: 25-49
+              <Badge className={`${getStrengthBadgeClass('ember')} px-3 py-1`}>
+                Ember: 25-49
               </Badge>
-              <Badge className={`${getStrengthBadgeClass('thin')} px-3 py-1`}>
-                Thin: 0-24
+              <Badge className={`${getStrengthBadgeClass('spark')} px-3 py-1`}>
+                Spark: 0-24
               </Badge>
             </div>
           </div>

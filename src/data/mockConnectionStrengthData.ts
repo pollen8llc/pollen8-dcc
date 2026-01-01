@@ -44,8 +44,8 @@ const mockContactsRaw: Array<{
       coldInteractions: 0,
       cancelledMeetings: 0
     },
-    origin: { source: 'invite', hasInviter: true, inviterStrength: 'thick' },
-    network: { inviterStrength: 'thick', sharedConnections: 5, affiliationCount: 3, communityOverlap: 2 }
+    origin: { source: 'invite', hasInviter: true, inviterStrength: 'star' },
+    network: { inviterStrength: 'star', sharedConnections: 5, affiliationCount: 3, communityOverlap: 2 }
   },
   {
     id: '2',
@@ -64,8 +64,8 @@ const mockContactsRaw: Array<{
       coldInteractions: 0,
       cancelledMeetings: 1
     },
-    origin: { source: 'invite', hasInviter: true, inviterStrength: 'solid' },
-    network: { inviterStrength: 'solid', sharedConnections: 4, affiliationCount: 2, communityOverlap: 3 }
+    origin: { source: 'invite', hasInviter: true, inviterStrength: 'flame' },
+    network: { inviterStrength: 'flame', sharedConnections: 4, affiliationCount: 2, communityOverlap: 3 }
   },
   {
     id: '3',
@@ -106,8 +106,8 @@ const mockContactsRaw: Array<{
       coldInteractions: 0,
       cancelledMeetings: 0
     },
-    origin: { source: 'invite', hasInviter: true, inviterStrength: 'growing' },
-    network: { inviterStrength: 'growing', sharedConnections: 3, affiliationCount: 2, communityOverlap: 1 }
+    origin: { source: 'invite', hasInviter: true, inviterStrength: 'ember' },
+    network: { inviterStrength: 'ember', sharedConnections: 3, affiliationCount: 2, communityOverlap: 1 }
   },
   {
     id: '5',
@@ -146,8 +146,8 @@ const mockContactsRaw: Array<{
       coldInteractions: 0,
       cancelledMeetings: 1
     },
-    origin: { source: 'manual', hasInviter: true, inviterStrength: 'solid' },
-    network: { inviterStrength: 'solid', sharedConnections: 2, affiliationCount: 2, communityOverlap: 1 }
+    origin: { source: 'manual', hasInviter: true, inviterStrength: 'flame' },
+    network: { inviterStrength: 'flame', sharedConnections: 2, affiliationCount: 2, communityOverlap: 1 }
   },
   {
     id: '7',
@@ -166,8 +166,8 @@ const mockContactsRaw: Array<{
       coldInteractions: 0,
       cancelledMeetings: 0
     },
-    origin: { source: 'invite', hasInviter: true, inviterStrength: 'thick' },
-    network: { inviterStrength: 'thick', sharedConnections: 2, affiliationCount: 1, communityOverlap: 0 }
+    origin: { source: 'invite', hasInviter: true, inviterStrength: 'star' },
+    network: { inviterStrength: 'star', sharedConnections: 2, affiliationCount: 1, communityOverlap: 0 }
   },
   
   // GROWING connections (4)
@@ -208,8 +208,8 @@ const mockContactsRaw: Array<{
       coldInteractions: 0,
       cancelledMeetings: 1
     },
-    origin: { source: 'wizard', hasInviter: true, inviterStrength: 'thin' },
-    network: { inviterStrength: 'thin', sharedConnections: 1, affiliationCount: 0, communityOverlap: 1 }
+    origin: { source: 'wizard', hasInviter: true, inviterStrength: 'spark' },
+    network: { inviterStrength: 'spark', sharedConnections: 1, affiliationCount: 0, communityOverlap: 1 }
   },
   {
     id: '10',
@@ -248,8 +248,8 @@ const mockContactsRaw: Array<{
       coldInteractions: 0,
       cancelledMeetings: 0
     },
-    origin: { source: 'invite', hasInviter: true, inviterStrength: 'growing' },
-    network: { inviterStrength: 'growing', sharedConnections: 1, affiliationCount: 1, communityOverlap: 0 }
+    origin: { source: 'invite', hasInviter: true, inviterStrength: 'ember' },
+    network: { inviterStrength: 'ember', sharedConnections: 1, affiliationCount: 1, communityOverlap: 0 }
   },
   
   // THIN connections (4)
@@ -355,7 +355,7 @@ export function getStrengthDistribution(): Record<ConnectionStrength, number> {
   return mockContacts.reduce((acc, contact) => {
     acc[contact.scoreBreakdown.strength]++;
     return acc;
-  }, { thin: 0, growing: 0, solid: 0, thick: 0 } as Record<ConnectionStrength, number>);
+  }, { spark: 0, ember: 0, flame: 0, star: 0 } as Record<ConnectionStrength, number>);
 }
 
 // Get average scores

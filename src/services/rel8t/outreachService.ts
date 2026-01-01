@@ -311,8 +311,8 @@ export const updateOutreachStatus = async (id: string, status: OutreachStatus): 
             await updateContactProgress(outreach.actv8_contact_id, newStepIndex, newCompletedSteps);
             
             // Upgrade connection strength based on completed steps
-            const strengthProgression = ['thin', 'growing', 'solid', 'thick'];
-            const currentStrengthIndex = strengthProgression.indexOf(actv8Contact.connection_strength || 'thin');
+            const strengthProgression = ['spark', 'ember', 'flame', 'star'];
+            const currentStrengthIndex = strengthProgression.indexOf(actv8Contact.connection_strength || 'spark');
             const stepsCompleted = newCompletedSteps.length;
             
             // Upgrade strength every 2 completed steps

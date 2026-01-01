@@ -48,10 +48,10 @@ function getConversationStarters(contact: MockNetworkContact, step: DevelopmentP
   starters.push(`Ask about trends in ${contact.industry}`);
   
   // Based on relationship warmth
-  if (contact.connectionStrength === 'thin') {
+  if (contact.connectionStrength === 'spark') {
     starters.push("Remind them briefly who you are");
     starters.push("Keep it short and low-pressure");
-  } else if (contact.connectionStrength === 'thick') {
+  } else if (contact.connectionStrength === 'star') {
     starters.push("Be personal and reference shared experiences");
   }
   

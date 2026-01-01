@@ -1,7 +1,7 @@
 import { getConnectionStrength } from "@/data/mockNetworkData";
 
 interface ConnectionStrengthBarProps {
-  strength: 'thin' | 'growing' | 'solid' | 'thick';
+  strength: 'spark' | 'ember' | 'flame' | 'star';
   showLabel?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -16,10 +16,10 @@ export function ConnectionStrengthBar({ strength, showLabel = true, size = 'md' 
   };
 
   const strengthColors: Record<string, string> = {
-    thin: 'bg-destructive',
-    growing: 'bg-amber-500',
-    solid: 'bg-primary',
-    thick: 'bg-emerald-500'
+    spark: 'bg-destructive',
+    ember: 'bg-amber-500',
+    flame: 'bg-primary',
+    star: 'bg-emerald-500'
   };
 
   return (
