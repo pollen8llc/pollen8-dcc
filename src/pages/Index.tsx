@@ -41,8 +41,8 @@ const Index = () => {
         const destination = currentUser.labr8_setup_complete ? "/labr8/dashboard" : "/labr8/setup";
         navigate(destination, { replace: true });
       } else {
-        console.log('🚀 Index.tsx - Redirecting authenticated user to REL8 connect page');
-        navigate("/rel8/connect", { replace: true });
+        console.log('🚀 Index.tsx - Redirecting authenticated user to REL8 dashboard');
+        navigate("/rel8", { replace: true });
       }
     }
   }, [currentUser, isLoading, navigate]);
