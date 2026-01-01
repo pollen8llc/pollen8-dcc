@@ -25,7 +25,7 @@ interface OutreachListProps {
 const OutreachList = ({ 
   maxItems, 
   showTabs = true, 
-  defaultTab = "upcoming", 
+  defaultTab = "today", 
   className = "",
   showCalendar = false
 }: OutreachListProps) => {
@@ -220,7 +220,10 @@ const OutreachList = ({
             </div>
           )}
 
-          <TabsList className="grid grid-cols-3 mb-6 backdrop-blur-sm bg-muted/50">
+          <TabsList className="grid grid-cols-4 mb-6 backdrop-blur-sm bg-muted/50">
+            <TabsTrigger value="today" className="data-[state=active]:bg-background">
+              Today
+            </TabsTrigger>
             <TabsTrigger value="upcoming" className="data-[state=active]:bg-background">
               Upcoming
             </TabsTrigger>
@@ -232,7 +235,7 @@ const OutreachList = ({
             </TabsTrigger>
           </TabsList>
           
-          {(["upcoming", "overdue", "completed"] as OutreachFilterTab[]).map(tab => (
+          {(["today", "upcoming", "overdue", "completed"] as OutreachFilterTab[]).map(tab => (
             <TabsContent key={tab} value={tab} className="mt-0 animate-fade-in">
               {renderOutreachContent()}
             </TabsContent>
