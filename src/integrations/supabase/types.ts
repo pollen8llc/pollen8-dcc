@@ -3306,7 +3306,7 @@ export type Database = {
       }
       calculate_evalu8_stats: {
         Args: { p_contact_id: string; p_user_id: string }
-        Returns: string
+        Returns: Json
       }
       can_view_profile: {
         Args: { profile_user_id: string; viewer_id: string }
