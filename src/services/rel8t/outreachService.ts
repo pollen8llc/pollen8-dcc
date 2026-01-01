@@ -172,6 +172,7 @@ export const getOutreachById = async (id: string): Promise<Outreach | null> => {
       contacts_notified_at: (data as any).contacts_notified_at,
       trigger_id: (data as any).trigger_id,
       notes: (data as any).notes,
+      structured_notes: (data as any).structured_notes,
       contacts
     } as Outreach;
   } catch (error: any) {
@@ -269,6 +270,7 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
         channel_details: item.channel_details,
         contacts_notified_at: item.contacts_notified_at,
         trigger_id: item.trigger_id,
+        structured_notes: item.structured_notes,
         contacts
       } as Outreach;
     });
