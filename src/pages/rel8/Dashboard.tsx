@@ -1,22 +1,16 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
-import { Calendar, Users, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle, Globe, ChevronDown } from "lucide-react";
-import OutreachList from "@/components/rel8t/OutreachList";
+import { Users, Building2, Clock, CheckCircle, Globe, ChevronDown } from "lucide-react";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import NetworkMapGlobe from "@/components/rel8t/NetworkMapGlobe";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const [isNetworkMapOpen, setIsNetworkMapOpen] = useState(false);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
   // Get outreach status counts with shorter staleTime
   const {
     data: outreachCounts = {
@@ -137,30 +131,6 @@ const Dashboard = () => {
           </Card>
         </Collapsible>
 
-        {/* Outreach Tasks Section */}
-        <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mb-8">
-          <div className="p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent backdrop-blur-xl border-b border-primary/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-primary" />
-                <div>
-                  <h3 className="text-lg font-semibold">Outreach Tasks</h3>
-                </div>
-              </div>
-              <Button 
-                onClick={() => setIsCalendarOpen(!isCalendarOpen)} 
-                size="sm"
-                variant={isCalendarOpen ? "default" : "outline"}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                {isCalendarOpen ? "Hide Calendar" : "Search by Date"}
-              </Button>
-            </div>
-          </div>
-          <CardContent className="pt-6">
-            <OutreachList showCalendar={isCalendarOpen} />
-          </CardContent>
-        </Card>
 
       </div>
     </div>
