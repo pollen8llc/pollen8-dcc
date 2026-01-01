@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Calendar, AlertCircle, Download, Trash2, Pencil, Users, CheckCircle2 } from "lucide-react";
+import { Calendar, AlertCircle, Download, Trash2, Pencil, Users, CheckCircle2, ExternalLink } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Outreach, updateOutreachStatus, deleteOutreach, sendCalendarUpdate } from "@/services/rel8t/outreachService";
 import { areNotesComplete } from "@/components/rel8t/StructuredNotesForm";
@@ -388,11 +388,10 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
                 variant="outline" 
                 size="sm" 
                 className="gap-1"
-                onClick={handleMarkComplete}
-                disabled={isCompleting}
+                onClick={() => navigate(`/rel8/outreach/${outreach.id}`)}
               >
-                <Check className="h-4 w-4" />
-                {isCompleting ? 'Completing...' : 'Mark Complete'}
+                <ExternalLink className="h-4 w-4" />
+                Details
               </Button>
             </>
           )}
