@@ -15,7 +15,7 @@ const GlassmorphicProgress = React.forwardRef<
     <div className={cn("relative w-full", className)} ref={ref}>
       <div className="relative h-2 w-full rounded-full overflow-hidden backdrop-blur-md bg-white/10 border border-white/20 shadow-lg">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-teal-400/80 via-cyan-400/80 to-blue-400/80 backdrop-blur-sm shadow-[0_0_20px_rgba(20,184,166,0.4)] transition-all duration-700 ease-out relative overflow-hidden"
+          className="h-full rounded-full bg-gradient-to-r from-orange-500/80 via-yellow-400/80 via-50% to-emerald-500/80 backdrop-blur-sm shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all duration-700 ease-out relative overflow-hidden"
           style={{ width: `${value}%` }}
         >
           {/* Animated shimmer effect */}
