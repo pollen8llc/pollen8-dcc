@@ -169,11 +169,11 @@ export default function OutreachDetails() {
       <div className="container max-w-4xl mx-auto px-4 py-6 pb-32">
         {/* Back Button */}
         <Link 
-          to={outreach.actv8_contact_id ? `/rel8/actv8/${outreach.actv8_contact_id}/profile` : '/rel8'} 
+          to="/rel8/actv8?task" 
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
         >
           <ArrowLeft className="h-4 w-4" />
-          {outreach.actv8_contact_id ? 'Back to Profile' : 'Back to Dashboard'}
+          Back to Outreach Tasks
         </Link>
 
         {/* Header */}

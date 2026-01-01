@@ -16,7 +16,10 @@ import { Plus, BarChart3, Loader2, Zap, Users, Calendar, CalendarCheck } from "l
 
 export default function Network() {
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab') || 'contacts';
+  // Support both ?tab=outreach and ?task for back navigation
+  const tabParam = searchParams.get('tab');
+  const hasTaskFlag = searchParams.has('task');
+  const initialTab = hasTaskFlag ? 'outreach' : (tabParam || 'contacts');
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
@@ -140,13 +143,13 @@ export default function Network() {
               <Users className="h-4 w-4" />
               <span>Connects</span>
             </TabsTrigger>
-            <TabsTrigger value="outreach" className="flex-1 gap-2 data-[state=active]:bg-background relative">
+            <TabsTrigger value="outreach" className="flex-1 gap-2 data-[state=active]:bg-background">
               <CalendarCheck className="h-4 w-4" />
               <span>Outreach</span>
               {pendingOutreachCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-5 w-5 bg-primary text-primary-foreground text-xs items-center justify-center font-medium">
+                <span className="relative ml-2 inline-flex">
+                  <span className="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-teal-400 opacity-60"></span>
+                  <span className="relative inline-flex rounded-full h-6 w-6 bg-gradient-to-br from-teal-400 to-teal-600 text-white text-xs font-bold items-center justify-center shadow-lg shadow-teal-500/50 border-2 border-teal-300">
                     {pendingOutreachCount > 9 ? '9+' : pendingOutreachCount}
                   </span>
                 </span>
