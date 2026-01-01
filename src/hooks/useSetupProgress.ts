@@ -11,6 +11,7 @@ export interface SetupTask {
   current: number;
   route: string;
   icon: string;
+  steps: string[];
 }
 
 export interface SetupProgressData {
@@ -93,6 +94,13 @@ export const useSetupProgress = (): SetupProgressData => {
       current: Math.min(categories.length, TARGET),
       route: "/rel8/categories",
       icon: "Folder",
+      steps: [
+        "Click \"Let's Go\" to open Categories",
+        "Click the \"Add Category\" button",
+        "Enter a category name (e.g., Family, Work, Friends)",
+        "Choose a color and icon",
+        "Click Save — Repeat for 3 categories",
+      ],
     },
     {
       id: "contacts",
@@ -102,6 +110,12 @@ export const useSetupProgress = (): SetupProgressData => {
       current: Math.min(contactCount, TARGET),
       route: "/rel8/connect",
       icon: "UserPlus",
+      steps: [
+        "Click \"Let's Go\" to open Connect",
+        "Click the \"Add Contact\" button",
+        "Enter the contact's name and details",
+        "Click Save — Repeat for 3 contacts",
+      ],
     },
     {
       id: "categorize",
@@ -111,6 +125,12 @@ export const useSetupProgress = (): SetupProgressData => {
       current: Math.min(categorizedCount, TARGET),
       route: "/rel8/contacts",
       icon: "Tags",
+      steps: [
+        "Click \"Let's Go\" to open Contacts",
+        "Click on a contact to view their profile",
+        "Click the Category dropdown",
+        "Select a category — Repeat for 3 contacts",
+      ],
     },
     {
       id: "reminders",
@@ -120,6 +140,13 @@ export const useSetupProgress = (): SetupProgressData => {
       current: Math.min(triggers.length, TARGET),
       route: "/rel8/triggers",
       icon: "Bell",
+      steps: [
+        "Click \"Let's Go\" to open Reminders",
+        "Click the \"Add Reminder\" button",
+        "Set the reminder type and frequency",
+        "Choose which contacts to include",
+        "Click Save — Repeat for 3 reminders",
+      ],
     },
     {
       id: "activate",
@@ -129,6 +156,12 @@ export const useSetupProgress = (): SetupProgressData => {
       current: Math.min(actv8Count, TARGET),
       route: "/rel8/actv8",
       icon: "Zap",
+      steps: [
+        "Click \"Let's Go\" to open Actv8",
+        "Browse your contacts list",
+        "Click the Activate button on a contact",
+        "Repeat for 3 contacts",
+      ],
     },
   ];
 

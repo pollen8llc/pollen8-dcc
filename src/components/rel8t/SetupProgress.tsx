@@ -1,10 +1,27 @@
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, ChevronRight, Folder, UserPlus, Tags, Bell, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import { 
+  Folder, 
+  UserPlus, 
+  Tags, 
+  Bell, 
+  Zap, 
+  Check,
+  ArrowRight,
+  LucideIcon
+} from "lucide-react";
 import { useSetupProgress, SetupTask } from "@/hooks/useSetupProgress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
-const iconMap: Record<string, React.ElementType> = {
+const iconMap: Record<string, LucideIcon> = {
   Folder,
   UserPlus,
   Tags,
@@ -12,228 +29,214 @@ const iconMap: Record<string, React.ElementType> = {
   Zap,
 };
 
-const SetupTaskCard = ({ task, index }: { task: SetupTask; index: number }) => {
-  const navigate = useNavigate();
-  const isComplete = task.current >= task.target;
-  const progress = Math.min((task.current / task.target) * 100, 100);
-  const Icon = iconMap[task.icon] || Folder;
-
-  return (
-    <motion.button
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.3 }}
-      onClick={() => navigate(task.route)}
-      className={cn(
-        "w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-300",
-        "bg-card/40 backdrop-blur-sm border border-border/50",
-        "hover:bg-card/60 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5",
-        "group cursor-pointer text-left",
-        isComplete && "border-primary/40 bg-primary/5"
-      )}
-    >
-      {/* Icon & Progress Circle */}
-      <div className="relative flex-shrink-0">
-        <div
-          className={cn(
-            "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300",
-            isComplete
-              ? "bg-primary/20 text-primary"
-              : "bg-muted/50 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-          )}
-        >
-          <AnimatePresence mode="wait">
-            {isComplete ? (
-              <motion.div
-                key="check"
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0, rotate: 180 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                <Check className="h-5 w-5" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="icon"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-              >
-                <Icon className="h-5 w-5" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-        
-        {/* Circular Progress Ring */}
-        {!isComplete && (
-          <svg className="absolute inset-0 w-12 h-12 -rotate-90">
-            <circle
-              cx="24"
-              cy="24"
-              r="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-muted/30"
-            />
-            <motion.circle
-              cx="24"
-              cy="24"
-              r="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              className="text-primary"
-              initial={{ strokeDasharray: "0 126" }}
-              animate={{ strokeDasharray: `${(progress / 100) * 126} 126` }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            />
-          </svg>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <h4
-            className={cn(
-              "font-semibold text-sm transition-colors",
-              isComplete ? "text-primary" : "text-foreground"
-            )}
-          >
-            {task.title}
-          </h4>
-          <span
-            className={cn(
-              "text-xs px-2 py-0.5 rounded-full font-medium",
-              isComplete
-                ? "bg-primary/20 text-primary"
-                : "bg-muted text-muted-foreground"
-            )}
-          >
-            {task.current}/{task.target}
-          </span>
-        </div>
-        <p className="text-xs text-muted-foreground mt-0.5 truncate">
-          {task.description}
-        </p>
-      </div>
-
-      {/* Arrow */}
-      <ChevronRight
-        className={cn(
-          "h-5 w-5 flex-shrink-0 transition-all duration-300",
-          isComplete
-            ? "text-primary/50"
-            : "text-muted-foreground group-hover:text-primary group-hover:translate-x-1"
-        )}
-      />
-    </motion.button>
-  );
-};
-
-export const SetupProgress = () => {
+const SetupProgress = () => {
   const { tasks, completedCount, totalTasks, isComplete, isLoading } = useSetupProgress();
 
-  // Don't render if setup is complete
-  if (isComplete) return null;
-
-  // Loading skeleton
   if (isLoading) {
     return (
-      <div className="mb-8">
-        <div className="bg-card/60 backdrop-blur-xl border border-border/50 rounded-2xl p-6 animate-pulse">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-muted/50 rounded-full" />
-            <div className="flex-1">
-              <div className="h-5 w-32 bg-muted/50 rounded mb-2" />
-              <div className="h-4 w-48 bg-muted/50 rounded" />
-            </div>
+      <Card className="bg-card/60 backdrop-blur-xl border-primary/20">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <span className="text-muted-foreground">Loading progress...</span>
           </div>
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-16 bg-muted/30 rounded-xl" />
-            ))}
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
-  const progressPercent = (completedCount / totalTasks) * 100;
+  if (isComplete) {
+    return null;
+  }
+
+  const progressPercentage = (completedCount / totalTasks) * 100;
+  
+  // Find the first incomplete task
+  const firstIncompleteTaskId = tasks.find(task => task.current < task.target)?.id;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="mb-8"
+      transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <div className="bg-card/60 backdrop-blur-xl border border-border/50 rounded-2xl p-6 shadow-lg shadow-black/5">
-        {/* Header with Progress Ring */}
-        <div className="flex items-center gap-4 mb-6">
-          {/* Large Progress Ring */}
-          <div className="relative w-16 h-16 flex-shrink-0">
-            <svg className="w-16 h-16 -rotate-90">
-              <circle
-                cx="32"
-                cy="32"
-                r="28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="4"
-                className="text-muted/20"
-              />
-              <motion.circle
-                cx="32"
-                cy="32"
-                r="28"
-                fill="none"
-                stroke="url(#progressGradient)"
-                strokeWidth="4"
-                strokeLinecap="round"
-                initial={{ strokeDasharray: "0 176" }}
-                animate={{ strokeDasharray: `${(progressPercent / 100) * 176} 176` }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-              />
-              <defs>
-                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" />
-                  <stop offset="100%" stopColor="hsl(var(--primary) / 0.6)" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-lg font-bold text-foreground">
-                {completedCount}
-                <span className="text-muted-foreground text-xs">/{totalTasks}</span>
-              </span>
+      <Card className="bg-card/60 backdrop-blur-xl border-primary/20 overflow-hidden">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-6">
+            {/* Progress Ring */}
+            <div className="relative w-16 h-16 flex-shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="14"
+                  fill="none"
+                  className="stroke-muted/30"
+                  strokeWidth="3"
+                />
+                <motion.circle
+                  cx="18"
+                  cy="18"
+                  r="14"
+                  fill="none"
+                  className="stroke-primary"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeDasharray={`${progressPercentage * 0.88} 88`}
+                  initial={{ strokeDasharray: "0 88" }}
+                  animate={{ strokeDasharray: `${progressPercentage * 0.88} 88` }}
+                  transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-sm font-bold">{completedCount}/{totalTasks}</span>
+              </div>
+            </div>
+
+            <div className="flex-1">
+              <CardTitle className="text-xl font-bold">Complete Your Setup</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Follow these steps to get the most out of REL8
+              </p>
             </div>
           </div>
+        </CardHeader>
 
-          {/* Title & Subtitle */}
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-foreground">
-              Complete your setup
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              {completedCount === 0
-                ? "Get started by completing these quick tasks"
-                : `${totalTasks - completedCount} task${totalTasks - completedCount !== 1 ? "s" : ""} remaining`}
-            </p>
+        <CardContent className="pt-0">
+          <Accordion type="single" collapsible className="space-y-2">
+            {tasks.map((task, index) => (
+              <SetupTaskAccordion 
+                key={task.id} 
+                task={task} 
+                index={index}
+                isFirstIncomplete={task.id === firstIncompleteTaskId}
+              />
+            ))}
+          </Accordion>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
+
+interface SetupTaskAccordionProps {
+  task: SetupTask;
+  index: number;
+  isFirstIncomplete: boolean;
+}
+
+const SetupTaskAccordion = ({ task, index, isFirstIncomplete }: SetupTaskAccordionProps) => {
+  const navigate = useNavigate();
+  const Icon = iconMap[task.icon] || Folder;
+  const isComplete = task.current >= task.target;
+  const progress = (task.current / task.target) * 100;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.1 }}
+    >
+      <AccordionItem 
+        value={task.id}
+        className={cn(
+          "rounded-xl border-2 overflow-hidden transition-all duration-300",
+          isComplete 
+            ? "bg-primary/5 border-primary/30" 
+            : "bg-card/40 border-border/50",
+          isFirstIncomplete && !isComplete && "animate-pulse-border"
+        )}
+      >
+        <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 transition-colors">
+          <div className="flex items-center gap-4 flex-1">
+            {/* Icon with completion state */}
+            <div className={cn(
+              "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+              isComplete 
+                ? "bg-primary text-primary-foreground" 
+                : "bg-muted/50 text-muted-foreground"
+            )}>
+              {isComplete ? (
+                <Check className="w-5 h-5" />
+              ) : (
+                <Icon className="w-5 h-5" />
+              )}
+            </div>
+
+            {/* Title and description */}
+            <div className="flex-1 text-left">
+              <h4 className={cn(
+                "font-semibold text-sm",
+                isComplete && "text-muted-foreground line-through"
+              )}>
+                {task.title}
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {task.description}
+              </p>
+            </div>
+
+            {/* Progress indicator */}
+            <div className="flex items-center gap-2 mr-2">
+              <div className="relative w-8 h-8">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="14"
+                    fill="none"
+                    className="stroke-muted/30"
+                    strokeWidth="4"
+                  />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="14"
+                    fill="none"
+                    className={cn(
+                      "transition-all duration-500",
+                      isComplete ? "stroke-primary" : "stroke-primary/60"
+                    )}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray={`${progress * 0.88} 88`}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[10px] font-bold">{task.current}/{task.target}</span>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </AccordionTrigger>
 
-        {/* Task List */}
-        <div className="space-y-3">
-          {tasks.map((task, index) => (
-            <SetupTaskCard key={task.id} task={task} index={index} />
-          ))}
-        </div>
-      </div>
+        <AccordionContent className="px-4 pb-4">
+          <div className="pt-2 pl-14">
+            <ol className="space-y-2 mb-4">
+              {task.steps.map((step, stepIndex) => (
+                <li 
+                  key={stepIndex}
+                  className="flex items-start gap-2 text-sm text-muted-foreground"
+                >
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-muted/50 text-xs font-medium flex items-center justify-center mt-0.5">
+                    {stepIndex + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+
+            <Button
+              onClick={() => navigate(task.route)}
+              className="w-full gap-2"
+              variant={isComplete ? "secondary" : "default"}
+            >
+              {isComplete ? "View" : "Let's Go"}
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
     </motion.div>
   );
 };
