@@ -15,6 +15,7 @@ import CommunityAuditTable from "@/components/admin/CommunityAuditTable";
 import AdminMetrics from "@/pages/admin/AdminMetrics";
 import UserFlows from "@/pages/admin/UserFlows";
 import TechnicalDocumentationGenerator from "@/components/admin/TechnicalDocumentationGenerator";
+import ConnectionStrengthAnalytics from "@/components/admin/ConnectionStrengthAnalytics";
 const AdminDashboard = () => {
   const {
     id
@@ -116,6 +117,9 @@ const AdminDashboard = () => {
                 <TabsTrigger value="flows" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
                   User Flows
                 </TabsTrigger>
+                <TabsTrigger value="connection-strength" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
+                  Connection Strength
+                </TabsTrigger>
                 <TabsTrigger value="users" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
                   User Management
                 </TabsTrigger>
@@ -170,6 +174,21 @@ const AdminDashboard = () => {
 
               <TabsContent value="flows" className="animate-fade-in">
                 <UserFlows />
+              </TabsContent>
+
+              <TabsContent value="connection-strength" className="animate-fade-in">
+                <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                      <span className="text-black font-bold text-xl">🔗</span>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground">Connection Strength Analytics</h2>
+                      <p className="text-muted-foreground">Formula breakdown and contact scoring simulation</p>
+                    </div>
+                  </div>
+                  <ConnectionStrengthAnalytics />
+                </div>
               </TabsContent>
 
               <TabsContent value="users" className="animate-fade-in">
