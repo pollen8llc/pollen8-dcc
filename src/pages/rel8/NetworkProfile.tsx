@@ -9,6 +9,7 @@ import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathC
 import { DevelopmentTimeline } from "@/components/rel8t/network/DevelopmentTimeline";
 import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModal";
 import { LinkOutreachDialog } from "@/components/rel8t/network/LinkOutreachDialog";
+import { Actv8InsightsCard } from "@/components/rel8t/network/Actv8InsightsCard";
 
 import { StepInterfaceRouter } from "@/components/rel8t/touchpoint";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
@@ -408,11 +409,12 @@ export default function NetworkProfile() {
           <ConnectionStrengthBar strength={contact.connectionStrength} size="lg" />
         </Card>
 
-        {/* Notes Section */}
-        <Card className="p-4">
-          <h3 className="text-sm font-medium mb-2">Notes</h3>
-          <p className="text-sm text-muted-foreground">{contact.vibeNotes}</p>
-        </Card>
+        {/* Relationship Insights Section */}
+        <Actv8InsightsCard 
+          actv8ContactId={actv8Contact.id}
+          contactId={actv8Contact.contact_id}
+          intentionNotes={actv8Contact.intention_notes || undefined}
+        />
 
         {/* Development Path Section */}
         <Card className="p-4">
