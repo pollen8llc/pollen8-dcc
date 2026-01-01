@@ -16,7 +16,7 @@ import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Loader2, Mail, Phone, Calendar, TrendingUp, Settings, MessageCircle, Edit, Heart, Zap } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
@@ -166,7 +166,7 @@ export default function NetworkProfile() {
     interactions: [] as any[],
   };
 
-  const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  
 
   const handleSelectPath = (pathId: string) => {
     updatePathMutation.mutate(pathId);
@@ -260,20 +260,7 @@ export default function NetworkProfile() {
             <div className="md:hidden space-y-4">
               {/* Avatar Row */}
               <div className="flex items-center justify-center">
-                <div className="relative">
-                  <Avatar className="h-24 w-24 ring-2 ring-primary/20">
-                    <AvatarImage src={contact.avatar} />
-                    <AvatarFallback className="text-2xl bg-secondary">{getInitials(contact.name)}</AvatarFallback>
-                  </Avatar>
-                  {/* Strength indicator */}
-                  <div className={`absolute bottom-1 right-1 w-6 h-6 rounded-full border-2 border-background flex items-center justify-center ${
-                    contact.connectionStrength === 'star' ? 'bg-primary' :
-                    contact.connectionStrength === 'flame' ? 'bg-emerald-500' :
-                    contact.connectionStrength === 'ember' ? 'bg-amber-500' : 'bg-red-500'
-                  }`}>
-                    <TrendingUp className="h-3 w-3 text-white" />
-                  </div>
-                </div>
+                <Avatar userId={actv8Contact.contact_id || "UXI8000"} size={100} className="ring-2 ring-primary/20" />
               </div>
 
               {/* Name Row */}
@@ -322,20 +309,7 @@ export default function NetworkProfile() {
             <div className="hidden md:block">
               {/* Contact Info Section */}
               <div className="flex items-start gap-6 mb-6">
-                <div className="relative">
-                  <Avatar className="h-20 w-20 ring-2 ring-primary/20">
-                    <AvatarImage src={contact.avatar} />
-                    <AvatarFallback className="text-xl bg-secondary">{getInitials(contact.name)}</AvatarFallback>
-                  </Avatar>
-                  {/* Strength indicator */}
-                  <div className={`absolute bottom-0 right-0 w-6 h-6 rounded-full border-2 border-background flex items-center justify-center ${
-                    contact.connectionStrength === 'star' ? 'bg-primary' :
-                    contact.connectionStrength === 'flame' ? 'bg-emerald-500' :
-                    contact.connectionStrength === 'ember' ? 'bg-amber-500' : 'bg-red-500'
-                  }`}>
-                    <TrendingUp className="h-3 w-3 text-white" />
-                  </div>
-                </div>
+                <Avatar userId={actv8Contact.contact_id || "UXI8000"} size={80} className="ring-2 ring-primary/20" />
                 
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold">{contact.name}</h1>
