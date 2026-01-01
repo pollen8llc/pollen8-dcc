@@ -37,21 +37,59 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isNotifying, setIsNotifying] = useState(false);
   
+  const [isCompleting, setIsCompleting] = useState(false);
+
   const handleMarkComplete = async () => {
-    // Get user email for calendar update
-    const { data: { user } } = await supabase.auth.getUser();
-    const userEmail = user?.email;
+    if (isCompleting) return;
+    setIsCompleting(true);
     
-    // Update database status
-    const success = await updateOutreachStatus(outreach.id, "completed");
-    
-    if (success) {
-      // Send calendar cancellation to remove from external calendar
-      if (outreach.calendar_sync_enabled && userEmail) {
-        await sendCalendarUpdate(outreach.id, 'cancel', userEmail);
+    try {
+      // Get user email for calendar update
+      const { data: { user } } = await supabase.auth.getUser();
+      const userEmail = user?.email;
+      
+      if (!user) {
+        toast({
+          title: "Not authenticated",
+          description: "Please log in to mark tasks complete.",
+          variant: "destructive"
+        });
+        setIsCompleting(false);
+        return;
       }
       
-      queryClient.invalidateQueries({ queryKey: ["outreach"] });
+      // Update database status
+      const success = await updateOutreachStatus(outreach.id, "completed");
+      
+      if (success) {
+        // Send calendar cancellation to remove from external calendar
+        if (outreach.calendar_sync_enabled && userEmail) {
+          await sendCalendarUpdate(outreach.id, 'cancel', userEmail);
+        }
+        
+        queryClient.invalidateQueries({ queryKey: ["outreach"] });
+        queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
+        
+        toast({
+          title: "Task completed",
+          description: "Outreach task marked as complete."
+        });
+      } else {
+        toast({
+          title: "Failed to complete",
+          description: "Could not mark task as complete. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error marking complete:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCompleting(false);
     }
   };
 
@@ -322,9 +360,10 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
                 size="sm" 
                 className="gap-1"
                 onClick={handleMarkComplete}
+                disabled={isCompleting}
               >
                 <Check className="h-4 w-4" />
-                Mark Complete
+                {isCompleting ? 'Completing...' : 'Mark Complete'}
               </Button>
             </>
           )}
