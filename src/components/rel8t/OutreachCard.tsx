@@ -257,11 +257,23 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
 
   const isOverdue = new Date(outreach.due_date) < new Date() && outreach.status === "pending";
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on a button or interactive element
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('[role="dialog"]')) {
+      return;
+    }
+    navigate(`/rel8/outreach/${outreach.id}`);
+  };
+
   return (
-    <Card className={cn(
-      "mb-4 flex flex-col", 
-      isOverdue ? "border-red-500/30" : "border-border/20"
-    )}>
+    <Card 
+      className={cn(
+        "mb-4 flex flex-col cursor-pointer transition-colors hover:border-primary/40", 
+        isOverdue ? "border-red-500/30" : "border-border/20"
+      )}
+      onClick={handleCardClick}
+    >
       <CardHeader className="px-4 py-3 border-b border-border/20 bg-card">
         <div className="flex justify-between items-center">
           <div className="flex gap-2 flex-wrap items-center">
