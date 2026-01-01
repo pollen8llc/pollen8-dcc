@@ -38,11 +38,11 @@ export function Rel8OnlyNavigation() {
       isActive: location.pathname === "/rel8/connect"
     },
     {
-      href: "/rel8/reminders",
+      href: "/rel8/triggers",
       label: "Reminders",
       icon: Zap,
       iconColor: "text-orange-500",
-      isActive: location.pathname.startsWith("/rel8/reminders")
+      isActive: location.pathname.startsWith("/rel8/triggers")
     },
     {
       href: "/rel8/categories",
