@@ -38,6 +38,11 @@ export interface StructuredNotes {
   free_notes?: string;
 }
 
+// Helper function to check if required notes are complete
+export const areNotesComplete = (notes: StructuredNotes): boolean => {
+  return !!(notes.interaction_outcome && notes.rapport_progress);
+};
+
 interface StructuredNotesFormProps {
   initialNotes?: StructuredNotes;
   onSave: (notes: StructuredNotes) => Promise<void>;
@@ -151,7 +156,9 @@ export function StructuredNotesForm({
       <CardContent className="space-y-6">
         {/* Interaction Outcome */}
         <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">How did it go?</Label>
+          <Label className="text-sm text-muted-foreground">
+            How did it go? <span className="text-destructive">*</span>
+          </Label>
           <div className="grid grid-cols-3 gap-2">
             <RadioOption
               selected={notes.interaction_outcome === 'positive'}
@@ -321,7 +328,9 @@ export function StructuredNotesForm({
 
         {/* Rapport Progress */}
         <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">Rapport Progress</Label>
+          <Label className="text-sm text-muted-foreground">
+            Rapport Progress <span className="text-destructive">*</span>
+          </Label>
           <div className="grid grid-cols-3 gap-2">
             <RadioOption
               selected={notes.rapport_progress === 'strengthened'}

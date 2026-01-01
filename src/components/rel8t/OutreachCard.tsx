@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Calendar, AlertCircle, Download, Trash2, Pencil, Users, CheckCircle2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Outreach, updateOutreachStatus, deleteOutreach, sendCalendarUpdate } from "@/services/rel8t/outreachService";
+import { areNotesComplete } from "@/components/rel8t/StructuredNotesForm";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -41,6 +42,20 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
 
   const handleMarkComplete = async () => {
     if (isCompleting) return;
+    
+    // Check if notes are complete before allowing completion
+    const structuredNotes = (outreach as any).structured_notes || {};
+    if (!areNotesComplete(structuredNotes)) {
+      toast({
+        title: "Feedback Required",
+        description: "Please complete the Post-Outreach Feedback on the task details page before marking as complete.",
+        variant: "destructive"
+      });
+      // Navigate to details page so user can fill in notes
+      navigate(`/rel8/outreach/${outreach.id}`);
+      return;
+    }
+    
     setIsCompleting(true);
     
     try {
@@ -277,14 +292,16 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
           </div>
           
           <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(`/rel8/wizard?mode=edit&id=${outreach.id}`)}
-              className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
+            {outreach.status !== 'completed' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(`/rel8/wizard?mode=edit&id=${outreach.id}`)}
+                className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
