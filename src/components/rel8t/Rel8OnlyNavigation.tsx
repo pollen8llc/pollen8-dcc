@@ -17,11 +17,11 @@ export function Rel8OnlyNavigation() {
   
   const navItems = [
     {
-      href: "/rel8",
-      label: "Relationships",
+      href: "/rel8/actv8",
+      label: "Connections",
       icon: Calendar,
       iconColor: "text-cyan-500",
-      isActive: location.pathname === "/rel8"
+      isActive: location.pathname === "/rel8/actv8"
     },
     {
       href: "/rel8/contacts",
@@ -38,11 +38,11 @@ export function Rel8OnlyNavigation() {
       isActive: location.pathname === "/rel8/connect"
     },
     {
-      href: "/rel8/triggers",
-      label: "Triggers",
+      href: "/rel8/reminders",
+      label: "Reminders",
       icon: Zap,
       iconColor: "text-orange-500",
-      isActive: location.pathname.startsWith("/rel8/triggers")
+      isActive: location.pathname.startsWith("/rel8/reminders")
     },
     {
       href: "/rel8/categories",
@@ -57,7 +57,7 @@ export function Rel8OnlyNavigation() {
     <nav className="flex items-center gap-2 p-2 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg">
       {/* Avatar Link - scales down on smaller screens */}
       <Link
-        to="/rel8/actv8"
+        to="/rel8"
         className="flex items-center justify-center flex-shrink-0"
       >
         <UnifiedAvatar
