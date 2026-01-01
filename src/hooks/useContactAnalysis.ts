@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getActv8ContactByContactId } from "@/services/actv8Service";
-import { getOutreachesForContact } from "@/services/rel8t/outreachService";
+import { getOrCreateContactEvaluation } from "@/services/evalu8Service";
 
 export interface ContactAnalysis {
   totalOutreaches: number;
@@ -22,19 +22,23 @@ export interface ContactAnalysis {
     topics: string;
   } | null;
   summary: string;
+  engagementScore: number;
+  notesCount: number;
+  channelStats: Record<string, number>;
 }
 
 const generateSummary = (
   completedOutreaches: number,
   pendingOutreaches: number,
-  actv8Status: ContactAnalysis["actv8Status"],
-  latestInteraction: ContactAnalysis["latestInteraction"]
+  engagementScore: number,
+  connectionStrength: string,
+  lastOutreachAt: string | null
 ): string => {
   const parts: string[] = [];
 
-  if (latestInteraction) {
+  if (lastOutreachAt) {
     const daysSince = Math.floor(
-      (Date.now() - new Date(latestInteraction.date).getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - new Date(lastOutreachAt).getTime()) / (1000 * 60 * 60 * 24)
     );
     if (daysSince === 0) {
       parts.push("Last spoke today.");
@@ -49,16 +53,18 @@ const generateSummary = (
     parts.push(`${completedOutreaches} completed ${completedOutreaches === 1 ? 'meeting' : 'meetings'}.`);
   }
 
-  if (actv8Status?.isActive) {
-    parts.push(`On ${actv8Status.pathName} path (Step ${actv8Status.currentStep + 1}/${actv8Status.totalSteps}).`);
-    
-    const strengthLabels: Record<string, string> = {
-      spark: "Connection is new",
-      ember: "Connection is warming",
-      flame: "Connection is strong",
-      star: "Connection is excellent"
-    };
-    parts.push(strengthLabels[actv8Status.connectionStrength] || "");
+  const strengthLabels: Record<string, string> = {
+    cold: "Connection is cold",
+    warm: "Connection is warming",
+    hot: "Connection is strong",
+    star: "Connection is excellent"
+  };
+  if (connectionStrength) {
+    parts.push(strengthLabels[connectionStrength] || "");
+  }
+
+  if (engagementScore > 0) {
+    parts.push(`Engagement: ${engagementScore}%.`);
   }
 
   if (pendingOutreaches > 0) {
@@ -81,21 +87,24 @@ export const useContactAnalysis = (contactId: string | undefined) => {
           actv8Status: null,
           latestInteraction: null,
           summary: "No activity recorded yet.",
+          engagementScore: 0,
+          notesCount: 0,
+          channelStats: {},
         };
       }
 
-      // Fetch outreaches for this contact
-      const outreaches = await getOutreachesForContact(contactId);
-      const completedOutreaches = outreaches.filter(o => o.status === 'completed').length;
-      const pendingOutreaches = outreaches.filter(o => o.status === 'pending').length;
+      // Fetch evalu8 stats from pre-computed table
+      const evalu8 = await getOrCreateContactEvaluation(contactId);
       
-      // Get notes from completed outreaches
-      const latestOutreachNotes = outreaches
-        .filter(o => (o as any).notes)
-        .map(o => (o as any).notes)
-        .slice(0, 3);
+      const totalOutreaches = evalu8?.total_outreach_count || 0;
+      const completedOutreaches = evalu8?.completed_outreach_count || 0;
+      const pendingOutreaches = evalu8?.pending_outreach_count || 0;
+      const engagementScore = evalu8?.engagement_score || 0;
+      const connectionStrength = evalu8?.connection_strength || 'cold';
+      const channelStats = evalu8?.channel_stats || {};
+      const notesCount = evalu8?.total_notes_count || 0;
 
-      // Fetch Actv8 status
+      // Fetch Actv8 status for path details
       let actv8Status: ContactAnalysis["actv8Status"] = null;
       try {
         const actv8Contact = await getActv8ContactByContactId(contactId);
@@ -139,18 +148,22 @@ export const useContactAnalysis = (contactId: string | undefined) => {
       const summary = generateSummary(
         completedOutreaches,
         pendingOutreaches,
-        actv8Status,
-        latestInteraction
+        engagementScore,
+        connectionStrength,
+        evalu8?.last_outreach_at || null
       );
 
       return {
-        totalOutreaches: outreaches.length,
+        totalOutreaches,
         completedOutreaches,
         pendingOutreaches,
-        latestOutreachNotes,
+        latestOutreachNotes: [],
         actv8Status,
         latestInteraction,
         summary,
+        engagementScore,
+        notesCount,
+        channelStats,
       };
     },
     enabled: !!contactId,
