@@ -6,6 +6,7 @@ import {
   Tags, 
   Bell, 
   Zap, 
+  Coffee,
   Check,
   ArrowRight,
   LucideIcon
@@ -27,6 +28,7 @@ const iconMap: Record<string, LucideIcon> = {
   Tags,
   Bell,
   Zap,
+  Coffee,
 };
 
 const SetupProgress = () => {
