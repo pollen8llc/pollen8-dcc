@@ -462,6 +462,107 @@ export type Database = {
         }
         Relationships: []
       }
+      evalu8_contacts: {
+        Row: {
+          actv8_completed_steps: number | null
+          actv8_current_step: number | null
+          actv8_path_id: string | null
+          actv8_total_steps: number | null
+          auto_summary: string | null
+          average_response_time_hours: number | null
+          cancelled_outreach_count: number | null
+          channel_stats: Json | null
+          completed_outreach_count: number | null
+          connection_strength: string | null
+          contact_id: string
+          created_at: string | null
+          engagement_score: number | null
+          first_outreach_at: string | null
+          id: string
+          last_actv8_update_at: string | null
+          last_completed_outreach_at: string | null
+          last_note_added_at: string | null
+          last_outreach_at: string | null
+          last_summary_update: string | null
+          pending_outreach_count: number | null
+          rapport_status: string | null
+          response_rate_percent: number | null
+          total_notes_count: number | null
+          total_notes_word_count: number | null
+          total_outreach_count: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          actv8_completed_steps?: number | null
+          actv8_current_step?: number | null
+          actv8_path_id?: string | null
+          actv8_total_steps?: number | null
+          auto_summary?: string | null
+          average_response_time_hours?: number | null
+          cancelled_outreach_count?: number | null
+          channel_stats?: Json | null
+          completed_outreach_count?: number | null
+          connection_strength?: string | null
+          contact_id: string
+          created_at?: string | null
+          engagement_score?: number | null
+          first_outreach_at?: string | null
+          id?: string
+          last_actv8_update_at?: string | null
+          last_completed_outreach_at?: string | null
+          last_note_added_at?: string | null
+          last_outreach_at?: string | null
+          last_summary_update?: string | null
+          pending_outreach_count?: number | null
+          rapport_status?: string | null
+          response_rate_percent?: number | null
+          total_notes_count?: number | null
+          total_notes_word_count?: number | null
+          total_outreach_count?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          actv8_completed_steps?: number | null
+          actv8_current_step?: number | null
+          actv8_path_id?: string | null
+          actv8_total_steps?: number | null
+          auto_summary?: string | null
+          average_response_time_hours?: number | null
+          cancelled_outreach_count?: number | null
+          channel_stats?: Json | null
+          completed_outreach_count?: number | null
+          connection_strength?: string | null
+          contact_id?: string
+          created_at?: string | null
+          engagement_score?: number | null
+          first_outreach_at?: string | null
+          id?: string
+          last_actv8_update_at?: string | null
+          last_completed_outreach_at?: string | null
+          last_note_added_at?: string | null
+          last_outreach_at?: string | null
+          last_summary_update?: string | null
+          pending_outreach_count?: number | null
+          rapport_status?: string | null
+          response_rate_percent?: number | null
+          total_notes_count?: number | null
+          total_notes_word_count?: number | null
+          total_outreach_count?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evalu8_contacts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       google_import_history: {
         Row: {
           contacts_imported: number | null
@@ -3199,6 +3300,10 @@ export type Database = {
       assign_request_to_provider: {
         Args: { p_service_provider_id: string; p_service_request_id: string }
         Returns: boolean
+      }
+      calculate_evalu8_stats: {
+        Args: { p_contact_id: string; p_user_id: string }
+        Returns: string
       }
       can_view_profile: {
         Args: { profile_user_id: string; viewer_id: string }
