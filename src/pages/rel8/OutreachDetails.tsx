@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getOutreachById, updateOutreachStatus, deleteOutreach, updateOutreachStructuredNotes, Outreach, StructuredNotes } from "@/services/rel8t/outreachService";
@@ -44,6 +44,8 @@ export default function OutreachDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const notesRef = useRef<HTMLDivElement>(null);
+  const [showNotesAlert, setShowNotesAlert] = useState(false);
 
   // Fetch outreach details
   const { data: outreach, isLoading, error } = useQuery({
@@ -59,13 +61,22 @@ export default function OutreachDetails() {
     enabled: !!outreach?.actv8_contact_id,
   });
 
+  // Scroll to notes and show alert
+  const scrollToNotes = () => {
+    setShowNotesAlert(true);
+    notesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Auto-hide the alert after 5 seconds
+    setTimeout(() => setShowNotesAlert(false), 5000);
+  };
+
   // Complete mutation
   const completeMutation = useMutation({
     mutationFn: () => {
       // Check if notes are complete before allowing completion
       const structuredNotes = (outreach as any)?.structured_notes || {};
       if (!areNotesComplete(structuredNotes)) {
-        throw new Error('Please complete the required feedback fields (How did it go? and Rapport Progress) before marking as complete.');
+        scrollToNotes();
+        throw new Error('Please complete the required feedback fields before marking as complete.');
       }
       return updateOutreachStatus(id!, 'completed');
     },
@@ -75,7 +86,10 @@ export default function OutreachDetails() {
       toast.success('Outreach marked as complete!');
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Failed to complete outreach');
+      // Only show toast if it's not the notes validation error (we handle that with the scroll)
+      if (error instanceof Error && !error.message.includes('required feedback')) {
+        toast.error(error.message);
+      }
     },
   });
 
@@ -285,14 +299,25 @@ export default function OutreachDetails() {
         )}
 
         {/* Structured Notes Form - always editable for updates */}
-        <StructuredNotesForm
-          initialNotes={(outreach as any).structured_notes || {}}
-          onSave={async (notes) => {
-            await structuredNotesMutation.mutateAsync(notes);
-          }}
-          isSaving={structuredNotesMutation.isPending}
-          disabled={false}
-        />
+        <div ref={notesRef} className="relative scroll-mt-6">
+          {showNotesAlert && (
+            <div className="absolute -top-2 left-0 right-0 z-10 flex items-center justify-center">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-destructive text-destructive-foreground text-sm font-medium shadow-lg animate-pulse">
+                <AlertTriangle className="h-4 w-4" />
+                Complete required fields below
+              </div>
+            </div>
+          )}
+          <StructuredNotesForm
+            initialNotes={(outreach as any).structured_notes || {}}
+            onSave={async (notes) => {
+              await structuredNotesMutation.mutateAsync(notes);
+              setShowNotesAlert(false);
+            }}
+            isSaving={structuredNotesMutation.isPending}
+            disabled={false}
+          />
+        </div>
 
         {/* Calendar Sync Status */}
         <Card className="glass-card mb-6">
