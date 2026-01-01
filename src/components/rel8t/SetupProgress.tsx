@@ -140,7 +140,8 @@ const SetupTaskAccordion = ({ task, index, isFirstIncomplete }: SetupTaskAccordi
       <AccordionItem 
         value={task.id}
         className={cn(
-          "rounded-xl border-2 overflow-hidden transition-all duration-300",
+          "rounded-xl border-2 overflow-hidden",
+          !(isFirstIncomplete && !isComplete) && "transition-all duration-300",
           isComplete 
             ? "bg-primary/5 border-primary/30" 
             : "bg-card/40 border-border/50",
