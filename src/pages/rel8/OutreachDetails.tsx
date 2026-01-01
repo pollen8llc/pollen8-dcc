@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getOutreachById, updateOutreachStatus, deleteOutreach, updateOutreachStructuredNotes, Outreach, StructuredNotes } from "@/services/rel8t/outreachService";
+import { areNotesComplete } from "@/components/rel8t/StructuredNotesForm";
 import { getActv8Contact } from "@/services/actv8Service";
 import { getDevelopmentPath } from "@/data/mockNetworkData";
 import { Button } from "@/components/ui/button";
@@ -60,11 +61,21 @@ export default function OutreachDetails() {
 
   // Complete mutation
   const completeMutation = useMutation({
-    mutationFn: () => updateOutreachStatus(id!, 'completed'),
+    mutationFn: () => {
+      // Check if notes are complete before allowing completion
+      const structuredNotes = (outreach as any)?.structured_notes || {};
+      if (!areNotesComplete(structuredNotes)) {
+        throw new Error('Please complete the required feedback fields (How did it go? and Rapport Progress) before marking as complete.');
+      }
+      return updateOutreachStatus(id!, 'completed');
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['outreach', id] });
       queryClient.invalidateQueries({ queryKey: ['actv8-contact'] });
       toast.success('Outreach marked as complete!');
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Failed to complete outreach');
     },
   });
 
@@ -273,14 +284,14 @@ export default function OutreachDetails() {
           </Card>
         )}
 
-        {/* Structured Notes Form */}
+        {/* Structured Notes Form - always editable for updates */}
         <StructuredNotesForm
           initialNotes={(outreach as any).structured_notes || {}}
           onSave={async (notes) => {
             await structuredNotesMutation.mutateAsync(notes);
           }}
           isSaving={structuredNotesMutation.isPending}
-          disabled={outreach.status === 'completed'}
+          disabled={false}
         />
 
         {/* Calendar Sync Status */}
@@ -361,14 +372,16 @@ export default function OutreachDetails() {
             </Button>
           )}
           
-          <Button
-            variant="outline"
-            onClick={() => navigate(`/rel8/wizard?mode=edit&id=${id}`)}
-            className="flex items-center gap-2"
-          >
-            <Edit className="h-4 w-4" />
-            Edit Outreach
-          </Button>
+          {outreach.status !== 'completed' && (
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/rel8/wizard?mode=edit&id=${id}`)}
+              className="flex items-center gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              Edit Outreach
+            </Button>
+          )}
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
