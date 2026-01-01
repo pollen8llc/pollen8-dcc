@@ -168,9 +168,9 @@ const RelationshipWizard = () => {
       setIcsContent(ics);
       setShowSuccessDialog(true);
     } else {
-      // Clear wizard data and redirect to the main rel8 dashboard
+      // Clear wizard data and redirect to actv8 outreach tab
       clearWizardData();
-      navigate("/rel8");
+      navigate("/rel8/actv8");
     }
   };
 
@@ -351,7 +351,7 @@ const RelationshipWizard = () => {
             setShowSuccessDialog(open);
             if (!open) {
               clearWizardData();
-              navigate("/rel8");
+              navigate("/rel8/actv8");
             }
           }}
           trigger={createdTrigger}
