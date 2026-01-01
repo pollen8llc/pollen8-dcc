@@ -50,7 +50,7 @@ const Dashboard = () => {
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <Rel8Header />
+      <Rel8Header showProfileBanner />
 
       <div className="container mx-auto max-w-6xl px-4 py-8 pb-32">
         {/* Quick Stats */}
