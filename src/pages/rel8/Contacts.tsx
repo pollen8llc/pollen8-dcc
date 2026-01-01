@@ -319,7 +319,7 @@ const Contacts = () => {
               </Button>
               
               <Button 
-                onClick={() => navigate("/rel8/connect/create")}
+                onClick={() => navigate("/rel8/connect")}
                 className="flex items-center justify-center gap-2 w-full sm:w-auto"
                 size="sm"
               >
