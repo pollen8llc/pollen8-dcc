@@ -187,7 +187,7 @@ export default {
         "avatar-slow-pulse": "avatar-slow-pulse 4s ease-in-out infinite",
         "avatar-shimmer": "avatar-shimmer 3s ease-in-out infinite",
         "avatar-fast-rotate": "avatar-rotate 6s linear infinite",
-        "pulse-border": "pulse-border 3.5s ease-in-out infinite",
+        "pulse-border": "pulse-border 6s ease-in-out infinite",
         "avatar-slow-rotate": "avatar-rotate 10s linear infinite",
         "avatar-delayed-orbit": "avatar-orbit 3s linear infinite 1.5s",
         // Admin avatar animations - slow and subtle
