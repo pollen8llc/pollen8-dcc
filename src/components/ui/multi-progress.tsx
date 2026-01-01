@@ -23,24 +23,24 @@ const MultiProgress = React.forwardRef<HTMLDivElement, MultiProgressProps>(
         )}
         {...props}
       >
-        {/* Setup segment (0-10%) */}
+        {/* Setup segment (0-10%) - Orange */}
         <div 
-          className="absolute left-0 top-0 h-full bg-blue-500 transition-all duration-300"
+          className="absolute left-0 top-0 h-full bg-orange-500 transition-all duration-300"
           style={{ width: `${setupPercent}%` }}
         />
         
-        {/* Usage segment (10-50%) */}
+        {/* Usage segment (10-50%) - Yellow */}
         <div 
-          className="absolute top-0 h-full bg-green-500 transition-all duration-300"
+          className="absolute top-0 h-full bg-yellow-400 transition-all duration-300"
           style={{ 
             left: '10%', 
             width: `${usagePercent}%` 
           }}
         />
         
-        {/* Premium segment (50-100%) */}
+        {/* Premium segment (50-100%) - Green to Teal */}
         <div 
-          className="absolute top-0 h-full bg-primary transition-all duration-300"
+          className="absolute top-0 h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
           style={{ 
             left: '50%', 
             width: `${premiumPercent}%` 
