@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getOutreachById, updateOutreachStatus, deleteOutreach, Outreach } from "@/services/rel8t/outreachService";
+import { getOutreachById, updateOutreachStatus, deleteOutreach, updateOutreachNotes, Outreach } from "@/services/rel8t/outreachService";
 import { getActv8Contact } from "@/services/actv8Service";
 import { getDevelopmentPath } from "@/data/mockNetworkData";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { 
   ArrowLeft, 
@@ -21,7 +23,9 @@ import {
   Edit,
   AlertTriangle,
   ExternalLink,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  Save
 } from "lucide-react";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
@@ -41,6 +45,8 @@ export default function OutreachDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [notes, setNotes] = useState<string>("");
+  const [notesLoaded, setNotesLoaded] = useState(false);
 
   // Fetch outreach details
   const { data: outreach, isLoading, error } = useQuery({
@@ -48,6 +54,12 @@ export default function OutreachDetails() {
     queryFn: () => getOutreachById(id!),
     enabled: !!id,
   });
+  
+  // Initialize notes when outreach loads
+  if (outreach && !notesLoaded) {
+    setNotes((outreach as any).notes || "");
+    setNotesLoaded(true);
+  }
 
   // Fetch linked Actv8 contact if exists
   const { data: actv8Contact } = useQuery({
@@ -72,6 +84,18 @@ export default function OutreachDetails() {
     onSuccess: () => {
       toast.success('Outreach deleted');
       navigate('/rel8');
+    },
+  });
+
+  // Notes mutation
+  const notesMutation = useMutation({
+    mutationFn: (newNotes: string) => updateOutreachNotes(id!, newNotes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['outreach', id] });
+      toast.success('Notes saved!');
+    },
+    onError: () => {
+      toast.error('Failed to save notes');
     },
   });
 
@@ -258,6 +282,38 @@ export default function OutreachDetails() {
             </CardContent>
           </Card>
         )}
+
+        {/* Outreach Notes */}
+        <Card className="glass-card mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Outreach Notes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Textarea
+              placeholder="Add notes about this outreach (e.g., what was discussed, key takeaways, next steps...)"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+              className="resize-none"
+            />
+            <Button
+              size="sm"
+              onClick={() => notesMutation.mutate(notes)}
+              disabled={notesMutation.isPending}
+              className="flex items-center gap-2"
+            >
+              {notesMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save Notes
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Calendar Sync Status */}
         <Card className="glass-card mb-6">

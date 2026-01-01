@@ -41,6 +41,7 @@ export interface Outreach {
   channel_details?: Record<string, any> | null;
   contacts_notified_at?: string | null;
   trigger_id?: string | null;
+  notes?: string | null;
   // Actv8 Build Rapport integration
   actv8_contact_id?: string | null;
   actv8_step_index?: number | null;
@@ -158,6 +159,7 @@ export const getOutreachById = async (id: string): Promise<Outreach | null> => {
       channel_details: (data as any).channel_details,
       contacts_notified_at: (data as any).contacts_notified_at,
       trigger_id: (data as any).trigger_id,
+      notes: (data as any).notes,
       contacts
     } as Outreach;
   } catch (error: any) {
@@ -431,6 +433,21 @@ export const sendCalendarUpdate = async (
     return true;
   } catch (error) {
     console.error('Failed to send calendar update:', error);
+    return false;
+  }
+};
+
+export const updateOutreachNotes = async (id: string, notes: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from("rms_outreach")
+      .update({ notes, updated_at: new Date().toISOString() })
+      .eq("id", id);
+
+    if (error) throw error;
+    return true;
+  } catch (error: any) {
+    console.error("Error updating outreach notes:", error);
     return false;
   }
 };
