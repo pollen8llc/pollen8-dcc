@@ -118,7 +118,7 @@ export default function Network() {
           <TabsList className="w-full h-12 p-1 bg-muted/50 backdrop-blur-sm mb-6">
             <TabsTrigger value="contacts" className="flex-1 gap-2 data-[state=active]:bg-background">
               <Users className="h-4 w-4" />
-              <span>Contacts</span>
+              <span>Connects</span>
             </TabsTrigger>
             <TabsTrigger value="outreach" className="flex-1 gap-2 data-[state=active]:bg-background">
               <CalendarCheck className="h-4 w-4" />
