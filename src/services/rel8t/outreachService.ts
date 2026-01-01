@@ -20,6 +20,17 @@ export interface Contact {
   organization?: string;
 }
 
+export interface StructuredNotes {
+  interaction_outcome?: 'positive' | 'neutral' | 'negative';
+  energy_level?: 'high' | 'medium' | 'low';
+  followup_booked?: 'yes' | 'no' | 'maybe';
+  followup_date?: string;
+  key_topics?: string[];
+  action_items?: string;
+  rapport_progress?: 'strengthened' | 'maintained' | 'declined';
+  free_notes?: string;
+}
+
 export interface Outreach {
   id: string;
   user_id: string;
@@ -42,6 +53,7 @@ export interface Outreach {
   contacts_notified_at?: string | null;
   trigger_id?: string | null;
   notes?: string | null;
+  structured_notes?: StructuredNotes | null;
   // Actv8 Build Rapport integration
   actv8_contact_id?: string | null;
   actv8_step_index?: number | null;
@@ -448,6 +460,24 @@ export const updateOutreachNotes = async (id: string, notes: string): Promise<bo
     return true;
   } catch (error: any) {
     console.error("Error updating outreach notes:", error);
+    return false;
+  }
+};
+
+export const updateOutreachStructuredNotes = async (id: string, structuredNotes: StructuredNotes): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from("rms_outreach")
+      .update({ 
+        structured_notes: structuredNotes as any, 
+        updated_at: new Date().toISOString() 
+      })
+      .eq("id", id);
+
+    if (error) throw error;
+    return true;
+  } catch (error: any) {
+    console.error("Error updating structured notes:", error);
     return false;
   }
 };

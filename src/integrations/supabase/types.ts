@@ -2935,6 +2935,7 @@ export type Database = {
           scheduled_at: string | null
           sequence: number | null
           status: string
+          structured_notes: Json | null
           system_email: string | null
           title: string
           trigger_id: string | null
@@ -2962,6 +2963,7 @@ export type Database = {
           scheduled_at?: string | null
           sequence?: number | null
           status?: string
+          structured_notes?: Json | null
           system_email?: string | null
           title: string
           trigger_id?: string | null
@@ -2989,6 +2991,7 @@ export type Database = {
           scheduled_at?: string | null
           sequence?: number | null
           status?: string
+          structured_notes?: Json | null
           system_email?: string | null
           title?: string
           trigger_id?: string | null
