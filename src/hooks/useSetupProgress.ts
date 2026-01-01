@@ -49,6 +49,25 @@ const getActv8ContactCount = async (): Promise<number> => {
   return count || 0;
 };
 
+const getBuildRapportProgressCount = async (): Promise<number> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 0;
+  
+  // Count Actv8 contacts on Build Rapport path who have made progress (step > 0)
+  const { count, error } = await supabase
+    .from("rms_actv8_contacts")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("development_path_id", "build_rapport")
+    .gt("current_step_index", 0);
+  
+  if (error) {
+    console.error("Error fetching build rapport count:", error);
+    return 0;
+  }
+  return count || 0;
+};
+
 export const useSetupProgress = (): SetupProgressData => {
   const TARGET = 3;
 
@@ -83,7 +102,13 @@ export const useSetupProgress = (): SetupProgressData => {
     staleTime: 1000 * 30,
   });
 
-  const isLoading = categoriesLoading || contactsLoading || categorizedLoading || triggersLoading || actv8Loading;
+  const { data: buildRapportCount = 0, isLoading: buildRapportLoading } = useQuery({
+    queryKey: ["setup-build-rapport-count"],
+    queryFn: getBuildRapportProgressCount,
+    staleTime: 1000 * 30,
+  });
+
+  const isLoading = categoriesLoading || contactsLoading || categorizedLoading || triggersLoading || actv8Loading || buildRapportLoading;
 
   const tasks: SetupTask[] = [
     {
@@ -161,6 +186,22 @@ export const useSetupProgress = (): SetupProgressData => {
         "Browse your contacts list",
         "Click the Activate button on a contact",
         "Repeat for 3 contacts",
+      ],
+    },
+    {
+      id: "build-rapport",
+      title: "Build Rapport",
+      description: "Complete your first meeting with an activated contact",
+      target: 1,
+      current: Math.min(buildRapportCount, 1),
+      route: "/rel8/actv8",
+      icon: "Coffee",
+      steps: [
+        "Click \"Let's Go\" to open Actv8",
+        "Click on an activated contact",
+        "Go to the Development Timeline tab",
+        "Click on a Build Rapport step",
+        "Schedule and complete a meeting",
       ],
     },
   ];
