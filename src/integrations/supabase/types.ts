@@ -2827,6 +2827,7 @@ export type Database = {
           id: string
           last_calendar_update: string | null
           message: string
+          notes: string | null
           outreach_channel: string | null
           priority: string | null
           raw_ics: string | null
@@ -2853,6 +2854,7 @@ export type Database = {
           id?: string
           last_calendar_update?: string | null
           message: string
+          notes?: string | null
           outreach_channel?: string | null
           priority?: string | null
           raw_ics?: string | null
@@ -2879,6 +2881,7 @@ export type Database = {
           id?: string
           last_calendar_update?: string | null
           message?: string
+          notes?: string | null
           outreach_channel?: string | null
           priority?: string | null
           raw_ics?: string | null

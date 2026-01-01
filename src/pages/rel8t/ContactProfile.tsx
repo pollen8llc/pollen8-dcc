@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from "@tanstack/react-query";
 import { Rel8Header } from '@/components/rel8t/Rel8Header';
 import { ContactHeader } from '@/components/rel8t/ContactHeader';
+import { AnalyzeCard } from '@/components/rel8t/AnalyzeCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ProfileCard from '@/components/connections/ProfileCard';
-import { Mail, Phone, MapPin, Building2, Tag, Heart, Loader2, User, UserPlus, Clock, Cake, Calendar, Target, Users, MessageSquare } from 'lucide-react';
+import { Mail, Phone, MapPin, Building2, Tag, Heart, Loader2, User, UserPlus, Cake, Calendar, Target, Users } from 'lucide-react';
 import { getContactById } from "@/services/rel8t/contactService";
 import { format } from "date-fns";
 
@@ -199,65 +200,8 @@ export default function ContactProfile() {
           </CardContent>
         </Card>
 
-        {/* Engagement & Follow-Up */}
-        <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              Engagement & Follow-Up
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <div className="flex items-start gap-3">
-                <Clock className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                <div>
-                  <div className="text-xs md:text-sm text-muted-foreground">Last Time You Spoke</div>
-                  <div className="text-sm md:text-base">
-                    {contact.last_introduction_date 
-                      ? format(new Date(contact.last_introduction_date), "MMM d, yyyy")
-                      : <EmptyPlaceholder text="Not recorded" />
-                    }
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                <div>
-                  <div className="text-xs md:text-sm text-muted-foreground">Next Follow-Up</div>
-                  <div className="text-sm md:text-base">
-                    {contact.next_followup_date 
-                      ? format(new Date(contact.next_followup_date), "MMM d, yyyy")
-                      : <EmptyPlaceholder text="No follow-up scheduled" />
-                    }
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <Heart className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                <div>
-                  <div className="text-xs md:text-sm text-muted-foreground">Rapport Status</div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`inline-block w-3 h-3 rounded-full ${getRapportStatusColor(contact.rapport_status)}`} />
-                    <span className="text-sm md:text-base">{getRapportStatusText(contact.rapport_status)}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <MessageSquare className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                <div>
-                  <div className="text-xs md:text-sm text-muted-foreground">Preferred Channel</div>
-                  <div className="text-sm md:text-base capitalize">
-                    {contact.preferred_channel || <EmptyPlaceholder text="Not specified" />}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Analyze Card */}
+        <AnalyzeCard contactId={contact.id} contactName={contact.preferred_name || contact.name} />
 
         {/* Relevant Dates */}
         <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
