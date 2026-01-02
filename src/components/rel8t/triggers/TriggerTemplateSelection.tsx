@@ -1,5 +1,10 @@
-import { useRef } from "react";
-import { Clock, CalendarClock, CalendarRange, CalendarDays, CalendarCheck, Settings, Check } from "lucide-react";
+import { useState } from "react";
+import { Clock, Calendar as CalendarIcon, CalendarRange, CalendarDays, CalendarCheck, Settings, CalendarClock } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 export interface TriggerTemplate {
@@ -8,6 +13,7 @@ export interface TriggerTemplate {
   description: string;
   icon: any;
   iconColor: string;
+  accentColor: string;
   frequency: string;
   defaultDaysAhead: number;
 }
@@ -20,54 +26,60 @@ export const TRIGGER_TEMPLATES: TriggerTemplate[] = [
   {
     id: "onetime",
     name: "One Time",
-    description: "Perfect for special occasions",
+    description: "Perfect for special occasions and unique events",
     icon: Clock,
     iconColor: "text-teal-500",
+    accentColor: "border-teal-500/20 hover:border-teal-500/40",
     frequency: "onetime",
     defaultDaysAhead: 1
   },
   {
     id: "weekly",
     name: "Weekly",
-    description: "Regular check-ins",
+    description: "Ideal for regular check-ins and weekly updates",
     icon: CalendarClock,
     iconColor: "text-blue-500",
+    accentColor: "border-blue-500/20 hover:border-blue-500/40",
     frequency: "weekly",
     defaultDaysAhead: 7
   },
   {
     id: "biweekly",
     name: "Biweekly",
-    description: "Every two weeks",
+    description: "Great for consistent engagement every two weeks",
     icon: CalendarRange,
     iconColor: "text-purple-500",
+    accentColor: "border-purple-500/20 hover:border-purple-500/40",
     frequency: "biweekly",
     defaultDaysAhead: 14
   },
   {
     id: "monthly",
     name: "Monthly",
-    description: "Monthly touchpoints",
+    description: "Maintain relationships with monthly touchpoints",
     icon: CalendarDays,
     iconColor: "text-orange-500",
+    accentColor: "border-orange-500/20 hover:border-orange-500/40",
     frequency: "monthly",
     defaultDaysAhead: 30
   },
   {
     id: "quarterly",
     name: "Quarterly",
-    description: "Every three months",
+    description: "Strategic check-ins every three months",
     icon: CalendarCheck,
     iconColor: "text-green-500",
+    accentColor: "border-green-500/20 hover:border-green-500/40",
     frequency: "quarterly",
     defaultDaysAhead: 90
   },
   {
     id: "custom",
     name: "Custom",
-    description: "Full control",
+    description: "Full control over all reminder settings",
     icon: Settings,
     iconColor: "text-muted-foreground",
+    accentColor: "border-white/20 hover:border-white/30",
     frequency: "custom",
     defaultDaysAhead: 0
   }
@@ -75,87 +87,126 @@ export const TRIGGER_TEMPLATES: TriggerTemplate[] = [
 
 interface TriggerTemplateSelectionProps {
   onSelectTemplate: (template: TriggerTemplateWithDate) => void;
-  selectedTemplateId?: string;
+  showDatePickers?: boolean;
 }
 
 export function TriggerTemplateSelection({ 
   onSelectTemplate,
-  selectedTemplateId
+  showDatePickers = false 
 }: TriggerTemplateSelectionProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const handleTemplateSelect = (template: TriggerTemplate) => {
-    const calculatedDate = new Date();
-    calculatedDate.setDate(calculatedDate.getDate() + template.defaultDaysAhead);
-    onSelectTemplate({
-      ...template,
-      selectedDate: calculatedDate
+  const [templateDates, setTemplateDates] = useState<Record<string, Date>>(() => {
+    const initialDates: Record<string, Date> = {};
+    TRIGGER_TEMPLATES.forEach(template => {
+      const date = new Date();
+      date.setDate(date.getDate() + template.defaultDaysAhead);
+      initialDates[template.id] = date;
     });
+    return initialDates;
+  });
+
+  const handleTemplateSelect = (template: TriggerTemplateWithDate) => {
+    if (showDatePickers) {
+      // With date pickers, return template with selected date
+      onSelectTemplate({
+        ...template,
+        selectedDate: templateDates[template.id]
+      });
+    } else {
+      // Without date pickers, calculate date based on defaultDaysAhead
+      const calculatedDate = new Date();
+      calculatedDate.setDate(calculatedDate.getDate() + template.defaultDaysAhead);
+      onSelectTemplate({
+        ...template,
+        selectedDate: calculatedDate
+      });
+    }
+  };
+
+  const handleDateChange = (templateId: string, date: Date | undefined) => {
+    if (date) {
+      setTemplateDates(prev => ({
+        ...prev,
+        [templateId]: date
+      }));
+    }
   };
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      <div className="text-center space-y-1">
-        <h2 className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-          Choose a Template
-        </h2>
+    <div className="space-y-6 animate-fade-in">
+      <div className="text-center space-y-2">
+        <h2 className="text-lg font-semibold">Choose a Template</h2>
         <p className="text-sm text-muted-foreground">
-          Select a preset to get started quickly
+          {showDatePickers 
+            ? "Select a preset template and choose your start date" 
+            : "Select a preset template to quickly create your reminder"
+          }
         </p>
       </div>
 
-      {/* Mobile: Horizontal scroll, Desktop: Grid */}
-      <div 
-        ref={scrollRef}
-        className="flex md:grid md:grid-cols-3 gap-3 overflow-x-auto md:overflow-visible scrollbar-hide pb-2 -mx-2 px-2"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {TRIGGER_TEMPLATES.map((template) => {
           const Icon = template.icon;
-          const isSelected = selectedTemplateId === template.id;
-          
           return (
-            <button
+            <Card
               key={template.id}
-              onClick={() => handleTemplateSelect(template)}
               className={cn(
-                "flex-shrink-0 w-[140px] md:w-auto",
-                "flex flex-col items-center gap-3 p-4 rounded-2xl",
-                "border-2 transition-all duration-300",
-                "hover:scale-[1.02] hover:shadow-xl",
-                "bg-background/60 backdrop-blur-xl",
-                isSelected
-                  ? "border-primary shadow-lg shadow-primary/20 bg-primary/5"
-                  : "border-border/30 hover:border-primary/40"
+                "bg-card border-2 transition-all duration-200",
+                "hover:border-primary hover:shadow-lg",
+                template.accentColor,
+                "p-5 space-y-4"
               )}
             >
-              <div className={cn(
-                "relative p-3 rounded-xl transition-all duration-300",
-                isSelected ? "bg-primary/20" : "bg-muted/30"
-              )}>
-                <Icon className={cn(
-                  "h-6 w-6 transition-colors",
-                  isSelected ? "text-primary" : template.iconColor
-                )} />
-                {isSelected && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="h-3 w-3 text-primary-foreground" />
-                  </div>
-                )}
-              </div>
-              
-              <div className="text-center space-y-0.5">
+              <div className="flex items-center gap-3">
                 <div className={cn(
-                  "text-sm font-semibold transition-colors",
-                  isSelected ? "text-primary" : "text-foreground"
+                  "p-2.5 rounded-lg bg-background border-2 border-border"
                 )}>
-                  {template.name}
+                  <Icon className={cn("h-5 w-5", template.iconColor)} />
                 </div>
-                <div className="text-[11px] text-muted-foreground line-clamp-2">
-                  {template.description}
-                </div>
+                <h3 className="font-semibold">{template.name}</h3>
               </div>
-            </button>
+
+              <p className="text-sm text-muted-foreground leading-relaxed min-h-[40px]">
+                {template.description}
+              </p>
+
+              {showDatePickers && template.id !== 'custom' && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        "bg-background border-2 border-border hover:border-primary h-10"
+                      )}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(templateDates[template.id], "PP")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={templateDates[template.id]}
+                      onSelect={(date) => handleDateChange(template.id, date)}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+
+              <Button
+                onClick={() => handleTemplateSelect(template)}
+                className={cn(
+                  "w-full h-10",
+                  template.id === 'custom' && "mt-auto"
+                )}
+                variant={template.id === 'custom' ? 'outline' : 'default'}
+              >
+                {showDatePickers ? 'Select & Continue' : 'Select'}
+              </Button>
+            </Card>
           );
         })}
       </div>
