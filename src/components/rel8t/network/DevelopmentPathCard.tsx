@@ -8,6 +8,7 @@ import { format, parseISO, isPast, isToday } from "date-fns";
 import { Calendar, ExternalLink, Link2, Check, ChevronRight, Play, SkipForward, History } from "lucide-react";
 import { Outreach } from "@/services/rel8t/outreachService";
 import { PathHistoryEntry, SkippedPathEntry } from "@/hooks/useActv8Contacts";
+import { TierProgressBar } from "./TierProgressBar";
 
 interface LinkedOutreach {
   stepIndex: number;
@@ -101,19 +102,19 @@ export function DevelopmentPathCard({
 
   return (
     <div className="space-y-4">
-      {/* Tier Progress Indicator */}
-      <div className="flex items-center gap-2">
-        {[1, 2, 3, 4].map((tier) => (
-          <div
-            key={tier}
-            className={`flex-1 h-1.5 rounded-full transition-colors ${
-              tier <= pathTier ? "bg-primary" : "bg-muted"
-            }`}
-          />
-        ))}
-      </div>
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
-        {tierLabels[pathTier] || `Tier ${pathTier}`} • {pathHistory.length} paths completed
+      {/* Full 16-Segment Tier Progress */}
+      <TierProgressBar
+        currentTier={pathTier}
+        currentStepIndex={stepIndex}
+        totalStepsInCurrentPath={path?.steps?.length || 4}
+        pathHistory={pathHistory}
+        skippedPaths={skippedPaths}
+        size="md"
+        showLabels
+        animated
+      />
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-2">
+        {pathHistory.length} paths completed
         {skippedPaths.length > 0 && (
           <TooltipProvider>
             <Tooltip>

@@ -24,6 +24,7 @@ import {
 import { MoreVertical, Pause, Play, Trash2, MapPin, TrendingUp, Route } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { relationshipTypes } from "@/services/actv8Service";
+import { TierProgressBar } from "./TierProgressBar";
 
 interface NetworkContactCardProps {
   contact: Actv8ContactDisplay;
@@ -208,51 +209,26 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
                 </div>
               </div>
 
-              {/* Development Path Progress - Segmented */}
+              {/* Development Path Progress - 16 Segment Tier Bar */}
               <div className="w-full">
                 <div className="flex justify-between items-center mb-1.5">
                   <div className="flex items-center gap-1.5">
                     <Route className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">
-                      {contact.developmentPathName || 'Build Rapport'}
-                    </span>
+                    <span className="text-xs text-muted-foreground">Development Progress</span>
                   </div>
-                  <span className="text-xs font-medium text-primary">{currentStep}/{totalSteps} steps</span>
+                  <span className="text-xs font-medium text-primary">
+                    Tier {contact.pathTier} • Step {currentStep + 1}/4
+                  </span>
                 </div>
-                {/* Segmented progress bar */}
-                <div className="flex gap-1 w-full">
-                  {Array.from({ length: totalSteps }).map((_, index) => {
-                    const isCompleted = index < animatedSegments;
-                    const isCurrent = index === currentStep;
-                    return (
-                      <div
-                        key={index}
-                        className={`
-                          relative h-2 flex-1 rounded-full overflow-hidden transition-all duration-500
-                          ${isCompleted 
-                            ? 'bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 shadow-[0_0_12px_rgba(20,184,166,0.5)]' 
-                            : 'bg-muted/30 border border-white/10 backdrop-blur-md'
-                          }
-                          ${isCurrent && !isCompleted ? 'border-primary/50' : ''}
-                        `}
-                        style={{
-                          transitionDelay: isCompleted ? `${index * 100}ms` : '0ms'
-                        }}
-                      >
-                        {/* Glow effect for completed segments */}
-                        {isCompleted && (
-                          <div 
-                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"
-                            style={{
-                              animation: "shimmer 2s infinite",
-                              backgroundSize: "200% 100%"
-                            }}
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                <TierProgressBar
+                  currentTier={contact.pathTier}
+                  currentStepIndex={currentStep}
+                  totalStepsInCurrentPath={totalSteps}
+                  pathHistory={contact.pathHistory}
+                  skippedPaths={contact.skippedPaths}
+                  size="sm"
+                  animated
+                />
               </div>
 
               {/* Bottom row: Relationship type + Last interaction */}
