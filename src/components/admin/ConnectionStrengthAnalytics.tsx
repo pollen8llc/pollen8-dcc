@@ -9,7 +9,8 @@ import {
 } from 'recharts';
 import { 
   TrendingUp, TrendingDown, Users, Zap, Link2, Clock, 
-  CheckCircle2, XCircle, AlertTriangle, ArrowUpRight, ArrowDownRight
+  CheckCircle2, XCircle, AlertTriangle, ArrowUpRight, ArrowDownRight,
+  Route
 } from 'lucide-react';
 import { mockContacts, getStrengthDistribution, getAverageScores } from '@/data/mockConnectionStrengthData';
 import { 
@@ -17,7 +18,8 @@ import {
   mapScoreToStrength,
   ConnectionStrength,
   calculateConnectionStrength,
-  EngagementFactors
+  EngagementFactors,
+  PathFactors
 } from '@/utils/connectionStrengthCalculator';
 
 const ConnectionStrengthAnalytics: React.FC = () => {
@@ -25,11 +27,12 @@ const ConnectionStrengthAnalytics: React.FC = () => {
   const averages = getAverageScores();
   
   // Simulator state
-  const [simEngagement, setSimEngagement] = useState(20);
-  const [simOrigin, setSimOrigin] = useState(15);
-  const [simNetwork, setSimNetwork] = useState(15);
+  const [simEngagement, setSimEngagement] = useState(17);
+  const [simOrigin, setSimOrigin] = useState(12);
+  const [simNetwork, setSimNetwork] = useState(12);
+  const [simPath, setSimPath] = useState(7);
   
-  const simulatedTotal = simEngagement + simOrigin + simNetwork;
+  const simulatedTotal = simEngagement + simOrigin + simNetwork + simPath;
   const simulatedStrength = mapScoreToStrength(simulatedTotal);
   
   // Chart data
@@ -57,7 +60,7 @@ const ConnectionStrengthAnalytics: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Engagement */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -65,19 +68,19 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                   <Users className="w-4 h-4 text-primary" />
                   Engagement
                 </span>
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">40%</Badge>
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">35%</Badge>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full" style={{ width: '40%' }} />
+                <div className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full" style={{ width: '35%' }} />
               </div>
               <div className="space-y-1 text-xs">
                 <div className="flex items-center gap-1 text-green-400">
                   <ArrowUpRight className="w-3 h-3" />
-                  <span>Calendar accepts (+8), Fast responses (+5), Completed outreach (+6)</span>
+                  <span>Calendar accepts (+8), Fast responses (+5)</span>
                 </div>
                 <div className="flex items-center gap-1 text-red-400">
                   <ArrowDownRight className="w-3 h-3" />
-                  <span>Ignored notifications (-8), Declines (-6), Long gaps (-7)</span>
+                  <span>Ignored (-8), Declines (-6), Gaps (-7)</span>
                 </div>
               </div>
             </div>
@@ -89,14 +92,14 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                   <Link2 className="w-4 h-4 text-green-400" />
                   Origin
                 </span>
-                <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/30">30%</Badge>
+                <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/30">25%</Badge>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-green-500 to-green-500/60 rounded-full" style={{ width: '30%' }} />
+                <div className="h-full bg-gradient-to-r from-green-500 to-green-500/60 rounded-full" style={{ width: '25%' }} />
               </div>
               <div className="space-y-1 text-xs text-muted-foreground">
-                <p>Invite: 25pts | Wizard: 20pts | Manual: 15pts</p>
-                <p>Import: 10pts | Unknown: 5pts | +Inviter: +5pts</p>
+                <p>Invite: 20pts | Wizard: 16pts | Manual: 12pts</p>
+                <p>Import: 8pts | Unknown: 4pts | +Inviter: +5pts</p>
               </div>
             </div>
             
@@ -107,14 +110,38 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                   <Clock className="w-4 h-4 text-yellow-400" />
                   Network
                 </span>
-                <Badge variant="outline" className="bg-yellow-500/10 text-yellow-400 border-yellow-500/30">30%</Badge>
+                <Badge variant="outline" className="bg-yellow-500/10 text-yellow-400 border-yellow-500/30">25%</Badge>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-500/60 rounded-full" style={{ width: '30%' }} />
+                <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-500/60 rounded-full" style={{ width: '25%' }} />
               </div>
               <div className="space-y-1 text-xs text-muted-foreground">
-                <p>Inviter strength: 2-12pts | Shared connections: 2pts each</p>
-                <p>Affiliations: 1pt each | Community overlap: 1pt each</p>
+                <p>Inviter strength: 2-10pts | Shared: 2pts each</p>
+                <p>Affiliations: 1pt each | Community: 1pt each</p>
+              </div>
+            </div>
+            
+            {/* Path (NEW) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-medium flex items-center gap-2">
+                  <Route className="w-4 h-4 text-blue-400" />
+                  Path Progress
+                </span>
+                <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/30">15%</Badge>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-blue-500/60 rounded-full" style={{ width: '15%' }} />
+              </div>
+              <div className="space-y-1 text-xs">
+                <div className="flex items-center gap-1 text-green-400">
+                  <ArrowUpRight className="w-3 h-3" />
+                  <span>Tier (+2.5/tier), Completed (+1.5)</span>
+                </div>
+                <div className="flex items-center gap-1 text-red-400">
+                  <ArrowDownRight className="w-3 h-3" />
+                  <span>Skipped paths (-1 each)</span>
+                </div>
               </div>
             </div>
           </div>
@@ -198,12 +225,12 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm">Engagement Score</Label>
-                  <span className="text-sm font-mono text-primary">{simEngagement}/40</span>
+                  <span className="text-sm font-mono text-primary">{simEngagement}/35</span>
                 </div>
                 <Slider
                   value={[simEngagement]}
                   onValueChange={([v]) => setSimEngagement(v)}
-                  max={40}
+                  max={35}
                   step={1}
                   className="cursor-pointer"
                 />
@@ -212,12 +239,12 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm">Origin Score</Label>
-                  <span className="text-sm font-mono text-green-400">{simOrigin}/30</span>
+                  <span className="text-sm font-mono text-green-400">{simOrigin}/25</span>
                 </div>
                 <Slider
                   value={[simOrigin]}
                   onValueChange={([v]) => setSimOrigin(v)}
-                  max={30}
+                  max={25}
                   step={1}
                   className="cursor-pointer"
                 />
@@ -226,12 +253,26 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm">Network Score</Label>
-                  <span className="text-sm font-mono text-yellow-400">{simNetwork}/30</span>
+                  <span className="text-sm font-mono text-yellow-400">{simNetwork}/25</span>
                 </div>
                 <Slider
                   value={[simNetwork]}
                   onValueChange={([v]) => setSimNetwork(v)}
-                  max={30}
+                  max={25}
+                  step={1}
+                  className="cursor-pointer"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm">Path Progress Score</Label>
+                  <span className="text-sm font-mono text-blue-400">{simPath}/15</span>
+                </div>
+                <Slider
+                  value={[simPath]}
+                  onValueChange={([v]) => setSimPath(v)}
+                  max={15}
                   step={1}
                   className="cursor-pointer"
                 />
@@ -270,13 +311,14 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                   <th className="text-center py-3 px-2 font-medium text-muted-foreground">Engagement</th>
                   <th className="text-center py-3 px-2 font-medium text-muted-foreground">Origin</th>
                   <th className="text-center py-3 px-2 font-medium text-muted-foreground">Network</th>
+                  <th className="text-center py-3 px-2 font-medium text-muted-foreground">Path</th>
                   <th className="text-center py-3 px-2 font-medium text-muted-foreground">Total</th>
                   <th className="text-center py-3 px-2 font-medium text-muted-foreground">Strength</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedContacts.map((contact) => {
-                  const { engagement, origin, network, total, strength } = contact.scoreBreakdown;
+                  const { engagement, origin, network, path, total, strength } = contact.scoreBreakdown;
                   const netEngagement = engagement.positivePoints + engagement.negativePoints;
                   
                   return (
@@ -302,6 +344,14 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                       </td>
                       <td className="text-center py-3 px-2">
                         <span className="text-yellow-400">{network.score}</span>
+                      </td>
+                      <td className="text-center py-3 px-2">
+                        <div className="flex items-center justify-center gap-1">
+                          <span className="text-blue-400">{path.score.toFixed(1)}</span>
+                          <span className="text-xs text-muted-foreground">
+                            T{path.factors.currentTier}
+                          </span>
+                        </div>
                       </td>
                       <td className="text-center py-3 px-2">
                         <span className="font-bold text-primary">{total.toFixed(1)}</span>

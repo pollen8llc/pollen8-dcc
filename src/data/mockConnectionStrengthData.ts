@@ -2,6 +2,7 @@ import {
   EngagementFactors, 
   OriginFactors, 
   NetworkFactors, 
+  PathFactors,
   ScoreBreakdown,
   calculateConnectionStrength,
   ConnectionStrength
@@ -14,6 +15,7 @@ export interface MockContact {
   engagementFactors: EngagementFactors;
   originFactors: OriginFactors;
   networkFactors: NetworkFactors;
+  pathFactors: PathFactors;
   scoreBreakdown: ScoreBreakdown;
 }
 
@@ -25,6 +27,7 @@ const mockContactsRaw: Array<{
   engagement: EngagementFactors;
   origin: OriginFactors;
   network: NetworkFactors;
+  path: PathFactors;
 }> = [
   // THICK connections (3)
   {
@@ -45,7 +48,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 0
     },
     origin: { source: 'invite', hasInviter: true, inviterStrength: 'star' },
-    network: { inviterStrength: 'star', sharedConnections: 5, affiliationCount: 3, communityOverlap: 2 }
+    network: { inviterStrength: 'star', sharedConnections: 5, affiliationCount: 3, communityOverlap: 2 },
+    path: { currentTier: 4, completedPaths: 3, skippedPaths: 0, currentStepProgress: 2, isActiveInPath: true, hasStrategy: true, recentPathActivity: true }
   },
   {
     id: '2',
@@ -65,7 +69,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 1
     },
     origin: { source: 'invite', hasInviter: true, inviterStrength: 'flame' },
-    network: { inviterStrength: 'flame', sharedConnections: 4, affiliationCount: 2, communityOverlap: 3 }
+    network: { inviterStrength: 'flame', sharedConnections: 4, affiliationCount: 2, communityOverlap: 3 },
+    path: { currentTier: 3, completedPaths: 2, skippedPaths: 0, currentStepProgress: 3, isActiveInPath: true, hasStrategy: true, recentPathActivity: true }
   },
   {
     id: '3',
@@ -85,7 +90,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 0
     },
     origin: { source: 'wizard', hasInviter: false },
-    network: { sharedConnections: 6, affiliationCount: 4, communityOverlap: 2 }
+    network: { sharedConnections: 6, affiliationCount: 4, communityOverlap: 2 },
+    path: { currentTier: 3, completedPaths: 2, skippedPaths: 0, currentStepProgress: 4, isActiveInPath: true, hasStrategy: false, recentPathActivity: true }
   },
   
   // SOLID connections (4)
@@ -107,7 +113,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 0
     },
     origin: { source: 'invite', hasInviter: true, inviterStrength: 'ember' },
-    network: { inviterStrength: 'ember', sharedConnections: 3, affiliationCount: 2, communityOverlap: 1 }
+    network: { inviterStrength: 'ember', sharedConnections: 3, affiliationCount: 2, communityOverlap: 1 },
+    path: { currentTier: 2, completedPaths: 1, skippedPaths: 0, currentStepProgress: 2, isActiveInPath: true, hasStrategy: true, recentPathActivity: true }
   },
   {
     id: '5',
@@ -127,7 +134,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 0
     },
     origin: { source: 'wizard', hasInviter: false },
-    network: { sharedConnections: 4, affiliationCount: 1, communityOverlap: 2 }
+    network: { sharedConnections: 4, affiliationCount: 1, communityOverlap: 2 },
+    path: { currentTier: 2, completedPaths: 1, skippedPaths: 0, currentStepProgress: 1, isActiveInPath: true, hasStrategy: false, recentPathActivity: false }
   },
   {
     id: '6',
@@ -147,7 +155,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 1
     },
     origin: { source: 'manual', hasInviter: true, inviterStrength: 'flame' },
-    network: { inviterStrength: 'flame', sharedConnections: 2, affiliationCount: 2, communityOverlap: 1 }
+    network: { inviterStrength: 'flame', sharedConnections: 2, affiliationCount: 2, communityOverlap: 1 },
+    path: { currentTier: 2, completedPaths: 1, skippedPaths: 1, currentStepProgress: 3, isActiveInPath: true, hasStrategy: true, recentPathActivity: true }
   },
   {
     id: '7',
@@ -167,7 +176,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 0
     },
     origin: { source: 'invite', hasInviter: true, inviterStrength: 'star' },
-    network: { inviterStrength: 'star', sharedConnections: 2, affiliationCount: 1, communityOverlap: 0 }
+    network: { inviterStrength: 'star', sharedConnections: 2, affiliationCount: 1, communityOverlap: 0 },
+    path: { currentTier: 2, completedPaths: 1, skippedPaths: 0, currentStepProgress: 0, isActiveInPath: false, hasStrategy: false, recentPathActivity: false }
   },
   
   // GROWING connections (4)
@@ -189,7 +199,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 0
     },
     origin: { source: 'import', hasInviter: false },
-    network: { sharedConnections: 2, affiliationCount: 1, communityOverlap: 1 }
+    network: { sharedConnections: 2, affiliationCount: 1, communityOverlap: 1 },
+    path: { currentTier: 1, completedPaths: 0, skippedPaths: 0, currentStepProgress: 2, isActiveInPath: true, hasStrategy: false, recentPathActivity: true }
   },
   {
     id: '9',
@@ -209,7 +220,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 1
     },
     origin: { source: 'wizard', hasInviter: true, inviterStrength: 'spark' },
-    network: { inviterStrength: 'spark', sharedConnections: 1, affiliationCount: 0, communityOverlap: 1 }
+    network: { inviterStrength: 'spark', sharedConnections: 1, affiliationCount: 0, communityOverlap: 1 },
+    path: { currentTier: 1, completedPaths: 0, skippedPaths: 0, currentStepProgress: 1, isActiveInPath: true, hasStrategy: true, recentPathActivity: false }
   },
   {
     id: '10',
@@ -229,7 +241,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 0
     },
     origin: { source: 'manual', hasInviter: false },
-    network: { sharedConnections: 3, affiliationCount: 2, communityOverlap: 0 }
+    network: { sharedConnections: 3, affiliationCount: 2, communityOverlap: 0 },
+    path: { currentTier: 1, completedPaths: 0, skippedPaths: 1, currentStepProgress: 0, isActiveInPath: false, hasStrategy: false, recentPathActivity: false }
   },
   {
     id: '11',
@@ -249,7 +262,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 0
     },
     origin: { source: 'invite', hasInviter: true, inviterStrength: 'ember' },
-    network: { inviterStrength: 'ember', sharedConnections: 1, affiliationCount: 1, communityOverlap: 0 }
+    network: { inviterStrength: 'ember', sharedConnections: 1, affiliationCount: 1, communityOverlap: 0 },
+    path: { currentTier: 1, completedPaths: 0, skippedPaths: 0, currentStepProgress: 3, isActiveInPath: true, hasStrategy: false, recentPathActivity: true }
   },
   
   // THIN connections (4)
@@ -271,7 +285,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 1
     },
     origin: { source: 'import', hasInviter: false },
-    network: { sharedConnections: 0, affiliationCount: 0, communityOverlap: 0 }
+    network: { sharedConnections: 0, affiliationCount: 0, communityOverlap: 0 },
+    path: { currentTier: 1, completedPaths: 0, skippedPaths: 0, currentStepProgress: 0, isActiveInPath: false, hasStrategy: false, recentPathActivity: false }
   },
   {
     id: '13',
@@ -291,7 +306,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 2
     },
     origin: { source: 'import', hasInviter: false },
-    network: { sharedConnections: 1, affiliationCount: 0, communityOverlap: 0 }
+    network: { sharedConnections: 1, affiliationCount: 0, communityOverlap: 0 },
+    path: { currentTier: 1, completedPaths: 0, skippedPaths: 0, currentStepProgress: 0, isActiveInPath: false, hasStrategy: false, recentPathActivity: false }
   },
   {
     id: '14',
@@ -311,7 +327,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 0
     },
     origin: { source: 'unknown', hasInviter: false },
-    network: { sharedConnections: 0, affiliationCount: 0, communityOverlap: 0 }
+    network: { sharedConnections: 0, affiliationCount: 0, communityOverlap: 0 },
+    path: { currentTier: 1, completedPaths: 0, skippedPaths: 0, currentStepProgress: 0, isActiveInPath: false, hasStrategy: false, recentPathActivity: false }
   },
   {
     id: '15',
@@ -331,7 +348,8 @@ const mockContactsRaw: Array<{
       cancelledMeetings: 1
     },
     origin: { source: 'import', hasInviter: false },
-    network: { sharedConnections: 0, affiliationCount: 1, communityOverlap: 0 }
+    network: { sharedConnections: 0, affiliationCount: 1, communityOverlap: 0 },
+    path: { currentTier: 1, completedPaths: 0, skippedPaths: 2, currentStepProgress: 0, isActiveInPath: false, hasStrategy: false, recentPathActivity: false }
   }
 ];
 
@@ -343,10 +361,12 @@ export const mockContacts: MockContact[] = mockContactsRaw.map(contact => ({
   engagementFactors: contact.engagement,
   originFactors: contact.origin,
   networkFactors: contact.network,
+  pathFactors: contact.path,
   scoreBreakdown: calculateConnectionStrength(
     contact.engagement,
     contact.origin,
-    contact.network
+    contact.network,
+    contact.path
   )
 }));
 
@@ -359,15 +379,16 @@ export function getStrengthDistribution(): Record<ConnectionStrength, number> {
 }
 
 // Get average scores
-export function getAverageScores(): { engagement: number; origin: number; network: number; total: number } {
+export function getAverageScores(): { engagement: number; origin: number; network: number; path: number; total: number } {
   const totals = mockContacts.reduce(
     (acc, contact) => ({
       engagement: acc.engagement + contact.scoreBreakdown.engagement.score,
       origin: acc.origin + contact.scoreBreakdown.origin.score,
       network: acc.network + contact.scoreBreakdown.network.score,
+      path: acc.path + contact.scoreBreakdown.path.score,
       total: acc.total + contact.scoreBreakdown.total
     }),
-    { engagement: 0, origin: 0, network: 0, total: 0 }
+    { engagement: 0, origin: 0, network: 0, path: 0, total: 0 }
   );
   
   const count = mockContacts.length;
@@ -375,6 +396,7 @@ export function getAverageScores(): { engagement: number; origin: number; networ
     engagement: Math.round((totals.engagement / count) * 10) / 10,
     origin: Math.round((totals.origin / count) * 10) / 10,
     network: Math.round((totals.network / count) * 10) / 10,
+    path: Math.round((totals.path / count) * 10) / 10,
     total: Math.round((totals.total / count) * 10) / 10
   };
 }

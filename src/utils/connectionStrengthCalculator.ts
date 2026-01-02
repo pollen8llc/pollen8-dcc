@@ -1,5 +1,5 @@
 // Connection Strength Calculator
-// Formula: Engagement (40%) + Origin (30%) + Network (30%) = Total Score (0-100)
+// Formula: Engagement (35%) + Origin (25%) + Network (25%) + Path (15%) = Total Score (0-100)
 
 export type ConnectionStrength = 'spark' | 'ember' | 'flame' | 'star';
 
@@ -33,6 +33,16 @@ export interface NetworkFactors {
   communityOverlap: number;
 }
 
+export interface PathFactors {
+  currentTier: number; // 1-4
+  completedPaths: number; // Number of completed paths
+  skippedPaths: number; // Number of skipped paths
+  currentStepProgress: number; // 0-4 steps completed in current path
+  isActiveInPath: boolean; // Currently on a development path
+  hasStrategy: boolean; // Has an active strategy
+  recentPathActivity: boolean; // Path activity within 14 days
+}
+
 export interface ScoreBreakdown {
   engagement: {
     score: number;
@@ -48,11 +58,15 @@ export interface ScoreBreakdown {
     score: number;
     factors: NetworkFactors;
   };
+  path: {
+    score: number;
+    factors: PathFactors;
+  };
   total: number;
   strength: ConnectionStrength;
 }
 
-// Engagement Score Calculation (40% weight, max 40 points)
+// Engagement Score Calculation (35% weight, max 35 points)
 export function calculateEngagementScore(factors: EngagementFactors): { score: number; positivePoints: number; negativePoints: number } {
   let positivePoints = 0;
   let negativePoints = 0;
@@ -72,9 +86,9 @@ export function calculateEngagementScore(factors: EngagementFactors): { score: n
   negativePoints += factors.coldInteractions * -4;     // -4 per cold
   negativePoints += factors.cancelledMeetings * -6;    // -6 per cancelled
   
-  // Normalize to 0-40 range
+  // Normalize to 0-35 range
   const rawScore = positivePoints + negativePoints;
-  const normalizedScore = Math.max(0, Math.min(40, (rawScore / 50) * 40 + 20));
+  const normalizedScore = Math.max(0, Math.min(35, (rawScore / 50) * 35 + 17.5));
   
   return {
     score: Math.round(normalizedScore * 10) / 10,
@@ -83,51 +97,85 @@ export function calculateEngagementScore(factors: EngagementFactors): { score: n
   };
 }
 
-// Origin Score Calculation (30% weight, max 30 points)
+// Origin Score Calculation (25% weight, max 25 points)
 export function calculateOriginScore(factors: OriginFactors): number {
   const sourceScores: Record<string, number> = {
-    invite: 25,    // Best - came through trusted invite
-    wizard: 20,    // Good - created intentionally
-    manual: 15,    // OK - added manually
-    import: 10,    // Lower - bulk import
-    unknown: 5     // Lowest - unknown source
+    invite: 20,    // Best - came through trusted invite
+    wizard: 16,    // Good - created intentionally
+    manual: 12,    // OK - added manually
+    import: 8,     // Lower - bulk import
+    unknown: 4     // Lowest - unknown source
   };
   
-  let score = sourceScores[factors.source] || 5;
+  let score = sourceScores[factors.source] || 4;
   
   // Bonus for having an inviter
   if (factors.hasInviter) {
     score += 5;
   }
   
-  return Math.min(30, score);
+  return Math.min(25, score);
 }
 
-// Network Score Calculation (30% weight, max 30 points)
+// Network Score Calculation (25% weight, max 25 points)
 export function calculateNetworkScore(factors: NetworkFactors): number {
   let score = 0;
   
-  // Inviter strength bonus (0-12 points)
+  // Inviter strength bonus (0-10 points)
   const inviterBonus: Record<ConnectionStrength, number> = {
-    star: 12,
-    flame: 9,
-    ember: 5,
+    star: 10,
+    flame: 7,
+    ember: 4,
     spark: 2
   };
   if (factors.inviterStrength) {
     score += inviterBonus[factors.inviterStrength];
   }
   
-  // Shared connections (0-10 points, 2 per connection, max 5)
-  score += Math.min(10, factors.sharedConnections * 2);
+  // Shared connections (0-8 points, 2 per connection, max 4)
+  score += Math.min(8, factors.sharedConnections * 2);
   
   // Affiliations (0-4 points)
   score += Math.min(4, factors.affiliationCount);
   
-  // Community overlap (0-4 points)
-  score += Math.min(4, factors.communityOverlap);
+  // Community overlap (0-3 points)
+  score += Math.min(3, factors.communityOverlap);
   
-  return Math.min(30, score);
+  return Math.min(25, score);
+}
+
+// Path Score Calculation (15% weight, max 15 points)
+export function calculatePathScore(factors: PathFactors): number {
+  let score = 0;
+  
+  // Tier progression bonus (0-8 points, 2 per tier above 1)
+  score += Math.min(8, (factors.currentTier - 1) * 2.5);
+  
+  // Completed paths (0-4 points, 1.5 per completed)
+  score += Math.min(4, factors.completedPaths * 1.5);
+  
+  // Current step progress (0-2 points)
+  score += Math.min(2, factors.currentStepProgress * 0.5);
+  
+  // Active in path bonus
+  if (factors.isActiveInPath) {
+    score += 1;
+  }
+  
+  // Has strategy bonus
+  if (factors.hasStrategy) {
+    score += 1;
+  }
+  
+  // Recent path activity bonus
+  if (factors.recentPathActivity) {
+    score += 1;
+  }
+  
+  // Penalty for skipped paths (-1 per skipped, max -3)
+  score -= Math.min(3, factors.skippedPaths);
+  
+  return Math.max(0, Math.min(15, score));
 }
 
 // Map score to strength category
@@ -138,17 +186,30 @@ export function mapScoreToStrength(score: number): ConnectionStrength {
   return 'spark';
 }
 
+// Default path factors for contacts not in Actv8
+export const defaultPathFactors: PathFactors = {
+  currentTier: 1,
+  completedPaths: 0,
+  skippedPaths: 0,
+  currentStepProgress: 0,
+  isActiveInPath: false,
+  hasStrategy: false,
+  recentPathActivity: false,
+};
+
 // Calculate complete score breakdown
 export function calculateConnectionStrength(
   engagementFactors: EngagementFactors,
   originFactors: OriginFactors,
-  networkFactors: NetworkFactors
+  networkFactors: NetworkFactors,
+  pathFactors: PathFactors = defaultPathFactors
 ): ScoreBreakdown {
   const engagement = calculateEngagementScore(engagementFactors);
   const originScore = calculateOriginScore(originFactors);
   const networkScore = calculateNetworkScore(networkFactors);
+  const pathScore = calculatePathScore(pathFactors);
   
-  const total = Math.round((engagement.score + originScore + networkScore) * 10) / 10;
+  const total = Math.round((engagement.score + originScore + networkScore + pathScore) * 10) / 10;
   
   return {
     engagement: {
@@ -164,6 +225,10 @@ export function calculateConnectionStrength(
     network: {
       score: networkScore,
       factors: networkFactors
+    },
+    path: {
+      score: pathScore,
+      factors: pathFactors
     },
     total,
     strength: mapScoreToStrength(total)
