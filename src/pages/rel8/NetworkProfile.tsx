@@ -261,7 +261,7 @@ export default function NetworkProfile() {
             <div className="md:hidden space-y-4">
               {/* Avatar Row */}
               <div className="flex items-center justify-center">
-              <Avatar userId={actv8Contact.affiliatedUserId || "UXI8000"} size={100} className="ring-2 ring-primary/20" />
+              <Avatar userId={actv8Contact.affiliatedUserId || actv8Contact.contact_id} size={100} className="ring-2 ring-primary/20" />
               </div>
 
               {/* Name Row */}
@@ -310,7 +310,7 @@ export default function NetworkProfile() {
             <div className="hidden md:block">
               {/* Contact Info Section */}
               <div className="flex items-start gap-6 mb-6">
-                <Avatar userId={actv8Contact.affiliatedUserId || "UXI8000"} size={80} className="ring-2 ring-primary/20" />
+                <Avatar userId={actv8Contact.affiliatedUserId || actv8Contact.contact_id} size={80} className="ring-2 ring-primary/20" />
                 
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold">{contact.name}</h1>
