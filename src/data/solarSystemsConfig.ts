@@ -20,9 +20,9 @@ export interface SolarSystemConfig {
 }
 
 export const SOLAR_SYSTEMS: Record<string, SolarSystemConfig> = {
-  // Special teal base system for new users/members (no sun, no planets)
+  // Default avatar for contacts without affiliated users
   UXI8000: {
-    name: "Teal Base",
+    name: "Contact Default",
     sunColor: "hsl(180, 100%, 60%)",
     sunSize: 0, // No visible sun
     planets: [], // No planets
@@ -33,9 +33,9 @@ export const SOLAR_SYSTEMS: Record<string, SolarSystemConfig> = {
     }
   },
   
-  // Admin simple system - similar to UXI8008 structure but with white sun
+  // Admin role avatar
   UXI9000: {
-    name: "Admin Avatar",
+    name: "Admin",
     sunSize: 12,
     sunColor: "hsl(0, 0%, 95%)",
     planets: [
@@ -287,8 +287,9 @@ export const SOLAR_SYSTEMS: Record<string, SolarSystemConfig> = {
       boxShadow: "0 0 15px hsl(330, 100%, 75% / 0.5), inset 0 0 15px hsl(330, 100%, 75% / 0.2)"
     }
   },
+  // Default avatar for new members/users
   UXI8018: {
-    name: "Indigo Void",
+    name: "Member Default",
     sunColor: "hsl(240, 100%, 75%)",
     sunSize: 17,
     planets: [],

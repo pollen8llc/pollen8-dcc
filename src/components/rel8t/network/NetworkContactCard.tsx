@@ -114,6 +114,7 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
                     <UnifiedAvatar 
                       userId={contact.affiliatedUserId || contact.contactId} 
                       size={48}
+                      isContactId={!contact.affiliatedUserId}
                     />
                   </div>
                   {/* Strength indicator dot */}
