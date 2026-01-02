@@ -31,10 +31,10 @@ interface NetworkContactCardProps {
 }
 
 const strengthConfig: Record<string, { label: string; percentage: number; color: string }> = {
-  thin: { label: 'New', percentage: 10, color: 'from-rose-500 to-orange-500' },
-  growing: { label: 'Growing', percentage: 40, color: 'from-amber-500 to-yellow-500' },
-  solid: { label: 'Strong', percentage: 70, color: 'from-emerald-500 to-teal-500' },
-  thick: { label: 'Core', percentage: 100, color: 'from-primary to-cyan-400' },
+  spark: { label: 'Spark', percentage: 10, color: 'from-rose-500 to-orange-500' },
+  ember: { label: 'Ember', percentage: 40, color: 'from-amber-500 to-yellow-500' },
+  flame: { label: 'Flame', percentage: 70, color: 'from-emerald-500 to-teal-500' },
+  star: { label: 'Star', percentage: 100, color: 'from-primary to-cyan-400' },
 };
 
 export function NetworkContactCard({ contact }: NetworkContactCardProps) {
