@@ -112,8 +112,8 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
                 <div className="relative flex-shrink-0">
                   <div className="ring-2 ring-offset-2 ring-offset-background ring-primary/30 group-hover:ring-primary/50 transition-all rounded-full">
                     <UnifiedAvatar 
-                      userId={contact.affiliatedUserId} 
-                      size={48} 
+                      userId={contact.affiliatedUserId || contact.contactId} 
+                      size={48}
                     />
                   </div>
                   {/* Strength indicator dot */}
