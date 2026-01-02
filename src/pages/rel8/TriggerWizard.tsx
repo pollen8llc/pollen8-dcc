@@ -1,53 +1,49 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, ArrowLeft, Clock, Zap, ArrowRight } from "lucide-react";
-import { format } from "date-fns";
+import { ArrowLeft, Zap, ArrowRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TriggerTemplateSelection, TriggerTemplateWithDate } from "@/components/rel8t/triggers/TriggerTemplateSelection";
-import { FollowUpChannelStep } from "@/components/rel8t/triggers/FollowUpChannelStep";
+import { 
+  DateSelector, 
+  TimeSelector, 
+  FrequencySelector, 
+  PrioritySelector,
+  ChannelSelector,
+  type ChannelDetails 
+} from "@/components/rel8t/triggers/wizard";
 
 const TriggerWizard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get('returnTo');
-  const [showTemplateSelection, setShowTemplateSelection] = useState(true);
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>();
   
   const { 
     formData, 
     updateFormData, 
     handleSubmit,
-    frequencyOptions,
-    priorityOptions
   } = useTriggerWizard();
 
   const handleTemplateSelect = (template: TriggerTemplateWithDate) => {
-    // Use the date from the template if provided
     const templateDate = template.selectedDate || (() => {
       const newDate = new Date();
       newDate.setDate(newDate.getDate() + template.defaultDaysAhead);
       return newDate;
     })();
     
-    // Pre-fill form data based on template
     updateFormData({
       frequency: template.frequency,
       triggerDate: template.id === 'custom' ? formData.triggerDate : templateDate,
       selectedTemplate: template.id
     });
     
-    // Move to form view and step 2
-    setShowTemplateSelection(false);
+    setSelectedTemplateId(template.id);
     setCurrentStep(2);
   };
 
@@ -61,7 +57,6 @@ const TriggerWizard = () => {
     if (currentStep === 3) {
       setCurrentStep(2);
     } else if (currentStep === 2) {
-      setShowTemplateSelection(true);
       setCurrentStep(1);
     }
   };
@@ -70,21 +65,12 @@ const TriggerWizard = () => {
     e.preventDefault();
     const result = await handleSubmit(returnTo || undefined);
     
-    // Navigate based on returnTo parameter and success
     if (result) {
       if (returnTo === 'relationship') {
         navigate("/rel8/wizard");
       } else {
         navigate("/rel8/triggers");
       }
-    }
-  };
-
-  const handleBack = () => {
-    if (returnTo === 'relationship') {
-      navigate("/rel8/wizard");
-    } else {
-      navigate("/rel8/triggers");
     }
   };
 
@@ -96,12 +82,35 @@ const TriggerWizard = () => {
     }
   };
 
-  // Validate channel details based on selected channel
+  // Map channelDetails to the new format
+  const handleChannelDetailsChange = (details: ChannelDetails) => {
+    updateFormData({ 
+      channelDetails: {
+        phone: details.phone,
+        email: details.email,
+        platform: details.platform,
+        handle: details.handle,
+        meetingPlatform: details.platform,
+        link: details.meetingLink,
+        address: details.address,
+      }
+    });
+  };
+
+  const mapChannelDetails = (): ChannelDetails => ({
+    phone: formData.channelDetails?.phone,
+    email: formData.channelDetails?.email,
+    platform: formData.channelDetails?.platform || formData.channelDetails?.meetingPlatform,
+    handle: formData.channelDetails?.handle,
+    meetingLink: formData.channelDetails?.link,
+    address: formData.channelDetails?.address,
+  });
+
+  // Validate channel details
   const isChannelDetailsValid = () => {
-    if (!formData.outreachChannel) return true; // No channel selected, no validation needed
-    
+    if (!formData.outreachChannel) return true;
     const details = formData.channelDetails;
-    if (!details) return false; // Channel selected but no details provided
+    if (!details) return false;
     
     switch (formData.outreachChannel) {
       case 'text':
@@ -111,256 +120,183 @@ const TriggerWizard = () => {
         return !!details.email?.trim();
       case 'dm':
         return !!details.platform?.trim() && !!details.handle?.trim();
-      case 'meeting':
-        return !!details.meetingPlatform?.trim() && !!details.link?.trim();
+      case 'virtual':
+        return !!details.meetingPlatform?.trim();
       case 'irl':
         return !!details.address?.trim();
       default:
-        return false;
+        return true;
     }
   };
 
+  const stepProgress = (currentStep / 3) * 100;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/80">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto max-w-5xl px-4 py-8 pb-32">
-        {/* Minimal Header */}
-        <div className="flex items-center gap-3 mb-6 mt-6">
-          <Zap className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-semibold">Create Reminder</h1>
+      <div className="container mx-auto max-w-2xl px-4 py-6 pb-32">
+        {/* Header with Progress */}
+        <div className="mb-8 mt-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-primary/10">
+                <Zap className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                  Create Reminder
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  Step {currentStep} of 3
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-1.5">
+              {[1, 2, 3].map((step) => (
+                <div
+                  key={step}
+                  className={cn(
+                    "w-8 h-1.5 rounded-full transition-all duration-300",
+                    step <= currentStep ? "bg-primary" : "bg-border/50"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+          
+          {/* Gradient Progress Bar */}
+          <div className="h-1 rounded-full bg-border/30 overflow-hidden">
+            <div 
+              className="h-full rounded-full bg-gradient-to-r from-primary via-primary to-primary/60 transition-all duration-500 ease-out"
+              style={{ width: `${stepProgress}%` }}
+            />
+          </div>
         </div>
 
-        {/* Form Card */}
-        <Card className="backdrop-blur-md bg-card/95 border-2 border-border">
-            {!showTemplateSelection && (
-            <CardHeader className="border-b border-border/50 pb-4">
-              <CardTitle className="text-base font-medium">
-                Reminder Details
-              </CardTitle>
-            </CardHeader>
+        {/* Main Content Area */}
+        <div className="bg-background/60 backdrop-blur-xl border-2 border-border/30 rounded-2xl p-6 shadow-xl">
+          {/* Step 1: Template Selection */}
+          {currentStep === 1 && (
+            <TriggerTemplateSelection 
+              onSelectTemplate={handleTemplateSelect}
+              selectedTemplateId={selectedTemplateId}
+            />
           )}
-          <CardContent className={cn("p-6", showTemplateSelection && "pt-8")}>
-            {showTemplateSelection ? (
-              <TriggerTemplateSelection 
-                onSelectTemplate={handleTemplateSelect}
-                showDatePickers={false}
-              />
-            ) : (
-            <form onSubmit={onSubmit} className="space-y-6">
-              {currentStep === 2 && (
-                <>
-                  {/* Change Template Button */}
-                  {formData.selectedTemplate && formData.selectedTemplate !== 'custom' && (
-                    <div className="flex justify-start -mt-2 mb-4">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowTemplateSelection(true)}
-                        className="text-xs hover:text-primary"
-                      >
-                        ← Change Template
-                      </Button>
-                    </div>
-                  )}
 
-                  {/* Reminder Name */}
-                  <div className="space-y-2 mb-6">
-                    <Label htmlFor="name" className="text-sm font-medium">Reminder Name *</Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="e.g., Weekly Follow-up"
-                      value={formData.name}
-                      onChange={(e) => updateFormData({ name: e.target.value })}
-                      required
-                      className="h-11 bg-background border-2 border-border focus:border-primary"
-                    />
-                  </div>
+          {/* Step 2: Details Configuration */}
+          {currentStep === 2 && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="text-center space-y-1 mb-6">
+                <h2 className="text-lg font-semibold">Configure Your Reminder</h2>
+                <p className="text-sm text-muted-foreground">Set the details for your reminder</p>
+              </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    {/* Trigger Date - Hidden for template-based (already set) */}
-                    {formData.selectedTemplate === 'custom' && (
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">Start Date *</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full h-11 justify-start text-left font-normal bg-background border-2 border-border hover:border-primary",
-                                !formData.triggerDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {formData.triggerDate ? (
-                                format(formData.triggerDate, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={formData.triggerDate || undefined}
-                              onSelect={(date) => updateFormData({ triggerDate: date || null })}
-                              className="pointer-events-auto"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    )}
-
-                    {/* Show selected date as read-only for template-based triggers */}
-                    {formData.selectedTemplate && formData.selectedTemplate !== 'custom' && (
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">Start Date</Label>
-                        <div className="h-11 px-3 py-2 text-sm rounded-lg bg-muted border-2 border-border flex items-center">
-                          {formData.triggerDate && format(formData.triggerDate, "PPP")}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Trigger Time */}
-                    <div className="space-y-2">
-                      <Label htmlFor="triggerTime" className="text-sm font-medium">Time *</Label>
-                      <div className="relative">
-                        <Clock className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground pointer-events-none" />
-                        <Input
-                          id="triggerTime"
-                          type="time"
-                          value={formData.triggerTime || "09:00"}
-                          onChange={(e) => updateFormData({ triggerTime: e.target.value })}
-                          className="h-11 pl-10 bg-background border-2 border-border focus:border-primary"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    {/* Frequency - Only show for custom template */}
-                    {formData.selectedTemplate === 'custom' && (
-                      <div className="space-y-2">
-                        <Label htmlFor="frequency" className="text-sm font-medium">Frequency *</Label>
-                        <Select
-                          value={formData.frequency}
-                          onValueChange={(value) => updateFormData({ frequency: value })}
-                        >
-                          <SelectTrigger className="h-11 bg-background border-2 border-border hover:border-primary">
-                            <SelectValue placeholder="Select frequency" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {frequencyOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    {/* Show selected frequency as read-only for template-based triggers */}
-                    {formData.selectedTemplate && formData.selectedTemplate !== 'custom' && (
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">Frequency</Label>
-                        <div className="h-11 px-3 py-2 text-sm rounded-lg bg-muted border-2 border-border flex items-center">
-                          {frequencyOptions.find(opt => opt.value === formData.frequency)?.label}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Priority */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Priority *</Label>
-                      <Select
-                        value={formData.priority}
-                        onValueChange={(value) => updateFormData({ priority: value })}
-                      >
-                        <SelectTrigger className="h-11 bg-background border-2 border-border hover:border-primary">
-                          <SelectValue placeholder="Select priority" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {priorityOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex justify-between pt-4 border-t border-border">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handlePrevious}
-                      className="h-11 px-6 border-2"
-                    >
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={handleNext}
-                      disabled={!formData.name.trim()}
-                      className="h-11 px-8"
-                    >
-                      Next
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {currentStep === 3 && (
-                <>
-                  <FollowUpChannelStep
-                    selectedChannel={formData.outreachChannel}
-                    channelDetails={formData.channelDetails}
-                    onChannelChange={(channel) => updateFormData({ outreachChannel: channel })}
-                    onDetailsChange={(details) => updateFormData({ channelDetails: details })}
+              {/* Reminder Name */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-foreground/80">Reminder Name</label>
+                <div className="relative">
+                  <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="e.g., Weekly Check-in with John"
+                    value={formData.name}
+                    onChange={(e) => updateFormData({ name: e.target.value })}
+                    className="h-14 pl-12 rounded-xl border-2 border-border/50 bg-background/60 backdrop-blur-sm text-base focus:border-primary/50"
                   />
+                </div>
+              </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex justify-between pt-4 border-t border-border">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handlePrevious}
-                      className="h-11 px-6 border-2"
-                    >
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back
-                    </Button>
-                    <div className="flex gap-4">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleCancel}
-                        className="h-11 px-6 border-2"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="submit"
-                        disabled={!formData.name.trim() || (formData.outreachChannel && !isChannelDetailsValid())}
-                        className="h-11 px-8"
-                      >
-                        {returnTo === 'relationship' ? 'Add Reminder' : 'Create Reminder'}
-                      </Button>
-                    </div>
-                  </div>
-                </>
-              )}
+              {/* Date Selector */}
+              <DateSelector
+                selectedDate={formData.triggerDate || new Date()}
+                onDateChange={(date) => updateFormData({ triggerDate: date })}
+              />
+
+              {/* Time Selector */}
+              <TimeSelector
+                selectedTime={formData.triggerTime || "09:00"}
+                onTimeChange={(time) => updateFormData({ triggerTime: time })}
+              />
+
+              {/* Frequency & Priority Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FrequencySelector
+                  selectedFrequency={formData.frequency}
+                  onFrequencyChange={(freq) => updateFormData({ frequency: freq })}
+                />
+                <PrioritySelector
+                  selectedPriority={formData.priority}
+                  onPriorityChange={(priority) => updateFormData({ priority: priority })}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Channel Selection */}
+          {currentStep === 3 && (
+            <form onSubmit={onSubmit} className="space-y-6 animate-fade-in">
+              <div className="text-center space-y-1 mb-6">
+                <h2 className="text-lg font-semibold">Follow-Up Channel</h2>
+                <p className="text-sm text-muted-foreground">How will you reach out?</p>
+              </div>
+
+              <ChannelSelector
+                selectedChannel={formData.outreachChannel || ""}
+                channelDetails={mapChannelDetails()}
+                onChannelChange={(channel) => updateFormData({ outreachChannel: channel })}
+                onDetailsChange={handleChannelDetailsChange}
+              />
             </form>
-            )}
-          </CardContent>
-        </Card>
+          )}
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="mt-6 flex justify-between">
+          {currentStep > 1 ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handlePrevious}
+              className="h-12 px-6 rounded-xl border-2 bg-background/60 backdrop-blur-sm"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              className="h-12 px-6 rounded-xl border-2 bg-background/60 backdrop-blur-sm"
+            >
+              Cancel
+            </Button>
+          )}
+          
+          {currentStep === 2 && (
+            <Button
+              type="button"
+              onClick={handleNext}
+              disabled={!formData.name.trim()}
+              className="h-12 px-8 rounded-xl shadow-lg shadow-primary/25"
+            >
+              Next
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+          
+          {currentStep === 3 && (
+            <Button
+              type="submit"
+              onClick={onSubmit}
+              disabled={!formData.name.trim() || (formData.outreachChannel && !isChannelDetailsValid())}
+              className="h-12 px-8 rounded-xl shadow-lg shadow-primary/25"
+            >
+              {returnTo === 'relationship' ? 'Add Reminder' : 'Create Reminder'}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Sticky Bottom Navigation */}
