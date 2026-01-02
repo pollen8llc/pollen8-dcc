@@ -12,6 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { StructuredNotesForm } from "@/components/rel8t/StructuredNotesForm";
+import { OutreachTimelineAccordion } from "@/components/rel8t/OutreachTimelineAccordion";
+import { motion } from "framer-motion";
 import { 
   ArrowLeft, 
   Calendar, 
@@ -24,7 +26,8 @@ import {
   Edit,
   AlertTriangle,
   ExternalLink,
-  MessageSquare
+  MessageSquare,
+  Activity
 } from "lucide-react";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
@@ -39,6 +42,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const stagger = {
+  visible: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 export default function OutreachDetails() {
   const { id } = useParams();
@@ -179,38 +195,54 @@ export default function OutreachDetails() {
   const stepInfo = actv8Contact?.path?.steps?.[outreach.actv8_step_index ?? 0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
-      <div className="container max-w-4xl mx-auto px-4 py-6 pb-32">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <motion.div 
+        className="container max-w-4xl mx-auto px-4 py-6 pb-32"
+        initial="hidden"
+        animate="visible"
+        variants={stagger}
+      >
         {/* Back Button */}
-        <Link 
-          to="/rel8/actv8?task" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Outreach Tasks
-        </Link>
+        <motion.div variants={fadeInUp}>
+          <Link 
+            to="/rel8/actv8?task" 
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 group"
+          >
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Outreach Tasks
+          </Link>
+        </motion.div>
 
         {/* Header */}
-        <div className="glass-card p-6 mb-6">
-          <div className="flex flex-col gap-4">
+        <motion.div 
+          variants={fadeInUp}
+          className="relative overflow-hidden rounded-2xl bg-card/80 backdrop-blur-md border border-primary/20 p-6 mb-6 shadow-lg shadow-primary/5"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+          <div className="relative flex flex-col gap-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-3">
                   {getStatusBadge()}
                   {getPriorityBadge()}
                 </div>
-                <h1 className="text-2xl font-bold">{outreach.title}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{outreach.title}</h1>
                 {outreach.description && (
-                  <p className="text-muted-foreground mt-2">{outreach.description}</p>
+                  <p className="text-muted-foreground mt-2 leading-relaxed">{outreach.description}</p>
                 )}
               </div>
             </div>
 
             {/* Actv8 Build Rapport Badge */}
             {actv8Contact && (
-              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+                className="p-4 rounded-xl bg-primary/10 border border-primary/30 backdrop-blur-sm"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30 font-semibold">
                     Build Rapport
                   </Badge>
                   <span className="text-sm text-muted-foreground">
@@ -219,174 +251,221 @@ export default function OutreachDetails() {
                 </div>
                 <Link 
                   to={`/rel8/actv8/${outreach.actv8_contact_id}/profile`}
-                  className="text-sm text-primary hover:underline flex items-center gap-1"
+                  className="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1 group"
                 >
                   View {actv8Contact.contact?.name}'s development path
-                  <ExternalLink className="h-3 w-3" />
+                  <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
-              </div>
+              </motion.div>
             )}
 
             {/* Due Date */}
             <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className={isOverdue ? 'text-destructive font-medium' : ''}>
+              <div className={`p-2 rounded-lg ${isOverdue ? 'bg-destructive/20' : 'bg-muted/50'}`}>
+                <Calendar className={`h-4 w-4 ${isOverdue ? 'text-destructive' : 'text-muted-foreground'}`} />
+              </div>
+              <span className={isOverdue ? 'text-destructive font-medium' : 'text-foreground'}>
                 Due: {format(dueDate, 'PPP')} at {format(dueDate, 'p')}
               </span>
-              {isOverdue && <AlertTriangle className="h-4 w-4 text-destructive" />}
+              {isOverdue && <AlertTriangle className="h-4 w-4 text-destructive animate-pulse" />}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Contacts */}
         {outreach.contacts && outreach.contacts.length > 0 && (
-          <Card className="glass-card mb-6">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Contacts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {outreach.contacts.map((contact) => (
-                  <div key={contact.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback>
-                        {contact.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium">{contact.name}</p>
-                      {contact.organization && (
-                        <p className="text-sm text-muted-foreground">{contact.organization}</p>
-                      )}
-                    </div>
-                    {contact.email && (
-                      <a href={`mailto:${contact.email}`} className="text-primary hover:underline text-sm">
-                        {contact.email}
-                      </a>
-                    )}
+          <motion.div variants={fadeInUp}>
+            <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
+              <CardHeader className="pb-3 border-b border-border/30">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-primary/10">
+                    <Mail className="h-4 w-4 text-primary" />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  Contacts
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="space-y-3">
+                  {outreach.contacts.map((contact, index) => (
+                    <motion.div 
+                      key={contact.id} 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/30 hover:bg-muted/50 transition-colors"
+                    >
+                      <Avatar className="h-10 w-10 ring-2 ring-primary/20">
+                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                          {contact.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{contact.name}</p>
+                        {contact.organization && (
+                          <p className="text-sm text-muted-foreground truncate">{contact.organization}</p>
+                        )}
+                      </div>
+                      {contact.email && (
+                        <a href={`mailto:${contact.email}`} className="text-primary hover:text-primary/80 transition-colors text-sm hidden sm:block">
+                          {contact.email}
+                        </a>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
         {/* Channel Details */}
         {outreach.outreach_channel && (
-          <Card className="glass-card mb-6">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                {getChannelIcon()}
-                Outreach Channel
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="font-medium capitalize">{outreach.outreach_channel.replace('_', ' ')}</p>
-                {outreach.channel_details && (
-                  <div className="text-sm text-muted-foreground">
-                    {Object.entries(outreach.channel_details).map(([key, value]) => (
-                      <div key={key} className="flex items-center gap-2">
-                        <span className="capitalize">{key.replace('_', ' ')}:</span>
-                        <span>{String(value)}</span>
-                      </div>
-                    ))}
+          <motion.div variants={fadeInUp}>
+            <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
+              <CardHeader className="pb-3 border-b border-border/30">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-primary/10">
+                    {getChannelIcon()}
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  Outreach Channel
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="space-y-2">
+                  <p className="font-medium capitalize">{outreach.outreach_channel.replace('_', ' ')}</p>
+                  {outreach.channel_details && (
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      {Object.entries(outreach.channel_details).map(([key, value]) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <span className="capitalize text-muted-foreground/70">{key.replace('_', ' ')}:</span>
+                          <span className="text-foreground">{String(value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
-        {/* Structured Notes Form - always editable for updates */}
-        <div ref={notesRef} className="relative scroll-mt-6">
+        {/* Calendar Sync Status & Timeline */}
+        <motion.div variants={fadeInUp}>
+          <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
+            <CardHeader className="pb-3 border-b border-border/30">
+              <CardTitle className="text-base flex items-center gap-2">
+                <div className="p-1.5 rounded-md bg-primary/10">
+                  <Activity className="h-4 w-4 text-primary" />
+                </div>
+                Calendar Sync & Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              {outreach.calendar_sync_enabled ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Sync Enabled
+                    </Badge>
+                    {outreach.last_calendar_update && (
+                      <span className="text-xs text-muted-foreground">
+                        Last sync: {format(parseISO(outreach.last_calendar_update), 'PPp')}
+                      </span>
+                    )}
+                  </div>
+                  {outreach.system_email && (
+                    <p className="text-sm text-muted-foreground">
+                      Synced via: <span className="text-foreground/80 font-mono text-xs">{outreach.system_email}</span>
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-sm">Calendar sync not enabled</span>
+                </div>
+              )}
+            </CardContent>
+            
+            {/* Timeline Accordion */}
+            <OutreachTimelineAccordion outreachId={id!} />
+          </Card>
+        </motion.div>
+
+        {/* Structured Notes Form */}
+        <motion.div variants={fadeInUp} ref={notesRef} className="relative scroll-mt-6">
           {showNotesAlert && (
-            <div className="absolute -top-2 left-0 right-0 z-10 flex items-center justify-center">
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute -top-2 left-0 right-0 z-10 flex items-center justify-center"
+            >
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-destructive text-destructive-foreground text-sm font-medium shadow-lg animate-pulse">
                 <AlertTriangle className="h-4 w-4" />
                 Complete required fields below
               </div>
-            </div>
+            </motion.div>
           )}
-          <StructuredNotesForm
-            initialNotes={(outreach as any).structured_notes || {}}
-            onSave={async (notes) => {
-              await structuredNotesMutation.mutateAsync(notes);
-              setShowNotesAlert(false);
-            }}
-            isSaving={structuredNotesMutation.isPending}
-            disabled={false}
-          />
-        </div>
-
-        {/* Calendar Sync Status */}
-        <Card className="glass-card mb-6">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Calendar Sync
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {outreach.calendar_sync_enabled ? (
-              <div className="space-y-2">
-                <Badge className="bg-emerald-500">Calendar Sync Enabled</Badge>
-                {outreach.system_email && (
-                  <p className="text-sm text-muted-foreground">
-                    Synced to: {outreach.system_email}
-                  </p>
-                )}
-                {outreach.last_calendar_update && (
-                  <p className="text-sm text-muted-foreground">
-                    Last updated: {format(parseISO(outreach.last_calendar_update), 'PPp')}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Calendar sync not enabled for this outreach</p>
-            )}
-          </CardContent>
-        </Card>
+          <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
+            <StructuredNotesForm
+              initialNotes={(outreach as any).structured_notes || {}}
+              onSave={async (notes) => {
+                await structuredNotesMutation.mutateAsync(notes);
+                setShowNotesAlert(false);
+              }}
+              isSaving={structuredNotesMutation.isPending}
+              disabled={false}
+            />
+          </Card>
+        </motion.div>
 
         {/* Metadata */}
-        <Card className="glass-card mb-6">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            {outreach.created_at && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Created</span>
-                <span>{format(parseISO(outreach.created_at), 'PPp')}</span>
-              </div>
-            )}
-            {outreach.updated_at && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Last updated</span>
-                <span>{format(parseISO(outreach.updated_at), 'PPp')}</span>
-              </div>
-            )}
-            {outreach.contacts_notified_at && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Contacts notified</span>
-                <span>{format(parseISO(outreach.contacts_notified_at), 'PPp')}</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <motion.div variants={fadeInUp}>
+          <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
+            <CardHeader className="pb-3 border-b border-border/30">
+              <CardTitle className="text-base flex items-center gap-2">
+                <div className="p-1.5 rounded-md bg-muted/50">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </div>
+                Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-3 text-sm">
+              {outreach.created_at && (
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-muted-foreground">Created</span>
+                  <span className="font-mono text-xs">{format(parseISO(outreach.created_at), 'PPp')}</span>
+                </div>
+              )}
+              {outreach.updated_at && (
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-muted-foreground">Last updated</span>
+                  <span className="font-mono text-xs">{format(parseISO(outreach.updated_at), 'PPp')}</span>
+                </div>
+              )}
+              {outreach.contacts_notified_at && (
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-muted-foreground">Contacts notified</span>
+                  <span className="font-mono text-xs">{format(parseISO(outreach.contacts_notified_at), 'PPp')}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Separator className="my-6" />
+        <Separator className="my-6 bg-border/30" />
 
         {/* Actions */}
-        <div className="flex flex-wrap gap-3">
+        <motion.div 
+          variants={fadeInUp}
+          className="flex flex-wrap gap-3"
+        >
           {outreach.status === 'pending' && (
             <Button 
               onClick={() => completeMutation.mutate()}
               disabled={completeMutation.isPending}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/20"
             >
               {completeMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -401,7 +480,7 @@ export default function OutreachDetails() {
             <Button
               variant="outline"
               onClick={() => navigate(`/rel8/wizard?mode=edit&id=${id}`)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all"
             >
               <Edit className="h-4 w-4" />
               Edit Outreach
@@ -410,12 +489,12 @@ export default function OutreachDetails() {
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="flex items-center gap-2">
+              <Button variant="outline" className="flex items-center gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50">
                 <Trash2 className="h-4 w-4" />
                 Delete
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="bg-card/95 backdrop-blur-md border-border/50">
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Outreach?</AlertDialogTitle>
                 <AlertDialogDescription>
@@ -434,8 +513,8 @@ export default function OutreachDetails() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl">
         <Rel8OnlyNavigation />
