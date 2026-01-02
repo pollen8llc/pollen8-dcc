@@ -9,13 +9,15 @@ interface UnifiedAvatarProps {
   size?: number;
   className?: string;
   isAdmin?: boolean;
+  isContactId?: boolean;
 }
 
 const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({ 
   userId, 
   size = 40, 
   className = "",
-  isAdmin = false 
+  isAdmin = false,
+  isContactId = false
 }) => {
   const { currentUser } = useUser();
   const [solarSystemId, setSolarSystemId] = useState<string>("UXI8000");
@@ -26,7 +28,7 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
   useEffect(() => {
     const loadSolarSystem = async () => {
       if (!targetUserId) {
-        setSolarSystemId("UXI8000");
+        setSolarSystemId(isContactId ? "UXI8000" : "UXI8018");
         setLoading(false);
         return;
       }
@@ -39,18 +41,18 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
       }
 
       try {
-        const systemId = await SolarSystemAvatarService.getCachedSolarSystemId(targetUserId);
+        const systemId = await SolarSystemAvatarService.getCachedSolarSystemId(targetUserId, isContactId);
         setSolarSystemId(systemId);
       } catch (error) {
         console.error("Error loading solar system:", error);
-        setSolarSystemId("UXI8000"); // Fallback
+        setSolarSystemId(isContactId ? "UXI8000" : "UXI8018"); // Contact Default vs Member Default
       } finally {
         setLoading(false);
       }
     };
 
     loadSolarSystem();
-  }, [targetUserId]);
+  }, [targetUserId, isContactId]);
 
   const containerClasses = cn(
     "relative flex-shrink-0 overflow-hidden rounded-full aspect-square bg-muted/20",

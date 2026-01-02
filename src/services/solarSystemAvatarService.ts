@@ -68,12 +68,19 @@ export class SolarSystemAvatarService {
 
   /**
    * Determine which solar system ID a user should have based on their role and network value
+   * @param userId - The user ID or contact ID to look up
+   * @param isContactId - If true, this is a contact ID (not a user), use contact default
    */
-  static async getSolarSystemId(userId: string): Promise<string> {
+  static async getSolarSystemId(userId: string, isContactId: boolean = false): Promise<string> {
+    // If explicitly a contact ID, use contact default
+    if (isContactId) {
+      return "UXI8000"; // Contact Default
+    }
+
     const networkData = await this.getUserNetworkData(userId);
     
     if (!networkData) {
-      return "UXI8018"; // Default member system (Copper Harmony)
+      return "UXI8018"; // Member Default (new users without full profile)
     }
 
     // Admin users get the psychedelic system
@@ -131,9 +138,10 @@ export class SolarSystemAvatarService {
   private static cache = new Map<string, { systemId: string; timestamp: number }>();
   private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-  static async getCachedSolarSystemId(userId: string): Promise<string> {
+  static async getCachedSolarSystemId(userId: string, isContactId: boolean = false): Promise<string> {
+    const cacheKey = isContactId ? `contact:${userId}` : userId;
     const now = Date.now();
-    const cached = this.cache.get(userId);
+    const cached = this.cache.get(cacheKey);
     
     // Return cached result if it's still valid
     if (cached && (now - cached.timestamp) < this.CACHE_DURATION) {
@@ -141,8 +149,8 @@ export class SolarSystemAvatarService {
     }
 
     // Get fresh data and cache it
-    const systemId = await this.getSolarSystemId(userId);
-    this.cache.set(userId, { systemId, timestamp: now });
+    const systemId = await this.getSolarSystemId(userId, isContactId);
+    this.cache.set(cacheKey, { systemId, timestamp: now });
     
     return systemId;
   }
