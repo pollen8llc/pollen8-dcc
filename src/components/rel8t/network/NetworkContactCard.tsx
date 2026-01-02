@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Actv8ContactDisplay, useDeactivateContact } from "@/hooks/useActv8Contacts";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UnifiedAvatar } from "@/components/ui/unified-avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -110,11 +110,12 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 {/* Avatar with strength ring */}
                 <div className="relative flex-shrink-0">
-                  <Avatar className="h-12 w-12 ring-2 ring-offset-2 ring-offset-background ring-primary/30 group-hover:ring-primary/50 transition-all">
-                    <AvatarFallback className="bg-primary/10 text-foreground font-semibold group-hover:bg-primary/20 transition-colors">
-                      {getInitials(contact.name)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="ring-2 ring-offset-2 ring-offset-background ring-primary/30 group-hover:ring-primary/50 transition-all rounded-full">
+                    <UnifiedAvatar 
+                      userId={contact.affiliatedUserId} 
+                      size={48} 
+                    />
+                  </div>
                   {/* Strength indicator dot */}
                   <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-background bg-gradient-to-r ${strengthData.color}`} />
                 </div>

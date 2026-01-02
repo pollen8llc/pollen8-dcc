@@ -218,11 +218,30 @@ export async function getActiveContacts(): Promise<Actv8Contact[]> {
 
   if (pathsError) throw pathsError;
 
+  // Fetch affiliations for all contacts to get affiliated user IDs
+  const { data: affiliations, error: affiliationsError } = await supabase
+    .from("rms_contact_affiliations")
+    .select("contact_id, affiliated_user_id")
+    .in("contact_id", contactIds)
+    .eq("affiliation_type", "user")
+    .not("affiliated_user_id", "is", null);
+
+  if (affiliationsError) throw affiliationsError;
+
+  // Create a map of contact_id -> affiliated_user_id
+  const affiliationMap = new Map<string, string>();
+  affiliations?.forEach((aff) => {
+    if (aff.affiliated_user_id) {
+      affiliationMap.set(aff.contact_id, aff.affiliated_user_id);
+    }
+  });
+
   // Combine data
   return actv8Contacts.map((ac) => ({
     ...ac,
     contact: contacts?.find((c) => c.id === ac.contact_id),
     path: paths?.find((p) => p.id === ac.development_path_id),
+    affiliatedUserId: affiliationMap.get(ac.contact_id) || null,
   }));
 }
 
