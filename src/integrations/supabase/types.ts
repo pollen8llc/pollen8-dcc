@@ -2262,8 +2262,11 @@ export type Database = {
           intention_id: string | null
           intention_notes: string | null
           last_touchpoint_at: string | null
+          path_history: Json | null
           path_started_at: string | null
+          path_tier: number | null
           relationship_type: string | null
+          skipped_paths: Json | null
           status: string | null
           target_completion_date: string | null
           updated_at: string | null
@@ -2282,8 +2285,11 @@ export type Database = {
           intention_id?: string | null
           intention_notes?: string | null
           last_touchpoint_at?: string | null
+          path_history?: Json | null
           path_started_at?: string | null
+          path_tier?: number | null
           relationship_type?: string | null
+          skipped_paths?: Json | null
           status?: string | null
           target_completion_date?: string | null
           updated_at?: string | null
@@ -2302,8 +2308,11 @@ export type Database = {
           intention_id?: string | null
           intention_notes?: string | null
           last_touchpoint_at?: string | null
+          path_history?: Json | null
           path_started_at?: string | null
+          path_tier?: number | null
           relationship_type?: string | null
+          skipped_paths?: Json | null
           status?: string | null
           target_completion_date?: string | null
           updated_at?: string | null
@@ -2417,9 +2426,12 @@ export type Database = {
           created_by: string | null
           description: string
           id: string
+          is_required: boolean | null
           is_system: boolean | null
           name: string
           target_strength: string
+          tier: number | null
+          tier_order: number | null
           updated_at: string | null
         }
         Insert: {
@@ -2427,9 +2439,12 @@ export type Database = {
           created_by?: string | null
           description: string
           id: string
+          is_required?: boolean | null
           is_system?: boolean | null
           name: string
           target_strength: string
+          tier?: number | null
+          tier_order?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -2437,9 +2452,12 @@ export type Database = {
           created_by?: string | null
           description?: string
           id?: string
+          is_required?: boolean | null
           is_system?: boolean | null
           name?: string
           target_strength?: string
+          tier?: number | null
+          tier_order?: number | null
           updated_at?: string | null
         }
         Relationships: []

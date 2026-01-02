@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 // Types
 export interface DevelopmentPath {
@@ -7,7 +8,25 @@ export interface DevelopmentPath {
   description: string;
   target_strength: string;
   is_system: boolean;
+  tier: number;
+  tier_order: number;
+  is_required: boolean;
   steps?: DevelopmentPathStep[];
+}
+
+export interface PathHistoryEntry {
+  path_id: string;
+  path_name: string;
+  completed_at: string;
+  steps_completed: number;
+}
+
+export interface SkippedPathEntry {
+  path_id: string;
+  path_name: string;
+  skipped_at: string;
+  reason?: string;
+  tier_at_skip: number;
 }
 
 export interface DevelopmentPathStep {
@@ -38,6 +57,9 @@ export interface Actv8Contact {
   path_started_at: string | null;
   last_touchpoint_at: string | null;
   target_completion_date: string | null;
+  path_tier: number;
+  path_history: PathHistoryEntry[];
+  skipped_paths: SkippedPathEntry[];
   created_at: string;
   updated_at: string;
   // Joined data
@@ -52,6 +74,17 @@ export interface Actv8Contact {
   };
   path?: DevelopmentPath;
   affiliatedUserId?: string | null;
+}
+
+// Helper to transform database response to typed Actv8Contact
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformActv8Contact(data: any): Actv8Contact {
+  return {
+    ...data,
+    path_tier: data.path_tier ?? 1,
+    path_history: (data.path_history as PathHistoryEntry[]) || [],
+    skipped_paths: (data.skipped_paths as SkippedPathEntry[]) || [],
+  };
 }
 
 export interface Actv8Strategy {
@@ -101,7 +134,8 @@ export async function getDevelopmentPaths(): Promise<DevelopmentPath[]> {
   const { data: paths, error: pathsError } = await supabase
     .from("rms_actv8_paths")
     .select("*")
-    .order("name");
+    .order("tier")
+    .order("tier_order");
 
   if (pathsError) throw pathsError;
 
@@ -114,8 +148,132 @@ export async function getDevelopmentPaths(): Promise<DevelopmentPath[]> {
 
   return (paths || []).map((path) => ({
     ...path,
+    tier: path.tier ?? 1,
+    tier_order: path.tier_order ?? 0,
+    is_required: path.is_required ?? false,
     steps: (steps || []).filter((step) => step.path_id === path.id),
   }));
+}
+
+// Get available paths based on contact's current tier
+export async function getAvailablePaths(actv8ContactId: string): Promise<{
+  available: DevelopmentPath[];
+  locked: DevelopmentPath[];
+  currentTier: number;
+}> {
+  const contact = await getActv8Contact(actv8ContactId);
+  if (!contact) throw new Error("Contact not found");
+
+  const allPaths = await getDevelopmentPaths();
+  const currentTier = contact.path_tier || 1;
+  
+  // Available paths are current tier and one tier ahead (to allow advancement)
+  const available = allPaths.filter(p => p.tier <= currentTier + 1);
+  const locked = allPaths.filter(p => p.tier > currentTier + 1);
+
+  return { available, locked, currentTier };
+}
+
+// Complete current path and advance to next tier
+export async function completeCurrentPath(actv8ContactId: string): Promise<Actv8Contact> {
+  const contact = await getActv8Contact(actv8ContactId);
+  if (!contact) throw new Error("Contact not found");
+  if (!contact.path) throw new Error("No path assigned");
+
+  const newHistoryEntry: PathHistoryEntry = {
+    path_id: contact.development_path_id,
+    path_name: contact.path.name,
+    completed_at: new Date().toISOString(),
+    steps_completed: contact.completed_steps?.length || 0,
+  };
+
+  const updatedHistory = [...(contact.path_history || []), newHistoryEntry];
+  const newTier = Math.max(contact.path_tier || 1, contact.path.tier) + 1;
+
+  const { data, error } = await supabase
+    .from("rms_actv8_contacts")
+    .update({
+      path_tier: newTier,
+      path_history: updatedHistory as unknown as Json,
+    })
+    .eq("id", actv8ContactId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return transformActv8Contact(data);
+}
+
+// Skip current path and record the skip
+export async function skipCurrentPath(
+  actv8ContactId: string,
+  reason?: string
+): Promise<Actv8Contact> {
+  const contact = await getActv8Contact(actv8ContactId);
+  if (!contact) throw new Error("Contact not found");
+  if (!contact.path) throw new Error("No path assigned");
+
+  const skipEntry: SkippedPathEntry = {
+    path_id: contact.development_path_id,
+    path_name: contact.path.name,
+    skipped_at: new Date().toISOString(),
+    reason: reason || undefined,
+    tier_at_skip: contact.path_tier || 1,
+  };
+
+  const updatedSkips = [...(contact.skipped_paths || []), skipEntry];
+  const newTier = Math.max(contact.path_tier || 1, contact.path.tier) + 1;
+
+  const { data, error } = await supabase
+    .from("rms_actv8_contacts")
+    .update({
+      path_tier: newTier,
+      skipped_paths: updatedSkips as unknown as Json,
+      development_path_id: null as unknown as string, // Clear path so user must select a new one
+      current_step_index: 0,
+      completed_steps: [],
+      path_started_at: null,
+    })
+    .eq("id", actv8ContactId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return transformActv8Contact(data);
+}
+
+// Advance to a new path (validates tier eligibility)
+export async function advanceToPath(
+  actv8ContactId: string,
+  newPathId: string
+): Promise<Actv8Contact> {
+  const contact = await getActv8Contact(actv8ContactId);
+  if (!contact) throw new Error("Contact not found");
+
+  const newPath = await getDevelopmentPath(newPathId);
+  if (!newPath) throw new Error("Path not found");
+
+  const currentTier = contact.path_tier || 1;
+  
+  // Allow selecting paths up to one tier ahead
+  if (newPath.tier > currentTier + 1) {
+    throw new Error(`Cannot select this path yet. Complete current tier first.`);
+  }
+
+  const { data, error } = await supabase
+    .from("rms_actv8_contacts")
+    .update({
+      development_path_id: newPathId,
+      current_step_index: 0,
+      completed_steps: [],
+      path_started_at: new Date().toISOString(),
+    })
+    .eq("id", actv8ContactId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return transformActv8Contact(data);
 }
 
 export async function getDevelopmentPath(pathId: string): Promise<DevelopmentPath | null> {
@@ -161,12 +319,15 @@ export async function activateContact(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
+  // Always start with Build Rapport (tier 1) unless explicitly overridden
+  const startingPathId = pathId || DEFAULT_PATH_ID;
+
   const { data, error } = await supabase
     .from("rms_actv8_contacts")
     .insert({
       user_id: user.id,
       contact_id: contactId,
-      development_path_id: pathId || DEFAULT_PATH_ID,
+      development_path_id: startingPathId,
       current_step_index: 0,
       completed_steps: [],
       connection_strength: options?.connectionStrength || null,
@@ -178,12 +339,15 @@ export async function activateContact(
       status: "active",
       activated_at: new Date().toISOString(),
       path_started_at: new Date().toISOString(),
+      path_tier: 1,
+      path_history: [],
+      skipped_paths: [],
     })
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+  return transformActv8Contact(data);
 }
 
 export async function getActiveContacts(): Promise<Actv8Contact[]> {
@@ -236,8 +400,8 @@ export async function getActiveContacts(): Promise<Actv8Contact[]> {
     }
   });
 
-  // Combine data
-  return actv8Contacts.map((ac) => ({
+  // Combine data with transformation
+  return actv8Contacts.map((ac) => transformActv8Contact({
     ...ac,
     contact: contacts?.find((c) => c.id === ac.contact_id),
     path: paths?.find((p) => p.id === ac.development_path_id),
@@ -276,12 +440,12 @@ export async function getActv8Contact(actv8ContactId: string): Promise<Actv8Cont
   // Fetch path with steps
   const path = await getDevelopmentPath(actv8Contact.development_path_id);
 
-  return {
+  return transformActv8Contact({
     ...actv8Contact,
     contact: contact || undefined,
     path: path || undefined,
     affiliatedUserId: affiliation?.affiliated_user_id || null,
-  };
+  });
 }
 
 export async function getActv8ContactByContactId(contactId: string): Promise<Actv8Contact | null> {
@@ -318,7 +482,7 @@ export async function updateContactProgress(
     .single();
 
   if (error) throw error;
-  return data;
+  return transformActv8Contact(data);
 }
 
 export async function updateActv8Contact(
@@ -341,7 +505,7 @@ export async function updateActv8Contact(
     .single();
 
   if (error) throw error;
-  return data;
+  return transformActv8Contact(data);
 }
 
 export async function deactivateContact(actv8ContactId: string): Promise<void> {

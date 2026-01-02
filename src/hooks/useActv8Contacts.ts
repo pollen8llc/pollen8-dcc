@@ -2,6 +2,21 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getActiveContacts, deactivateContact, getActv8ContactByContactId } from "@/services/actv8Service";
 import { toast } from "sonner";
 
+export interface PathHistoryEntry {
+  path_id: string;
+  path_name: string;
+  completed_at: string;
+  steps_completed: number;
+}
+
+export interface SkippedPathEntry {
+  path_id: string;
+  path_name: string;
+  skipped_at: string;
+  reason?: string;
+  tier_at_skip: number;
+}
+
 export interface Actv8ContactDisplay {
   id: string;
   contactId: string;
@@ -21,6 +36,9 @@ export interface Actv8ContactDisplay {
   totalSteps?: number;
   status?: string;
   affiliatedUserId?: string | null;
+  pathTier: number;
+  pathHistory: PathHistoryEntry[];
+  skippedPaths: SkippedPathEntry[];
 }
 
 export function useActv8Contacts() {
@@ -51,6 +69,9 @@ export function useActv8Contacts() {
         totalSteps: ac.path?.steps?.length,
         status: ac.status,
         affiliatedUserId: ac.affiliatedUserId || null,
+        pathTier: ac.path_tier || 1,
+        pathHistory: ac.path_history || [],
+        skippedPaths: ac.skipped_paths || [],
       }));
     },
   });
