@@ -10,6 +10,7 @@ import { DevelopmentTimeline } from "@/components/rel8t/network/DevelopmentTimel
 import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModal";
 import { LinkOutreachDialog } from "@/components/rel8t/network/LinkOutreachDialog";
 import { Actv8InsightsCard } from "@/components/rel8t/network/Actv8InsightsCard";
+import { TierProgressBar } from "@/components/rel8t/network/TierProgressBar";
 
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
@@ -383,6 +384,21 @@ export default function NetworkProfile() {
             </div>
           </Card>
         )}
+
+        {/* Relationship Development Journey */}
+        <Card className="p-4">
+          <h3 className="text-sm font-medium mb-3">Relationship Development Journey</h3>
+          <TierProgressBar
+            currentTier={contact.pathTier}
+            currentStepIndex={contact.currentStepIndex}
+            totalStepsInCurrentPath={4}
+            pathHistory={contact.pathHistory}
+            skippedPaths={contact.skippedPaths}
+            size="lg"
+            showLabels
+            animated
+          />
+        </Card>
 
         {/* Connection Strength Section */}
         <Card className="p-4">
