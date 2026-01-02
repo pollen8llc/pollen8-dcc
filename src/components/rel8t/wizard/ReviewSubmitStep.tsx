@@ -25,7 +25,7 @@ interface ReviewSubmitStepProps {
     contacts: Contact[];
     triggers: Trigger[];
     priority: OutreachPriority;
-    // Actv8 Build Rapport data
+    // Actv8 development path data
     actv8ContactId?: string | null;
     actv8StepIndex?: number | null;
     actv8StepData?: Actv8StepData | null;
@@ -225,13 +225,13 @@ export const ReviewSubmitStep = ({
 
   return (
     <div className="space-y-6">
-      {/* Actv8 Build Rapport Mode Indicator */}
+      {/* Actv8 Development Path Mode Indicator */}
       {isActv8Mode && actv8StepData && (
         <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-              Build Rapport: {actv8StepData.stepName}
+              {actv8StepData.pathName}: {actv8StepData.stepName}
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">

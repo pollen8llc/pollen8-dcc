@@ -11,14 +11,12 @@ import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModa
 import { LinkOutreachDialog } from "@/components/rel8t/network/LinkOutreachDialog";
 import { Actv8InsightsCard } from "@/components/rel8t/network/Actv8InsightsCard";
 
-import { StepInterfaceRouter } from "@/components/rel8t/touchpoint";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Loader2, Mail, Phone, Calendar, TrendingUp, Settings, MessageCircle, Edit, Heart, Zap } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -50,10 +48,8 @@ export default function NetworkProfile() {
   } = useRelationshipWizard();
   
   const [showPathModal, setShowPathModal] = useState(false);
-  const [showTouchpointSheet, setShowTouchpointSheet] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkStepIndex, setLinkStepIndex] = useState<number>(0);
-  const [activeStepIndex, setActiveStepIndex] = useState<number | null>(null);
 
   const { data: actv8Contact, isLoading, error } = useQuery({
     queryKey: ['actv8-contact', id],
@@ -189,10 +185,8 @@ export default function NetworkProfile() {
     }
   };
 
-  const isBuildRapportPath = actv8Contact?.path?.id === 'build_rapport';
-
   const handlePlanTouchpoint = async (stepIndex: number) => {
-    if (isBuildRapportPath && actv8Contact?.path?.steps) {
+    if (actv8Contact?.path?.steps) {
       const step = actv8Contact.path.steps[stepIndex];
       if (step && actv8Contact.contact) {
         setActv8ContactId(actv8Contact.id);
@@ -217,19 +211,8 @@ export default function NetworkProfile() {
         }]);
         
         navigate(`/rel8/wizard?actv8Id=${actv8Contact.id}&stepIndex=${stepIndex}`);
-        return;
       }
     }
-    
-    setActiveStepIndex(stepIndex);
-    setShowTouchpointSheet(true);
-  };
-
-  const handleTouchpointComplete = (data: any) => {
-    console.log('Touchpoint planned:', data);
-    setShowTouchpointSheet(false);
-    setActiveStepIndex(null);
-    toast.success('Touchpoint saved successfully');
   };
 
   const handleLinkOutreach = (stepIndex: number) => {
@@ -463,23 +446,6 @@ export default function NetworkProfile() {
         currentTier={contact.pathTier}
         hasCurrentPath={!!contact.developmentPathId}
       />
-
-      <Sheet open={showTouchpointSheet} onOpenChange={setShowTouchpointSheet}>
-        <SheetContent side="bottom" className="h-[90vh] overflow-y-auto rounded-t-3xl">
-          <div className="sheet-handle" />
-          <SheetHeader className="mb-4">
-            <SheetTitle>Plan Touchpoint</SheetTitle>
-          </SheetHeader>
-          {activeStepIndex !== null && (
-            <StepInterfaceRouter
-              contact={contact}
-              stepIndex={activeStepIndex}
-              onComplete={handleTouchpointComplete}
-              onCancel={() => setShowTouchpointSheet(false)}
-            />
-          )}
-        </SheetContent>
-      </Sheet>
 
       <LinkOutreachDialog
         open={showLinkDialog}
