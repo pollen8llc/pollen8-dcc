@@ -1,10 +1,13 @@
-import { getDevelopmentPath } from "@/data/mockNetworkData";
+import { useQuery } from "@tanstack/react-query";
+import { getDevelopmentPath } from "@/services/actv8Service";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO, isPast, isToday } from "date-fns";
-import { Calendar, ExternalLink, Link2, Check, ChevronRight, Play } from "lucide-react";
+import { Calendar, ExternalLink, Link2, Check, ChevronRight, Play, SkipForward, History } from "lucide-react";
 import { Outreach } from "@/services/rel8t/outreachService";
+import { PathHistoryEntry, SkippedPathEntry } from "@/hooks/useActv8Contacts";
 
 interface LinkedOutreach {
   stepIndex: number;
@@ -18,11 +21,21 @@ interface DevelopmentPathCardProps {
   linkedOutreaches?: LinkedOutreach[];
   availableOutreaches?: Outreach[];
   actv8ContactId?: string;
+  pathTier?: number;
+  pathHistory?: PathHistoryEntry[];
+  skippedPaths?: SkippedPathEntry[];
   onPlanTouchpoint?: (stepIndex: number) => void;
   onLinkOutreach?: (stepIndex: number) => void;
   onAdvanceStep?: () => void;
   onChangePath?: () => void;
 }
+
+const tierLabels: Record<number, string> = {
+  1: "Foundation",
+  2: "Growth",
+  3: "Professional",
+  4: "Advanced",
+};
 
 export function DevelopmentPathCard({
   pathId,
@@ -30,12 +43,20 @@ export function DevelopmentPathCard({
   completedSteps,
   linkedOutreaches = [],
   availableOutreaches = [],
+  pathTier = 1,
+  pathHistory = [],
+  skippedPaths = [],
   onPlanTouchpoint,
   onLinkOutreach,
   onChangePath
 }: DevelopmentPathCardProps) {
   const navigate = useNavigate();
-  const path = pathId ? getDevelopmentPath(pathId) : null;
+  
+  const { data: path } = useQuery({
+    queryKey: ['development-path', pathId],
+    queryFn: () => pathId ? getDevelopmentPath(pathId) : null,
+    enabled: !!pathId,
+  });
 
   if (!path) {
     return (
@@ -55,8 +76,8 @@ export function DevelopmentPathCard({
 
   const stepIndex = currentStepIndex ?? 0;
   const completed = completedSteps ?? [];
-  const progress = ((stepIndex) / path.steps.length) * 100;
-  const isComplete = stepIndex >= path.steps.length;
+  const progress = ((stepIndex) / (path.steps?.length || 1)) * 100;
+  const isComplete = path.steps && stepIndex >= path.steps.length;
 
   const getLinkedOutreach = (index: number) => {
     return linkedOutreaches.find(lo => lo.stepIndex === index);
@@ -80,6 +101,46 @@ export function DevelopmentPathCard({
 
   return (
     <div className="space-y-4">
+      {/* Tier Progress Indicator */}
+      <div className="flex items-center gap-2">
+        {[1, 2, 3, 4].map((tier) => (
+          <div
+            key={tier}
+            className={`flex-1 h-1.5 rounded-full transition-colors ${
+              tier <= pathTier ? "bg-primary" : "bg-muted"
+            }`}
+          />
+        ))}
+      </div>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+        {tierLabels[pathTier] || `Tier ${pathTier}`} • {pathHistory.length} paths completed
+        {skippedPaths.length > 0 && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="ml-2 text-amber-500 cursor-help">
+                  • {skippedPaths.length} skipped
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs">
+                <p className="text-xs font-medium mb-1">Skipped Paths:</p>
+                <ul className="text-xs space-y-1">
+                  {skippedPaths.map((skip, i) => (
+                    <li key={i} className="flex items-start gap-1">
+                      <SkipForward className="h-3 w-3 mt-0.5 shrink-0" />
+                      <span>
+                        {skip.path_name}
+                        {skip.reason && <span className="text-muted-foreground"> - {skip.reason}</span>}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </p>
+
       {/* Path Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -92,7 +153,7 @@ export function DevelopmentPathCard({
           onClick={onChangePath} 
           className="text-xs text-primary h-8 rounded-lg"
         >
-          Change
+          View Options
         </Button>
       </div>
 
@@ -100,7 +161,7 @@ export function DevelopmentPathCard({
       <div>
         <div className="flex justify-between text-xs text-muted-foreground mb-2">
           <span>Progress</span>
-          <span className="font-medium">{Math.min(stepIndex + 1, path.steps.length)} of {path.steps.length}</span>
+          <span className="font-medium">{Math.min(stepIndex + 1, path.steps?.length || 0)} of {path.steps?.length || 0}</span>
         </div>
         <div className="h-2 bg-secondary rounded-full overflow-hidden">
           <div 
@@ -110,9 +171,26 @@ export function DevelopmentPathCard({
         </div>
       </div>
 
+      {/* Path History (if any) */}
+      {pathHistory.length > 0 && (
+        <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+            <History className="h-3 w-3" />
+            <span>Completed Paths</span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {pathHistory.map((history, i) => (
+              <Badge key={i} variant="secondary" className="text-[10px]">
+                {history.path_name}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Steps List - Settings list style */}
       <div className="space-y-1">
-        {path.steps.map((step, index) => {
+        {path.steps?.map((step, index) => {
           const isCompleted = index < stepIndex || completed.includes(step.id);
           const isCurrent = index === stepIndex;
           const linkedOutreach = getLinkedOutreach(index);
@@ -207,11 +285,20 @@ export function DevelopmentPathCard({
 
       {/* Path Complete State */}
       {isComplete && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center">
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
             <Check className="h-5 w-5 text-emerald-500" />
             <span className="font-medium text-emerald-500">Path Complete!</span>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onChangePath}
+            className="text-xs"
+          >
+            Choose Next Path
+            <ChevronRight className="h-3 w-3 ml-1" />
+          </Button>
         </div>
       )}
     </div>

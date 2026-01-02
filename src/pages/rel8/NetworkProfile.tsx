@@ -164,6 +164,9 @@ export default function NetworkProfile() {
     currentStepIndex: actv8Contact.current_step_index || 0,
     completedSteps: actv8Contact.completed_steps || [],
     pathStartedAt: actv8Contact.path_started_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+    pathTier: actv8Contact.path_tier || 1,
+    pathHistory: actv8Contact.path_history || [],
+    skippedPaths: actv8Contact.skipped_paths || [],
     interactions: [] as any[],
   };
 
@@ -426,6 +429,9 @@ export default function NetworkProfile() {
             linkedOutreaches={linkedOutreaches}
             availableOutreaches={availableOutreaches}
             actv8ContactId={actv8Contact.id}
+            pathTier={contact.pathTier}
+            pathHistory={contact.pathHistory}
+            skippedPaths={contact.skippedPaths}
             onPlanTouchpoint={handlePlanTouchpoint}
             onLinkOutreach={handleLinkOutreach}
             onAdvanceStep={handleAdvanceStep}
@@ -453,6 +459,9 @@ export default function NetworkProfile() {
         onOpenChange={setShowPathModal} 
         onSelectPath={handleSelectPath}
         currentPathId={contact.developmentPathId}
+        actv8ContactId={actv8Contact.id}
+        currentTier={contact.pathTier}
+        hasCurrentPath={!!contact.developmentPathId}
       />
 
       <Sheet open={showTouchpointSheet} onOpenChange={setShowTouchpointSheet}>
