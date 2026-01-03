@@ -247,6 +247,9 @@ export async function advanceToPath(
   actv8ContactId: string,
   newPathId: string
 ): Promise<Actv8Contact> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
   const contact = await getActv8Contact(actv8ContactId);
   if (!contact) throw new Error("Contact not found");
 
@@ -273,6 +276,26 @@ export async function advanceToPath(
     .single();
 
   if (error) throw error;
+  
+  // Create the first step instance for the new path
+  if (newPath.steps?.[0] && data) {
+    try {
+      await supabase
+        .from("rms_actv8_step_instances")
+        .insert({
+          actv8_contact_id: actv8ContactId,
+          step_id: newPath.steps[0].id,
+          step_index: 0,
+          path_id: newPathId,
+          status: 'active',
+          started_at: new Date().toISOString(),
+          user_id: user.id,
+        });
+    } catch (stepError) {
+      console.log("Could not create initial step instance:", stepError);
+    }
+  }
+  
   return transformActv8Contact(data);
 }
 
@@ -347,6 +370,27 @@ export async function activateContact(
     .single();
 
   if (error) throw error;
+  
+  // Create the first step instance as "active"
+  const path = await getDevelopmentPath(startingPathId);
+  if (path?.steps?.[0] && data) {
+    try {
+      await supabase
+        .from("rms_actv8_step_instances")
+        .insert({
+          actv8_contact_id: data.id,
+          step_id: path.steps[0].id,
+          step_index: 0,
+          path_id: startingPathId,
+          status: 'active',
+          started_at: new Date().toISOString(),
+          user_id: user.id,
+        });
+    } catch (stepError) {
+      console.log("Could not create initial step instance:", stepError);
+    }
+  }
+  
   return transformActv8Contact(data);
 }
 
@@ -805,3 +849,146 @@ export const relationshipTypes = [
   { id: "collaborator", label: "Collaborator" },
   { id: "client", label: "Client" },
 ];
+
+// =====================================================
+// Step Instances - Unique ID tracking for each step
+// =====================================================
+
+export interface StepInstance {
+  id: string;
+  actv8_contact_id: string;
+  step_id: string;
+  step_index: number;
+  path_id: string;
+  status: 'pending' | 'active' | 'completed' | 'skipped';
+  started_at: string | null;
+  completed_at: string | null;
+  outreach_id: string | null;
+  days_to_complete: number | null;
+  interaction_outcome: string | null;
+  rapport_progress: string | null;
+  notes: string | null;
+  metadata: Record<string, any>;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getStepInstances(actv8ContactId: string): Promise<StepInstance[]> {
+  const { data, error } = await supabase
+    .from("rms_actv8_step_instances")
+    .select("*")
+    .eq("actv8_contact_id", actv8ContactId)
+    .order("step_index");
+
+  if (error) throw error;
+  return (data || []) as StepInstance[];
+}
+
+export async function createStepInstance(
+  actv8ContactId: string,
+  stepId: string,
+  stepIndex: number,
+  pathId: string,
+  status: 'pending' | 'active' = 'active'
+): Promise<StepInstance> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { data, error } = await supabase
+    .from("rms_actv8_step_instances")
+    .insert({
+      actv8_contact_id: actv8ContactId,
+      step_id: stepId,
+      step_index: stepIndex,
+      path_id: pathId,
+      status,
+      started_at: status === 'active' ? new Date().toISOString() : null,
+      user_id: user.id,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as StepInstance;
+}
+
+export async function updateStepInstance(
+  instanceId: string,
+  updates: Partial<StepInstance>
+): Promise<StepInstance> {
+  const { data, error } = await supabase
+    .from("rms_actv8_step_instances")
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", instanceId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as StepInstance;
+}
+
+export async function completeStepInstance(
+  actv8ContactId: string,
+  stepIndex: number,
+  outreachId: string,
+  outcome?: { interaction_outcome?: string; rapport_progress?: string }
+): Promise<StepInstance | null> {
+  // Find the step instance for this step
+  const { data: instances, error: findError } = await supabase
+    .from("rms_actv8_step_instances")
+    .select("*")
+    .eq("actv8_contact_id", actv8ContactId)
+    .eq("step_index", stepIndex)
+    .limit(1);
+
+  if (findError) throw findError;
+  
+  const instance = instances?.[0];
+  if (!instance) return null;
+
+  // Calculate days to complete
+  const startedAt = instance.started_at ? new Date(instance.started_at) : new Date(instance.created_at);
+  const completedAt = new Date();
+  const daysToComplete = Math.ceil((completedAt.getTime() - startedAt.getTime()) / (1000 * 60 * 60 * 24));
+
+  const { data, error } = await supabase
+    .from("rms_actv8_step_instances")
+    .update({
+      status: 'completed',
+      completed_at: completedAt.toISOString(),
+      outreach_id: outreachId,
+      days_to_complete: daysToComplete,
+      interaction_outcome: outcome?.interaction_outcome || null,
+      rapport_progress: outcome?.rapport_progress || null,
+      updated_at: completedAt.toISOString(),
+    })
+    .eq("id", instance.id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as StepInstance;
+}
+
+export async function getOrCreateFirstStepInstance(
+  actv8ContactId: string,
+  pathId: string,
+  stepId: string
+): Promise<StepInstance> {
+  // Check if first step instance already exists
+  const { data: existing } = await supabase
+    .from("rms_actv8_step_instances")
+    .select("*")
+    .eq("actv8_contact_id", actv8ContactId)
+    .eq("step_index", 0)
+    .eq("path_id", pathId)
+    .maybeSingle();
+
+  if (existing) return existing as StepInstance;
+  
+  return createStepInstance(actv8ContactId, stepId, 0, pathId, 'active');
+}
