@@ -310,21 +310,61 @@ export const updateOutreachStatus = async (id: string, status: OutreachStatus): 
     if (status === 'completed' && outreach?.actv8_contact_id) {
       try {
         // Import the service dynamically to avoid circular imports
-        const { updateContactProgress, getActv8Contact, updateActv8Contact } = await import("@/services/actv8Service");
+        const { 
+          updateContactProgress, 
+          getActv8Contact, 
+          updateActv8Contact,
+          completeStepInstance,
+          createStepInstance 
+        } = await import("@/services/actv8Service");
+        
+        // Get full outreach data to access structured notes
+        const fullOutreach = await getOutreachById(id);
         
         // Get current actv8 contact data
         const actv8Contact = await getActv8Contact(outreach.actv8_contact_id);
         if (actv8Contact) {
           const currentStepIndex = actv8Contact.current_step_index || 0;
           const completedSteps = actv8Contact.completed_steps || [];
+          const currentStep = actv8Contact.path?.steps?.[currentStepIndex];
           
           // Only advance if this is the current step
           if (outreach.actv8_step_index === currentStepIndex) {
-            const newCompletedSteps = [...completedSteps, String(currentStepIndex)];
+            // Use actual step ID from path, not just index
+            const stepId = currentStep?.id || `step_${currentStepIndex}`;
+            const newCompletedSteps = [...completedSteps, stepId];
             const newStepIndex = currentStepIndex + 1;
             
-            // Update step progress
+            // Complete the step instance with metrics from structured notes
+            await completeStepInstance(
+              outreach.actv8_contact_id,
+              currentStepIndex,
+              id,
+              {
+                interaction_outcome: fullOutreach?.structured_notes?.interaction_outcome,
+                rapport_progress: fullOutreach?.structured_notes?.rapport_progress
+              }
+            );
+            
+            // Update step progress on the contact
             await updateContactProgress(outreach.actv8_contact_id, newStepIndex, newCompletedSteps);
+            
+            // Create the next step instance as "active" so it appears unlocked
+            const nextStep = actv8Contact.path?.steps?.[newStepIndex];
+            if (nextStep && actv8Contact.development_path_id) {
+              try {
+                await createStepInstance(
+                  outreach.actv8_contact_id,
+                  nextStep.id,
+                  newStepIndex,
+                  actv8Contact.development_path_id,
+                  'active'
+                );
+              } catch (stepError) {
+                // Step instance might already exist, ignore
+                console.log("Step instance may already exist:", stepError);
+              }
+            }
             
             // Upgrade connection strength based on completed steps
             const strengthProgression = ['spark', 'ember', 'flame', 'star'];
@@ -346,7 +386,7 @@ export const updateOutreachStatus = async (id: string, status: OutreachStatus): 
                 .from("cross_platform_notifications")
                 .insert({
                   user_id: user.id,
-                  title: "Build Rapport Progress",
+                  title: `${actv8Contact.path?.name || 'Path'} Progress`,
                   message: `Completed step ${currentStepIndex + 1} with ${actv8Contact.contact?.name || 'contact'}`,
                   notification_type: "actv8_step_complete",
                   is_read: false,
@@ -354,7 +394,8 @@ export const updateOutreachStatus = async (id: string, status: OutreachStatus): 
                     actv8ContactId: outreach.actv8_contact_id,
                     stepIndex: currentStepIndex,
                     newStepIndex: newStepIndex,
-                    contactName: actv8Contact.contact?.name
+                    contactName: actv8Contact.contact?.name,
+                    nextStepName: nextStep?.name || null
                   }
                 });
             }

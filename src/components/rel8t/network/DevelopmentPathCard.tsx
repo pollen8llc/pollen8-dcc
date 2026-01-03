@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { getDevelopmentPath } from "@/services/actv8Service";
+import { getDevelopmentPath, getStepInstances, StepInstance } from "@/services/actv8Service";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO, isPast, isToday } from "date-fns";
-import { Calendar, ExternalLink, Link2, Check, ChevronRight, Play, SkipForward, History } from "lucide-react";
+import { Calendar, ExternalLink, Link2, Check, ChevronRight, Play, SkipForward, History, Clock } from "lucide-react";
 import { Outreach } from "@/services/rel8t/outreachService";
 import { PathHistoryEntry, SkippedPathEntry } from "@/hooks/useActv8Contacts";
 import { TierProgressBar } from "./TierProgressBar";
@@ -44,6 +44,7 @@ export function DevelopmentPathCard({
   completedSteps,
   linkedOutreaches = [],
   availableOutreaches = [],
+  actv8ContactId,
   pathTier = 1,
   pathHistory = [],
   skippedPaths = [],
@@ -57,6 +58,12 @@ export function DevelopmentPathCard({
     queryKey: ['development-path', pathId],
     queryFn: () => pathId ? getDevelopmentPath(pathId) : null,
     enabled: !!pathId,
+  });
+
+  const { data: stepInstances = [] } = useQuery({
+    queryKey: ['step-instances', actv8ContactId],
+    queryFn: () => actv8ContactId ? getStepInstances(actv8ContactId) : [],
+    enabled: !!actv8ContactId,
   });
 
   if (!path) {
@@ -82,6 +89,10 @@ export function DevelopmentPathCard({
 
   const getLinkedOutreach = (index: number) => {
     return linkedOutreaches.find(lo => lo.stepIndex === index);
+  };
+
+  const getStepInstance = (stepId: string): StepInstance | undefined => {
+    return stepInstances.find(si => si.step_id === stepId);
   };
 
   const getOutreachStatusBadge = (outreach: Outreach) => {
@@ -194,7 +205,9 @@ export function DevelopmentPathCard({
         {path.steps?.map((step, index) => {
           const isCompleted = index < stepIndex || completed.includes(step.id);
           const isCurrent = index === stepIndex;
+          const isUnlocked = index <= stepIndex; // Step is unlocked if current or previous completed
           const linkedOutreach = getLinkedOutreach(index);
+          const stepInstance = getStepInstance(step.id);
 
           return (
             <div
@@ -226,8 +239,57 @@ export function DevelopmentPathCard({
                       {step.name}
                     </span>
                     {linkedOutreach && getOutreachStatusBadge(linkedOutreach.outreach)}
+                    {/* Step instance ID badge for tracking */}
+                    {stepInstance && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge variant="outline" className="text-[9px] h-4 px-1.5 font-mono opacity-60">
+                              #{stepInstance.id.slice(0, 6)}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-xs">
+                            <p>Step Instance ID: {stepInstance.id}</p>
+                            {stepInstance.status === 'completed' && stepInstance.days_to_complete && (
+                              <p className="text-muted-foreground">Completed in {stepInstance.days_to_complete} day{stepInstance.days_to_complete !== 1 ? 's' : ''}</p>
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{step.description}</p>
+                  
+                  {/* Step stats for completed steps */}
+                  {stepInstance?.status === 'completed' && (
+                    <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
+                      {stepInstance.days_to_complete !== null && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {stepInstance.days_to_complete} day{stepInstance.days_to_complete !== 1 ? 's' : ''}
+                        </span>
+                      )}
+                      {stepInstance.interaction_outcome && (
+                        <Badge variant="secondary" className="text-[9px] h-4 capitalize">
+                          {stepInstance.interaction_outcome}
+                        </Badge>
+                      )}
+                      {stepInstance.rapport_progress && (
+                        <Badge 
+                          variant="secondary" 
+                          className={`text-[9px] h-4 capitalize ${
+                            stepInstance.rapport_progress === 'strengthened' 
+                              ? 'bg-emerald-500/20 text-emerald-500' 
+                              : stepInstance.rapport_progress === 'declined'
+                                ? 'bg-red-500/20 text-red-500'
+                                : ''
+                          }`}
+                        >
+                          {stepInstance.rapport_progress}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                   
                   {/* Linked Outreach Info */}
                   {linkedOutreach && (
@@ -253,8 +315,8 @@ export function DevelopmentPathCard({
                     </div>
                   )}
                   
-                  {/* Current Step Actions */}
-                  {isCurrent && !linkedOutreach && (
+                  {/* Actions for unlocked steps without outreach (current step can plan) */}
+                  {isUnlocked && !linkedOutreach && !isCompleted && (
                     <div className="mt-3 flex gap-2">
                       <Button 
                         size="sm" 
