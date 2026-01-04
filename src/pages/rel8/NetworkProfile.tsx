@@ -8,7 +8,7 @@ import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStre
 import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathCard";
 import { DevelopmentTimeline } from "@/components/rel8t/network/DevelopmentTimeline";
 import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModal";
-import { LinkOutreachDialog } from "@/components/rel8t/network/LinkOutreachDialog";
+// Outreach linking removed - outreaches are tracked via step instances
 import { Actv8InsightsCard } from "@/components/rel8t/network/Actv8InsightsCard";
 import { TierProgressBar } from "@/components/rel8t/network/TierProgressBar";
 
@@ -49,8 +49,6 @@ export default function NetworkProfile() {
   } = useRelationshipWizard();
   
   const [showPathModal, setShowPathModal] = useState(false);
-  const [showLinkDialog, setShowLinkDialog] = useState(false);
-  const [linkStepIndex, setLinkStepIndex] = useState<number>(0);
 
   const { data: actv8Contact, isLoading, error } = useQuery({
     queryKey: ['actv8-contact', id],
@@ -70,14 +68,6 @@ export default function NetworkProfile() {
     enabled: !!id,
   });
 
-  const { data: availableOutreaches = [], refetch: refetchAvailable } = useQuery({
-    queryKey: ['contact-outreaches', actv8Contact?.contact_id],
-    queryFn: async () => {
-      if (!actv8Contact?.contact_id) return [];
-      return getOutreachesForContact(actv8Contact.contact_id);
-    },
-    enabled: !!actv8Contact?.contact_id,
-  });
 
   const updatePathMutation = useMutation({
     mutationFn: async (pathId: string) => {
@@ -216,16 +206,6 @@ export default function NetworkProfile() {
     }
   };
 
-  const handleLinkOutreach = (stepIndex: number) => {
-    setLinkStepIndex(stepIndex);
-    setShowLinkDialog(true);
-  };
-
-  const handleOutreachLinked = () => {
-    queryClient.invalidateQueries({ queryKey: ['actv8-outreaches', id] });
-    queryClient.invalidateQueries({ queryKey: ['contact-outreaches', actv8Contact?.contact_id] });
-    refetchAvailable();
-  };
 
   const relationshipTypeLabels: Record<string, string> = {
     collaborator: 'Collaborator',
@@ -426,14 +406,11 @@ export default function NetworkProfile() {
             currentStepIndex={contact.currentStepIndex}
             completedSteps={contact.completedSteps}
             linkedOutreaches={linkedOutreaches}
-            availableOutreaches={availableOutreaches}
             actv8ContactId={actv8Contact.id}
             pathTier={contact.pathTier}
             pathHistory={contact.pathHistory}
             skippedPaths={contact.skippedPaths}
             onPlanTouchpoint={handlePlanTouchpoint}
-            onLinkOutreach={handleLinkOutreach}
-            onAdvanceStep={handleAdvanceStep}
             onChangePath={() => setShowPathModal(true)}
           />
         </Card>
@@ -461,16 +438,7 @@ export default function NetworkProfile() {
         actv8ContactId={actv8Contact.id}
         currentTier={contact.pathTier}
         hasCurrentPath={!!contact.developmentPathId}
-      />
-
-      <LinkOutreachDialog
-        open={showLinkDialog}
-        onOpenChange={setShowLinkDialog}
-        outreaches={availableOutreaches}
-        actv8ContactId={actv8Contact.id}
-        stepIndex={linkStepIndex}
-        stepName={actv8Contact.path?.steps?.[linkStepIndex]?.name || `Step ${linkStepIndex + 1}`}
-        onLinked={handleOutreachLinked}
+        isPathComplete={actv8Contact.path?.steps && contact.currentStepIndex >= actv8Contact.path.steps.length}
       />
 
     </div>

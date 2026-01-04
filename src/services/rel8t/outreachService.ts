@@ -931,36 +931,3 @@ export const getOutreachesForContact = async (contactId: string): Promise<Outrea
   }
 };
 
-export const linkOutreachToActv8 = async (
-  outreachId: string,
-  actv8ContactId: string,
-  stepIndex: number
-): Promise<boolean> => {
-  try {
-    const { error } = await supabase
-      .from("rms_outreach")
-      .update({
-        actv8_contact_id: actv8ContactId,
-        actv8_step_index: stepIndex,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", outreachId);
-    
-    if (error) throw error;
-    
-    toast({
-      title: "Outreach linked",
-      description: "Outreach has been linked to the development path step.",
-    });
-    
-    return true;
-  } catch (error: any) {
-    console.error("Error linking outreach to actv8:", error);
-    toast({
-      title: "Error linking outreach",
-      description: error.message,
-      variant: "destructive",
-    });
-    return false;
-  }
-};

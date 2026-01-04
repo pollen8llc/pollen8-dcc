@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO, isPast, isToday } from "date-fns";
-import { Calendar, ExternalLink, Link2, Check, ChevronRight, Play, SkipForward, History, Clock } from "lucide-react";
+import { Calendar, ExternalLink, Check, ChevronRight, Play, SkipForward, History, Clock } from "lucide-react";
 import { Outreach } from "@/services/rel8t/outreachService";
 import { PathHistoryEntry, SkippedPathEntry } from "@/hooks/useActv8Contacts";
 import { TierProgressBar } from "./TierProgressBar";
@@ -20,13 +20,11 @@ interface DevelopmentPathCardProps {
   currentStepIndex?: number;
   completedSteps?: string[];
   linkedOutreaches?: LinkedOutreach[];
-  availableOutreaches?: Outreach[];
   actv8ContactId?: string;
   pathTier?: number;
   pathHistory?: PathHistoryEntry[];
   skippedPaths?: SkippedPathEntry[];
   onPlanTouchpoint?: (stepIndex: number) => void;
-  onLinkOutreach?: (stepIndex: number) => void;
   onAdvanceStep?: () => void;
   onChangePath?: () => void;
 }
@@ -43,13 +41,11 @@ export function DevelopmentPathCard({
   currentStepIndex,
   completedSteps,
   linkedOutreaches = [],
-  availableOutreaches = [],
   actv8ContactId,
   pathTier = 1,
   pathHistory = [],
   skippedPaths = [],
   onPlanTouchpoint,
-  onLinkOutreach,
   onChangePath
 }: DevelopmentPathCardProps) {
   const navigate = useNavigate();
@@ -315,9 +311,9 @@ export function DevelopmentPathCard({
                     </div>
                   )}
                   
-                  {/* Actions for unlocked steps without outreach (current step can plan) */}
-                  {isUnlocked && !linkedOutreach && !isCompleted && (
-                    <div className="mt-3 flex gap-2">
+                  {/* Actions for current step without outreach */}
+                  {isCurrent && !linkedOutreach && (
+                    <div className="mt-3">
                       <Button 
                         size="sm" 
                         onClick={() => onPlanTouchpoint?.(index)}
@@ -326,17 +322,6 @@ export function DevelopmentPathCard({
                         Plan Touchpoint
                         <ChevronRight className="h-3 w-3" />
                       </Button>
-                      {availableOutreaches.length > 0 && onLinkOutreach && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => onLinkOutreach(index)}
-                          className="h-8 text-xs rounded-lg gap-1"
-                        >
-                          <Link2 className="h-3 w-3" />
-                          Link
-                        </Button>
-                      )}
                     </div>
                   )}
                 </div>
