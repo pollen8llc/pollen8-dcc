@@ -3,7 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Loader2, Check, Coffee, Users, Handshake, CalendarCheck, Lock, SkipForward, AlertTriangle } from "lucide-react";
 import { getDevelopmentPaths, getAvailablePaths, skipCurrentPath, DevelopmentPath } from "@/services/actv8Service";
 import { cn } from "@/lib/utils";
@@ -35,6 +37,13 @@ const tierLabels: Record<number, string> = {
   3: "Professional",
   4: "Advanced",
 };
+
+const SKIP_REASONS = [
+  { id: "already_established", label: "Already have established rapport", description: "Relationship is already beyond this stage" },
+  { id: "not_relevant", label: "Path not relevant", description: "This path doesn't fit the relationship type" },
+  { id: "contact_unresponsive", label: "Contact unresponsive", description: "Unable to engage with this contact currently" },
+  { id: "priorities_changed", label: "Priorities changed", description: "Focus has shifted to other relationships" },
+] as const;
 
 export function PathSelectionModal({
   open,
@@ -300,22 +309,38 @@ export function PathSelectionModal({
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               Skip Current Path?
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
-              <p>
-                Skipping a path will be recorded in this contact's history. You'll advance to the next tier
-                and can select a different path.
-              </p>
-              <div>
-                <label className="text-sm font-medium text-foreground">
-                  Reason for skipping (optional)
-                </label>
-                <Textarea
-                  value={skipReason}
-                  onChange={(e) => setSkipReason(e.target.value)}
-                  placeholder="e.g., Already have established rapport, relationship started professionally..."
-                  className="mt-1.5"
-                  rows={3}
-                />
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Skipping a path will be recorded in this contact's history. You'll advance to the next tier
+                  and can select a different path.
+                </p>
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-3">
+                    Why are you skipping this path?
+                  </p>
+                  <RadioGroup
+                    value={skipReason}
+                    onValueChange={setSkipReason}
+                    className="space-y-2"
+                  >
+                    {SKIP_REASONS.map((reason) => (
+                      <div
+                        key={reason.id}
+                        className="flex items-start space-x-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => setSkipReason(reason.id)}
+                      >
+                        <RadioGroupItem value={reason.id} id={reason.id} className="mt-0.5" />
+                        <Label htmlFor={reason.id} className="cursor-pointer flex-1">
+                          <span className="font-medium text-foreground">{reason.label}</span>
+                          <span className="block text-xs text-muted-foreground mt-0.5">
+                            {reason.description}
+                          </span>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -324,7 +349,7 @@ export function PathSelectionModal({
             <AlertDialogAction
               onClick={handleSkipConfirm}
               className="bg-amber-500 hover:bg-amber-600"
-              disabled={skipMutation.isPending}
+              disabled={skipMutation.isPending || !skipReason}
             >
               {skipMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
