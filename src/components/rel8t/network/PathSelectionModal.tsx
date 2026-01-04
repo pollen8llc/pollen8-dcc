@@ -17,6 +17,7 @@ interface PathSelectionModalProps {
   actv8ContactId?: string;
   currentTier?: number;
   hasCurrentPath?: boolean;
+  isPathComplete?: boolean;
 }
 
 // Check if a path is the Build Rapport meeting-focused path
@@ -42,7 +43,8 @@ export function PathSelectionModal({
   currentPathId,
   actv8ContactId,
   currentTier = 1,
-  hasCurrentPath = false
+  hasCurrentPath = false,
+  isPathComplete = false
 }: PathSelectionModalProps) {
   const queryClient = useQueryClient();
   const [showSkipDialog, setShowSkipDialog] = useState(false);
@@ -81,7 +83,16 @@ export function PathSelectionModal({
     },
   });
 
+  // Can only select a new path if no current path OR path is complete
+  const isPathInProgress = hasCurrentPath && !isPathComplete;
+
   const handleSelect = (pathId: string) => {
+    if (isPathInProgress && pathId !== currentPathId) {
+      toast.error("Complete or skip your current path first", {
+        description: "Use the Skip Path option if you want to change paths."
+      });
+      return;
+    }
     onSelectPath(pathId);
     onOpenChange(false);
   };
@@ -140,6 +151,14 @@ export function PathSelectionModal({
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto px-4 pb-4 sm:px-6 sm:pb-6 space-y-6">
+              {/* Path in Progress Warning */}
+              {isPathInProgress && (
+                <div className="p-3 rounded-lg border border-primary/30 bg-primary/5">
+                  <p className="text-sm text-muted-foreground">
+                    You have a path in progress. Complete all steps or use <strong>Skip Path</strong> to change paths.
+                  </p>
+                </div>
+              )}
               {/* Skip Current Path Option */}
               {hasCurrentPath && actv8ContactId && (
                 <div className="flex items-center justify-between p-3 rounded-lg border border-amber-500/30 bg-amber-500/10">
@@ -176,7 +195,7 @@ export function PathSelectionModal({
                           <button
                             key={path.id}
                             onClick={() => handleSelect(path.id)}
-                            disabled={isNextTier && !hasCurrentPath}
+                            disabled={(isNextTier && !hasCurrentPath) || (isPathInProgress && !isCurrent)}
                             className={cn(
                               "text-left p-3 sm:p-4 rounded-lg border transition-all",
                               "hover:border-primary/50 hover:bg-primary/5",
