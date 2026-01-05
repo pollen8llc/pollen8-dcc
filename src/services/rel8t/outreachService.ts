@@ -776,14 +776,53 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
       }
     }
     
-    // Sync with Actv8 step instance if this is a Build Rapport outreach
-    if (outreach.actv8_contact_id && outreach.actv8_step_index !== null && outreach.actv8_step_index !== undefined) {
+    // Sync with Actv8: Find actv8 contact via contact_id if not already set
+    let actv8ContactId = outreach.actv8_contact_id;
+    let actv8StepIndex = outreach.actv8_step_index;
+    
+    // If no actv8_contact_id but we have contactIds, try to find matching actv8 contact
+    if (!actv8ContactId && contactIds.length > 0) {
+      try {
+        const { data: matchingActv8 } = await supabase
+          .from("rms_actv8_contacts")
+          .select("id, current_step_index")
+          .eq("user_id", user.id)
+          .in("contact_id", contactIds)
+          .eq("status", "active")
+          .limit(1)
+          .maybeSingle();
+        
+        if (matchingActv8) {
+          actv8ContactId = matchingActv8.id;
+          // Use the current step index if not explicitly provided
+          if (actv8StepIndex === null || actv8StepIndex === undefined) {
+            actv8StepIndex = matchingActv8.current_step_index ?? 0;
+          }
+          
+          // Update the outreach with the actv8 link
+          await supabase
+            .from("rms_outreach")
+            .update({
+              actv8_contact_id: actv8ContactId,
+              actv8_step_index: actv8StepIndex
+            })
+            .eq("id", outreachId);
+          
+          console.log("✅ Auto-linked outreach to actv8 contact:", actv8ContactId, "step:", actv8StepIndex);
+        }
+      } catch (lookupError) {
+        console.error("Error looking up actv8 contact:", lookupError);
+      }
+    }
+    
+    // Sync with Actv8 step instance if we have an actv8 contact
+    if (actv8ContactId && actv8StepIndex !== null && actv8StepIndex !== undefined) {
       try {
         const { updateStepInstance, getStepInstances, createStepInstance, getActv8Contact } = await import("@/services/actv8Service");
         
         // Get step instances to find the one matching this step index
-        const stepInstances = await getStepInstances(outreach.actv8_contact_id);
-        const matchingInstance = stepInstances.find(si => si.step_index === outreach.actv8_step_index);
+        const stepInstances = await getStepInstances(actv8ContactId);
+        const matchingInstance = stepInstances.find(si => si.step_index === actv8StepIndex);
         
         if (matchingInstance) {
           // Update the step instance with the outreach ID and set status to active
@@ -795,13 +834,13 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
           console.log("✅ Linked outreach to step instance:", matchingInstance.id);
         } else {
           // If no step instance exists, create one
-          const actv8Contact = await getActv8Contact(outreach.actv8_contact_id);
-          if (actv8Contact?.path?.steps?.[outreach.actv8_step_index]) {
-            const step = actv8Contact.path.steps[outreach.actv8_step_index];
+          const actv8Contact = await getActv8Contact(actv8ContactId);
+          if (actv8Contact?.path?.steps?.[actv8StepIndex]) {
+            const step = actv8Contact.path.steps[actv8StepIndex];
             const newInstance = await createStepInstance(
-              outreach.actv8_contact_id,
+              actv8ContactId,
               step.id,
-              outreach.actv8_step_index,
+              actv8StepIndex,
               actv8Contact.development_path_id,
               'active'
             );
@@ -846,7 +885,17 @@ export const getOutreachesByActv8Contact = async (actv8ContactId: string): Promi
       throw new Error('User not authenticated');
     }
     
-    const { data, error } = await supabase
+    // First get the contact_id from the actv8 contact record
+    const { data: actv8Record } = await supabase
+      .from("rms_actv8_contacts")
+      .select("contact_id")
+      .eq("id", actv8ContactId)
+      .single();
+    
+    const contactId = actv8Record?.contact_id;
+    
+    // Fetch outreaches that are directly linked via actv8_contact_id
+    const { data: directLinked, error: directError } = await supabase
       .from("rms_outreach")
       .select(`
         *,
@@ -864,10 +913,42 @@ export const getOutreachesByActv8Contact = async (actv8ContactId: string): Promi
       .eq("actv8_contact_id", actv8ContactId)
       .order("actv8_step_index", { ascending: true });
     
-    if (error) throw error;
+    if (directError) throw directError;
+    
+    // Also fetch outreaches that include this contact but aren't directly linked yet
+    let indirectLinked: any[] = [];
+    if (contactId) {
+      const { data: contactOutreaches } = await supabase
+        .from("rms_outreach_contacts")
+        .select(`
+          outreach_id,
+          rms_outreach(
+            *,
+            rms_outreach_contacts(
+              contact_id,
+              rms_contacts(
+                id,
+                name,
+                email,
+                organization
+              )
+            )
+          )
+        `)
+        .eq("contact_id", contactId);
+      
+      // Extract unique outreaches not already in directLinked
+      const directIds = new Set((directLinked || []).map(o => o.id));
+      indirectLinked = (contactOutreaches || [])
+        .filter(oc => oc.rms_outreach && !directIds.has(oc.rms_outreach.id))
+        .map(oc => oc.rms_outreach);
+    }
+    
+    // Combine both sets
+    const allOutreaches = [...(directLinked || []), ...indirectLinked];
     
     // Process data to format contacts  
-    const formattedData = (data as any)?.map((item: any) => {
+    const formattedData = allOutreaches.map((item: any) => {
       const contacts = Array.isArray(item.rms_outreach_contacts) 
         ? item.rms_outreach_contacts
             .map((oc: any) => oc.rms_contacts)
@@ -976,3 +1057,61 @@ export const getOutreachesForContact = async (contactId: string): Promise<Outrea
   }
 };
 
+
+// Sync existing outreaches to their actv8 contacts based on contact_id
+// This is useful for linking legacy outreaches that weren't created through the wizard
+export const syncOutreachesToActv8 = async (actv8ContactId: string): Promise<number> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
+    // Get the contact_id from actv8 record
+    const { data: actv8Record } = await supabase
+      .from("rms_actv8_contacts")
+      .select("contact_id, current_step_index, development_path_id")
+      .eq("id", actv8ContactId)
+      .single();
+    
+    if (!actv8Record?.contact_id) return 0;
+    
+    // Find unlinked outreaches for this contact
+    const { data: unlinkedOutreaches } = await supabase
+      .from("rms_outreach_contacts")
+      .select(`
+        outreach_id,
+        rms_outreach!inner(
+          id,
+          actv8_contact_id,
+          status
+        )
+      `)
+      .eq("contact_id", actv8Record.contact_id);
+    
+    // Filter to outreaches not yet linked
+    const toSync = (unlinkedOutreaches || []).filter(
+      oc => oc.rms_outreach && !oc.rms_outreach.actv8_contact_id
+    );
+    
+    if (toSync.length === 0) return 0;
+    
+    // Update each outreach to link to the actv8 contact
+    let synced = 0;
+    for (const item of toSync) {
+      const { error } = await supabase
+        .from("rms_outreach")
+        .update({
+          actv8_contact_id: actv8ContactId,
+          actv8_step_index: actv8Record.current_step_index ?? 0
+        })
+        .eq("id", item.outreach_id);
+      
+      if (!error) synced++;
+    }
+    
+    console.log(`✅ Synced ${synced} outreaches to actv8 contact ${actv8ContactId}`);
+    return synced;
+  } catch (error) {
+    console.error("Error syncing outreaches to actv8:", error);
+    return 0;
+  }
+};
