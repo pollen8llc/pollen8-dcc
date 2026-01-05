@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath } from "@/services/actv8Service";
-import { getOutreachesByActv8Contact, getOutreachesForContact } from "@/services/rel8t/outreachService";
+import { getOutreachesByActv8Contact, getOutreachesForContact, syncOutreachesToActv8 } from "@/services/rel8t/outreachService";
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathCard";
@@ -59,6 +59,9 @@ export default function NetworkProfile() {
   const { data: linkedOutreaches = [] } = useQuery({
     queryKey: ['actv8-outreaches', id],
     queryFn: async () => {
+      // First sync any unlinked outreaches to this actv8 contact
+      await syncOutreachesToActv8(id!);
+      
       const outreaches = await getOutreachesByActv8Contact(id!);
       return outreaches.map(o => ({
         stepIndex: o.actv8_step_index ?? 0,
