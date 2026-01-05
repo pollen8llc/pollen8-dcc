@@ -776,6 +776,51 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
       }
     }
     
+    // Sync with Actv8 step instance if this is a Build Rapport outreach
+    if (outreach.actv8_contact_id && outreach.actv8_step_index !== null && outreach.actv8_step_index !== undefined) {
+      try {
+        const { updateStepInstance, getStepInstances, createStepInstance, getActv8Contact } = await import("@/services/actv8Service");
+        
+        // Get step instances to find the one matching this step index
+        const stepInstances = await getStepInstances(outreach.actv8_contact_id);
+        const matchingInstance = stepInstances.find(si => si.step_index === outreach.actv8_step_index);
+        
+        if (matchingInstance) {
+          // Update the step instance with the outreach ID and set status to active
+          await updateStepInstance(matchingInstance.id, {
+            outreach_id: outreachId,
+            status: 'active',
+            started_at: new Date().toISOString()
+          });
+          console.log("✅ Linked outreach to step instance:", matchingInstance.id);
+        } else {
+          // If no step instance exists, create one
+          const actv8Contact = await getActv8Contact(outreach.actv8_contact_id);
+          if (actv8Contact?.path?.steps?.[outreach.actv8_step_index]) {
+            const step = actv8Contact.path.steps[outreach.actv8_step_index];
+            const newInstance = await createStepInstance(
+              outreach.actv8_contact_id,
+              step.id,
+              outreach.actv8_step_index,
+              actv8Contact.development_path_id,
+              'active'
+            );
+            // Update the new instance with the outreach ID
+            if (newInstance) {
+              await updateStepInstance(newInstance.id, {
+                outreach_id: outreachId,
+                started_at: new Date().toISOString()
+              });
+              console.log("✅ Created and linked new step instance:", newInstance.id);
+            }
+          }
+        }
+      } catch (syncError) {
+        console.error("Error syncing with Actv8 step instance:", syncError);
+        // Don't fail the outreach creation if sync fails
+      }
+    }
+    
     toast({
       title: "Outreach created",
       description: "Calendar invitation sent to your email.",
