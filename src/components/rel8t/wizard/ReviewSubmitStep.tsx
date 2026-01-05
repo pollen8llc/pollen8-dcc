@@ -145,6 +145,11 @@ export const ReviewSubmitStep = ({
       // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
       queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
+      // Invalidate step instances so the path card shows updated outreach links
+      if (actv8ContactId) {
+        queryClient.invalidateQueries({ queryKey: ["step-instances", actv8ContactId] });
+        queryClient.invalidateQueries({ queryKey: ["actv8-outreaches", actv8ContactId] });
+      }
       
       // Success! Outreach items created from existing triggers
       setSubmissionStatus("success");

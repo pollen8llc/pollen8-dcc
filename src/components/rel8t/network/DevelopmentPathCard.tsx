@@ -84,11 +84,30 @@ export function DevelopmentPathCard({
   const isComplete = path.steps && stepIndex >= path.steps.length;
 
   const getLinkedOutreach = (index: number) => {
+    // First check if we have a linked outreach from step instances
+    const instance = stepInstances.find(si => si.step_index === index);
+    if (instance?.outreach_id) {
+      // Find the outreach in linkedOutreaches by outreach_id
+      const outreachFromInstance = linkedOutreaches.find(
+        lo => lo.outreach.id === instance.outreach_id
+      );
+      if (outreachFromInstance) {
+        return outreachFromInstance;
+      }
+    }
+    // Fallback to legacy stepIndex matching
     return linkedOutreaches.find(lo => lo.stepIndex === index);
   };
 
-  const getStepInstance = (stepId: string): StepInstance | undefined => {
-    return stepInstances.find(si => si.step_id === stepId);
+  const getStepInstance = (stepId: string, stepIndex?: number): StepInstance | undefined => {
+    // First try to find by step_id
+    const byStepId = stepInstances.find(si => si.step_id === stepId);
+    if (byStepId) return byStepId;
+    // Fallback to step_index if provided
+    if (stepIndex !== undefined) {
+      return stepInstances.find(si => si.step_index === stepIndex);
+    }
+    return undefined;
   };
 
   const getOutreachStatusBadge = (outreach: Outreach) => {
@@ -203,7 +222,7 @@ export function DevelopmentPathCard({
           const isCurrent = index === stepIndex;
           const isUnlocked = index <= stepIndex; // Step is unlocked if current or previous completed
           const linkedOutreach = getLinkedOutreach(index);
-          const stepInstance = getStepInstance(step.id);
+          const stepInstance = getStepInstance(step.id, index);
 
           return (
             <div
