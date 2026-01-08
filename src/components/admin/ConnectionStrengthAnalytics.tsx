@@ -2,10 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { 
   Users, Zap, Link2, Clock, Route,
   Sparkles, Flame, CircleDot, Star, Plus, Minus,
-  Calculator, ChevronRight
+  Calculator, ChevronRight, Edit, Save, X, Loader2
 } from 'lucide-react';
 import { mockContacts, getStrengthDistribution, getAverageScores } from '@/data/mockConnectionStrengthData';
 import { 
@@ -14,15 +16,18 @@ import {
 } from '@/utils/connectionStrengthCalculator';
 import { SolarSystem } from '@/components/ui/SolarSystem';
 import { SOLAR_SYSTEMS } from '@/data/solarSystemsConfig';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getFormulas, updateFormula, formulasToConfig, Formula } from '@/services/formulaService';
+import { toast } from 'sonner';
 
 // Avatar tiers organized by complexity (number of planets)
 const AVATAR_TIERS = {
-  tier0: ['UXI8000', 'UXI8002', 'UXI8009', 'UXI8018', 'UXI8025', 'UXI8035'], // 0 planets - simplest
-  tier1: ['UXI8001', 'UXI8007', 'UXI8012', 'UXI8015', 'UXI8019', 'UXI8023', 'UXI8027', 'UXI8029', 'UXI8033', 'UXI8037', 'UXI8039'], // 1 planet
-  tier2: ['UXI8003', 'UXI8004', 'UXI8008', 'UXI8014', 'UXI8017', 'UXI8021', 'UXI8024', 'UXI8026', 'UXI8031', 'UXI8034', 'UXI8036', 'UXI8040'], // 2 planets
-  tier3: ['UXI8005', 'UXI8010', 'UXI8011', 'UXI8020', 'UXI8022', 'UXI8030', 'UXI8032'], // 3 planets
-  tier4: ['UXI8006', 'UXI8013', 'UXI8028', 'UXI8038'], // 4 planets
-  tier5: ['UXI8016', 'UXI9000'], // 5 planets - most complex
+  tier0: ['UXI8000', 'UXI8002', 'UXI8009', 'UXI8018', 'UXI8025', 'UXI8035'],
+  tier1: ['UXI8001', 'UXI8007', 'UXI8012', 'UXI8015', 'UXI8019', 'UXI8023', 'UXI8027', 'UXI8029', 'UXI8033', 'UXI8037', 'UXI8039'],
+  tier2: ['UXI8003', 'UXI8004', 'UXI8008', 'UXI8014', 'UXI8017', 'UXI8021', 'UXI8024', 'UXI8026', 'UXI8031', 'UXI8034', 'UXI8036', 'UXI8040'],
+  tier3: ['UXI8005', 'UXI8010', 'UXI8011', 'UXI8020', 'UXI8022', 'UXI8030', 'UXI8032'],
+  tier4: ['UXI8006', 'UXI8013', 'UXI8028', 'UXI8038'],
+  tier5: ['UXI8016', 'UXI9000'],
 };
 
 // Score thresholds for avatar tiers (scalable to thousands)
@@ -42,7 +47,6 @@ const getAvatarForScore = (score: number): { id: string; tier: number; planets: 
   const tierKey = `tier${threshold.tier}` as keyof typeof AVATAR_TIERS;
   const tierAvatars = AVATAR_TIERS[tierKey];
   
-  // Pick avatar within tier based on score (for variety)
   const index = Math.floor((score % tierAvatars.length));
   
   return { 
@@ -53,7 +57,112 @@ const getAvatarForScore = (score: number): { id: string; tier: number; planets: 
   };
 };
 
+// Editable value component
+const EditableValue: React.FC<{
+  formula: Formula;
+  isEditing: boolean;
+  onSave: (id: string, value: number) => void;
+  isSaving: boolean;
+}> = ({ formula, isEditing, onSave, isSaving }) => {
+  const [editValue, setEditValue] = useState(formula.value.toString());
+  const [isEditingThis, setIsEditingThis] = useState(false);
+
+  const handleSave = () => {
+    const numValue = parseFloat(editValue);
+    if (isNaN(numValue)) {
+      toast.error('Please enter a valid number');
+      return;
+    }
+    if (formula.min_value !== undefined && numValue < formula.min_value) {
+      toast.error(`Value must be at least ${formula.min_value}`);
+      return;
+    }
+    if (formula.max_value !== undefined && numValue > formula.max_value) {
+      toast.error(`Value must be at most ${formula.max_value}`);
+      return;
+    }
+    onSave(formula.id, numValue);
+    setIsEditingThis(false);
+  };
+
+  if (!isEditing) {
+    return <span className="font-mono font-bold">{formula.value}</span>;
+  }
+
+  if (isEditingThis) {
+    return (
+      <div className="inline-flex items-center gap-1">
+        <Input
+          type="number"
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          className="w-20 h-7 text-sm font-mono"
+          step={formula.value % 1 !== 0 ? 0.1 : 1}
+          min={formula.min_value}
+          max={formula.max_value}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleSave();
+            if (e.key === 'Escape') setIsEditingThis(false);
+          }}
+          autoFocus
+        />
+        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSave} disabled={isSaving}>
+          {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3 text-green-500" />}
+        </Button>
+        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingThis(false)}>
+          <X className="h-3 w-3 text-red-500" />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => {
+        setEditValue(formula.value.toString());
+        setIsEditingThis(true);
+      }}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 hover:bg-primary/20 transition-colors font-mono font-bold"
+    >
+      {formula.value}
+      <Edit className="h-3 w-3 text-primary" />
+    </button>
+  );
+};
+
 const ConnectionStrengthAnalytics: React.FC = () => {
+  const queryClient = useQueryClient();
+  const [isEditMode, setIsEditMode] = useState(false);
+  
+  // Fetch formulas from database
+  const { data: formulas = [], isLoading, error } = useQuery({
+    queryKey: ['formulas'],
+    queryFn: getFormulas,
+  });
+
+  // Mutation for updating formulas
+  const updateMutation = useMutation({
+    mutationFn: ({ id, value }: { id: string; value: number }) => updateFormula(id, value),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['formulas'] });
+      toast.success('Formula updated successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to update formula: ' + (error as Error).message);
+    },
+  });
+
+  // Helper to get formula value
+  const getFormulaValue = (category: string, key: string, defaultValue: number): number => {
+    const formula = formulas.find(f => f.category === category && f.key === key);
+    return formula ? formula.value : defaultValue;
+  };
+
+  // Helper to get formula object
+  const getFormula = (category: string, key: string): Formula | undefined => {
+    return formulas.find(f => f.category === category && f.key === key);
+  };
+
   const distribution = getStrengthDistribution();
   const averages = getAverageScores();
   
@@ -81,45 +190,81 @@ const ConnectionStrengthAnalytics: React.FC = () => {
   const [simCompletedPaths, setSimCompletedPaths] = useState(1);
   const [simSkippedPaths, setSimSkippedPaths] = useState(0);
 
-  // Calculate scores
-  const originPoints: Record<string, number> = {
-    invite: 20, wizard: 16, manual: 12, import: 8, unknown: 4
+  // Get formula values from database (with defaults)
+  const calendarAcceptsPoints = getFormulaValue('engagement', 'calendar_accepts_points', 6);
+  const fastResponsePoints = getFormulaValue('engagement', 'fast_response_points', 4);
+  const ignoredPenalty = getFormulaValue('engagement', 'ignored_penalty', -6);
+  const declinePenalty = getFormulaValue('engagement', 'decline_penalty', -5);
+  const gapPenalty = getFormulaValue('engagement', 'gap_penalty', -5);
+  
+  const invitePoints = getFormulaValue('origin', 'invite_points', 12);
+  const wizardPoints = getFormulaValue('origin', 'wizard_points', 10);
+  const manualPoints = getFormulaValue('origin', 'manual_points', 7);
+  const importPoints = getFormulaValue('origin', 'import_points', 5);
+  const unknownPoints = getFormulaValue('origin', 'unknown_points', 3);
+  const inviterBonus = getFormulaValue('origin', 'inviter_bonus', 3);
+  
+  const sharedContactsMultiplier = getFormulaValue('network', 'shared_contacts_multiplier', 1.5);
+  const affiliationsMultiplier = getFormulaValue('network', 'affiliations_multiplier', 1);
+  const communitiesMultiplier = getFormulaValue('network', 'communities_multiplier', 1);
+  
+  const tierMultiplier = getFormulaValue('path', 'tier_multiplier', 5);
+  const completedPathPoints = getFormulaValue('path', 'completed_path_points', 4);
+  const skippedPathPenalty = getFormulaValue('path', 'skipped_path_penalty', -2);
+
+  const pathWeight = getFormulaValue('weights', 'path_weight', 40);
+  const engagementWeight = getFormulaValue('weights', 'engagement_weight', 30);
+  const originWeight = getFormulaValue('weights', 'origin_weight', 15);
+  const networkWeight = getFormulaValue('weights', 'network_weight', 15);
+
+  const starMin = getFormulaValue('thresholds', 'star_min', 75);
+  const flameMin = getFormulaValue('thresholds', 'flame_min', 50);
+  const emberMin = getFormulaValue('thresholds', 'ember_min', 25);
+
+  // Calculate scores using formula values
+  const originPointsScaled: Record<string, number> = {
+    invite: invitePoints,
+    wizard: wizardPoints,
+    manual: manualPoints,
+    import: importPoints,
+    unknown: unknownPoints
   };
 
-  // NEW WEIGHTS: Path (40) > Engagement (30) > Origin (15) = Network (15) = 100 total
-  // Path is prioritized to encourage relationship development through tiers
-  
-  // Engagement: 30 pts max (was 35)
-  const engagementPositive = (simCalendarAccepts * 6) + (simFastResponses * 4);
-  const engagementNegative = (simIgnored * -6) + (simDeclines * -5) + (simGaps * -5);
+  // Engagement calculation
+  const engagementPositive = (simCalendarAccepts * calendarAcceptsPoints) + (simFastResponses * fastResponsePoints);
+  const engagementNegative = (simIgnored * ignoredPenalty) + (simDeclines * declinePenalty) + (simGaps * gapPenalty);
   const engagementRaw = engagementPositive + engagementNegative;
-  const engagementScore = Math.max(0, Math.min(30, engagementRaw));
+  const engagementScore = Math.max(0, Math.min(engagementWeight, engagementRaw));
   
-  // Origin: 15 pts max (was 25)
-  const originPointsScaled: Record<string, number> = {
-    invite: 12, wizard: 10, manual: 7, import: 5, unknown: 3
-  };
+  // Origin calculation
   const originBase = originPointsScaled[simOriginType];
-  const originBonus = simHasInviter ? 3 : 0;
-  const originScore = Math.min(15, originBase + originBonus);
+  const originBonusValue = simHasInviter ? inviterBonus : 0;
+  const originScore = Math.min(originWeight, originBase + originBonusValue);
   
-  // Network: 15 pts max (was 25)
+  // Network calculation
   const netInviterStrength = Math.min(5, Math.round(simInviterStrength / 2));
-  const networkScoreCalc = Math.min(15, 
+  const networkScoreCalc = Math.min(networkWeight, 
     netInviterStrength + 
-    (simSharedContacts * 1.5) + 
-    (simSharedAffiliations * 1) + 
-    (simSharedCommunities * 1)
+    (simSharedContacts * sharedContactsMultiplier) + 
+    (simSharedAffiliations * affiliationsMultiplier) + 
+    (simSharedCommunities * communitiesMultiplier)
   );
   
-  // Path Progress: 40 pts max (was 15) - HIGHEST PRIORITY
-  // Tier progression is now the most valuable factor
-  const pathPositive = (simCurrentTier * 5) + (simCompletedPaths * 4);
-  const pathNegative = simSkippedPaths * -2;
-  const pathScore = Math.max(0, Math.min(40, pathPositive + pathNegative));
+  // Path calculation
+  const pathPositive = (simCurrentTier * tierMultiplier) + (simCompletedPaths * completedPathPoints);
+  const pathNegative = simSkippedPaths * skippedPathPenalty;
+  const pathScore = Math.max(0, Math.min(pathWeight, pathPositive + pathNegative));
   
   const totalScore = engagementScore + originScore + networkScoreCalc + pathScore;
-  const simulatedStrength = mapScoreToStrength(totalScore);
+  
+  // Use custom thresholds for strength mapping
+  const getStrengthFromScore = (score: number): 'star' | 'flame' | 'ember' | 'spark' => {
+    if (score >= starMin) return 'star';
+    if (score >= flameMin) return 'flame';
+    if (score >= emberMin) return 'ember';
+    return 'spark';
+  };
+  const simulatedStrength = getStrengthFromScore(totalScore);
   
   // Sorted contacts
   const sortedContacts = useMemo(() => 
@@ -134,8 +279,94 @@ const ConnectionStrengthAnalytics: React.FC = () => {
   const currentAvatar = getAvatarForScore(networkScoreCalculated);
   const avatarConfig = SOLAR_SYSTEMS[currentAvatar.id];
 
+  const handleSaveFormula = (id: string, value: number) => {
+    updateMutation.mutate({ id, value });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <span className="ml-2">Loading formulas...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 rounded-xl bg-destructive/10 border border-destructive/30 text-center">
+        <p className="text-destructive">Failed to load formulas. Please try again.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
+      
+      {/* Edit Mode Toggle */}
+      <div className="flex items-center justify-between p-4 rounded-xl bg-card/60 border border-border">
+        <div>
+          <h2 className="font-semibold">Formula Configuration</h2>
+          <p className="text-sm text-muted-foreground">
+            {isEditMode ? 'Click on any value to edit it' : 'Enable edit mode to modify formula values'}
+          </p>
+        </div>
+        <Button
+          variant={isEditMode ? 'default' : 'outline'}
+          onClick={() => setIsEditMode(!isEditMode)}
+          className="gap-2"
+        >
+          {isEditMode ? (
+            <>
+              <Save className="w-4 h-4" />
+              View Mode
+            </>
+          ) : (
+            <>
+              <Edit className="w-4 h-4" />
+              Edit Mode
+            </>
+          )}
+        </Button>
+      </div>
+
+      {/* Category Weights Section */}
+      {isEditMode && (
+        <div className="p-6 rounded-2xl border border-primary/30 bg-primary/5">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Calculator className="w-5 h-5 text-primary" />
+            Category Weights (must sum to 100)
+          </h2>
+          <div className="grid grid-cols-4 gap-4">
+            {[
+              { key: 'path_weight', label: 'Path', color: 'blue' },
+              { key: 'engagement_weight', label: 'Engagement', color: 'primary' },
+              { key: 'origin_weight', label: 'Origin', color: 'green' },
+              { key: 'network_weight', label: 'Network', color: 'yellow' },
+            ].map(({ key, label, color }) => {
+              const formula = getFormula('weights', key);
+              return (
+                <div key={key} className={`p-4 rounded-xl bg-${color}-500/10 border border-${color}-500/20`}>
+                  <p className="text-sm text-muted-foreground mb-1">{label}</p>
+                  {formula ? (
+                    <EditableValue
+                      formula={formula}
+                      isEditing={isEditMode}
+                      onSave={handleSaveFormula}
+                      isSaving={updateMutation.isPending}
+                    />
+                  ) : (
+                    <span className="font-mono font-bold">-</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-sm text-muted-foreground mt-3">
+            Current total: <span className="font-bold">{pathWeight + engagementWeight + originWeight + networkWeight}</span>
+          </p>
+        </div>
+      )}
       
       {/* SECTION 1: Network Score Preview with Dynamic Avatar */}
       <div className="p-6 rounded-2xl bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border border-primary/30">
@@ -200,7 +431,7 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <p className="text-xs text-muted-foreground">Tier {currentAvatar.tier} • {currentAvatar.planets} planet{currentAvatar.planets !== 1 ? 's' : ''}</p>
             </div>
           </div>
-              </div>
+        </div>
         
         {/* Quick Presets */}
         <div className="flex flex-wrap gap-2 mb-6 justify-center">
@@ -224,7 +455,7 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               {preset.label}
             </button>
           ))}
-              </div>
+        </div>
         
         {/* Avatar Tier Scale */}
         <div className="border-t border-white/10 pt-4">
@@ -275,25 +506,52 @@ const ConnectionStrengthAnalytics: React.FC = () => {
           <div className="p-4 rounded-xl border-2 border-yellow-500/30 bg-yellow-500/10 text-center">
             <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
             <p className="text-3xl font-bold text-yellow-500">{distribution.star}</p>
-            <p className="text-sm text-muted-foreground">Star (75-100)</p>
+            <p className="text-sm text-muted-foreground">
+              Star ({isEditMode && getFormula('thresholds', 'star_min') ? (
+                <EditableValue
+                  formula={getFormula('thresholds', 'star_min')!}
+                  isEditing={isEditMode}
+                  onSave={handleSaveFormula}
+                  isSaving={updateMutation.isPending}
+                />
+              ) : starMin}-100)
+            </p>
           </div>
           <div className="p-4 rounded-xl border-2 border-green-500/30 bg-green-500/10 text-center">
             <Flame className="w-8 h-8 text-green-500 mx-auto mb-2" />
             <p className="text-3xl font-bold text-green-500">{distribution.flame}</p>
-            <p className="text-sm text-muted-foreground">Flame (50-74)</p>
+            <p className="text-sm text-muted-foreground">
+              Flame ({isEditMode && getFormula('thresholds', 'flame_min') ? (
+                <EditableValue
+                  formula={getFormula('thresholds', 'flame_min')!}
+                  isEditing={isEditMode}
+                  onSave={handleSaveFormula}
+                  isSaving={updateMutation.isPending}
+                />
+              ) : flameMin}-{starMin - 1})
+            </p>
           </div>
           <div className="p-4 rounded-xl border-2 border-primary/30 bg-primary/10 text-center">
             <Sparkles className="w-8 h-8 text-primary mx-auto mb-2" />
             <p className="text-3xl font-bold text-primary">{distribution.ember}</p>
-            <p className="text-sm text-muted-foreground">Ember (25-49)</p>
+            <p className="text-sm text-muted-foreground">
+              Ember ({isEditMode && getFormula('thresholds', 'ember_min') ? (
+                <EditableValue
+                  formula={getFormula('thresholds', 'ember_min')!}
+                  isEditing={isEditMode}
+                  onSave={handleSaveFormula}
+                  isSaving={updateMutation.isPending}
+                />
+              ) : emberMin}-{flameMin - 1})
+            </p>
           </div>
           <div className="p-4 rounded-xl border-2 border-zinc-500/30 bg-zinc-500/10 text-center">
             <CircleDot className="w-8 h-8 text-zinc-400 mx-auto mb-2" />
             <p className="text-3xl font-bold text-zinc-400">{distribution.spark}</p>
-            <p className="text-sm text-muted-foreground">Spark (0-24)</p>
-                </div>
-              </div>
-            </div>
+            <p className="text-sm text-muted-foreground">Spark (0-{emberMin - 1})</p>
+          </div>
+        </div>
+      </div>
             
       {/* SECTION 3: Connection Strength Calculator */}
       <div className="p-6 rounded-2xl border border-white/10 bg-card/40">
@@ -302,7 +560,7 @@ const ConnectionStrengthAnalytics: React.FC = () => {
           Connection Strength Calculator
         </h2>
 
-        {/* Factor 1: Path Progress (40 pts) - HIGHEST PRIORITY */}
+        {/* Factor 1: Path Progress */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium flex items-center gap-2">
@@ -311,7 +569,7 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <Badge variant="outline" className="ml-2 text-xs bg-blue-500/10 text-blue-500 border-blue-500/30">HIGHEST PRIORITY</Badge>
             </h3>
             <Badge className="bg-blue-500/20 text-blue-500 border-blue-500/30 text-base px-3">
-              {pathScore.toFixed(1)} / 40 pts
+              {pathScore.toFixed(1)} / {pathWeight} pts
             </Badge>
           </div>
           
@@ -321,7 +579,16 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm">Current Tier (T{simCurrentTier})</span>
-                  <span className="text-sm font-mono">{simCurrentTier} × 5 = <span className="text-blue-500 font-bold">+{simCurrentTier * 5}</span></span>
+                  <span className="text-sm font-mono">
+                    {simCurrentTier} × {isEditMode && getFormula('path', 'tier_multiplier') ? (
+                      <EditableValue
+                        formula={getFormula('path', 'tier_multiplier')!}
+                        isEditing={isEditMode}
+                        onSave={handleSaveFormula}
+                        isSaving={updateMutation.isPending}
+                      />
+                    ) : tierMultiplier} = <span className="text-blue-500 font-bold">+{simCurrentTier * tierMultiplier}</span>
+                  </span>
                 </div>
                 <Slider value={[simCurrentTier]} onValueChange={([v]) => setSimCurrentTier(v)} max={6} step={1} />
               </div>
@@ -329,7 +596,16 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm">Completed Paths ({simCompletedPaths})</span>
-                  <span className="text-sm font-mono">{simCompletedPaths} × 4 = <span className="text-blue-500 font-bold">+{simCompletedPaths * 4}</span></span>
+                  <span className="text-sm font-mono">
+                    {simCompletedPaths} × {isEditMode && getFormula('path', 'completed_path_points') ? (
+                      <EditableValue
+                        formula={getFormula('path', 'completed_path_points')!}
+                        isEditing={isEditMode}
+                        onSave={handleSaveFormula}
+                        isSaving={updateMutation.isPending}
+                      />
+                    ) : completedPathPoints} = <span className="text-blue-500 font-bold">+{simCompletedPaths * completedPathPoints}</span>
+                  </span>
                 </div>
                 <Slider value={[simCompletedPaths]} onValueChange={([v]) => setSimCompletedPaths(v)} max={5} step={1} />
               </div>
@@ -337,7 +613,16 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm">Skipped Paths ({simSkippedPaths})</span>
-                  <span className="text-sm font-mono">{simSkippedPaths} × -2 = <span className="text-red-500 font-bold">{simSkippedPaths * -2}</span></span>
+                  <span className="text-sm font-mono">
+                    {simSkippedPaths} × {isEditMode && getFormula('path', 'skipped_path_penalty') ? (
+                      <EditableValue
+                        formula={getFormula('path', 'skipped_path_penalty')!}
+                        isEditing={isEditMode}
+                        onSave={handleSaveFormula}
+                        isSaving={updateMutation.isPending}
+                      />
+                    ) : skippedPathPenalty} = <span className="text-red-500 font-bold">{simSkippedPaths * skippedPathPenalty}</span>
+                  </span>
                 </div>
                 <Slider value={[simSkippedPaths]} onValueChange={([v]) => setSimSkippedPaths(v)} max={5} step={1} />
               </div>
@@ -345,14 +630,14 @@ const ConnectionStrengthAnalytics: React.FC = () => {
             
             <div className="p-3 rounded-lg bg-white/5 text-sm">
               <span className="text-muted-foreground">Calculation:</span>{' '}
-              <span className="text-blue-500">+{(simCurrentTier * 5) + (simCompletedPaths * 4)}</span>{' '}
-              <span className="text-red-500">{simSkippedPaths * -2}</span>{' '}
-              = {(simCurrentTier * 5) + (simCompletedPaths * 4) + (simSkippedPaths * -2)} → clamped to <span className="font-bold">{pathScore.toFixed(1)}</span> (0-40 range)
+              <span className="text-blue-500">+{(simCurrentTier * tierMultiplier) + (simCompletedPaths * completedPathPoints)}</span>{' '}
+              <span className="text-red-500">{simSkippedPaths * skippedPathPenalty}</span>{' '}
+              = {(simCurrentTier * tierMultiplier) + (simCompletedPaths * completedPathPoints) + (simSkippedPaths * skippedPathPenalty)} → clamped to <span className="font-bold">{pathScore.toFixed(1)}</span> (0-{pathWeight} range)
             </div>
           </div>
         </div>
 
-        {/* Factor 2: Engagement (30 pts) */}
+        {/* Factor 2: Engagement */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium flex items-center gap-2">
@@ -360,7 +645,7 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               2. Engagement Score
             </h3>
             <Badge className="bg-primary/20 text-primary border-primary/30 text-base px-3">
-              {engagementScore} / 30 pts
+              {engagementScore} / {engagementWeight} pts
             </Badge>
           </div>
           
@@ -375,7 +660,16 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm">Calendar Accepts ({simCalendarAccepts})</span>
-                    <span className="text-sm font-mono">{simCalendarAccepts} × 6 = <span className="text-green-500 font-bold">+{simCalendarAccepts * 6}</span></span>
+                    <span className="text-sm font-mono">
+                      {simCalendarAccepts} × {isEditMode && getFormula('engagement', 'calendar_accepts_points') ? (
+                        <EditableValue
+                          formula={getFormula('engagement', 'calendar_accepts_points')!}
+                          isEditing={isEditMode}
+                          onSave={handleSaveFormula}
+                          isSaving={updateMutation.isPending}
+                        />
+                      ) : calendarAcceptsPoints} = <span className="text-green-500 font-bold">+{simCalendarAccepts * calendarAcceptsPoints}</span>
+                    </span>
                   </div>
                   <Slider value={[simCalendarAccepts]} onValueChange={([v]) => setSimCalendarAccepts(v)} max={5} step={1} />
                 </div>
@@ -383,10 +677,19 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm">Fast Responses ({simFastResponses})</span>
-                    <span className="text-sm font-mono">{simFastResponses} × 4 = <span className="text-green-500 font-bold">+{simFastResponses * 4}</span></span>
-              </div>
+                    <span className="text-sm font-mono">
+                      {simFastResponses} × {isEditMode && getFormula('engagement', 'fast_response_points') ? (
+                        <EditableValue
+                          formula={getFormula('engagement', 'fast_response_points')!}
+                          isEditing={isEditMode}
+                          onSave={handleSaveFormula}
+                          isSaving={updateMutation.isPending}
+                        />
+                      ) : fastResponsePoints} = <span className="text-green-500 font-bold">+{simFastResponses * fastResponsePoints}</span>
+                    </span>
+                  </div>
                   <Slider value={[simFastResponses]} onValueChange={([v]) => setSimFastResponses(v)} max={5} step={1} />
-              </div>
+                </div>
               </div>
             </div>
             
@@ -400,39 +703,66 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm">Ignored Outreach ({simIgnored})</span>
-                    <span className="text-sm font-mono">{simIgnored} × -6 = <span className="text-red-500 font-bold">{simIgnored * -6}</span></span>
+                    <span className="text-sm font-mono">
+                      {simIgnored} × {isEditMode && getFormula('engagement', 'ignored_penalty') ? (
+                        <EditableValue
+                          formula={getFormula('engagement', 'ignored_penalty')!}
+                          isEditing={isEditMode}
+                          onSave={handleSaveFormula}
+                          isSaving={updateMutation.isPending}
+                        />
+                      ) : ignoredPenalty} = <span className="text-red-500 font-bold">{simIgnored * ignoredPenalty}</span>
+                    </span>
                   </div>
                   <Slider value={[simIgnored]} onValueChange={([v]) => setSimIgnored(v)} max={5} step={1} />
-              </div>
+                </div>
                 
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm">Declines ({simDeclines})</span>
-                    <span className="text-sm font-mono">{simDeclines} × -5 = <span className="text-red-500 font-bold">{simDeclines * -5}</span></span>
-              </div>
+                    <span className="text-sm font-mono">
+                      {simDeclines} × {isEditMode && getFormula('engagement', 'decline_penalty') ? (
+                        <EditableValue
+                          formula={getFormula('engagement', 'decline_penalty')!}
+                          isEditing={isEditMode}
+                          onSave={handleSaveFormula}
+                          isSaving={updateMutation.isPending}
+                        />
+                      ) : declinePenalty} = <span className="text-red-500 font-bold">{simDeclines * declinePenalty}</span>
+                    </span>
+                  </div>
                   <Slider value={[simDeclines]} onValueChange={([v]) => setSimDeclines(v)} max={5} step={1} />
                 </div>
                 
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm">Contact Gaps ({simGaps})</span>
-                    <span className="text-sm font-mono">{simGaps} × -5 = <span className="text-red-500 font-bold">{simGaps * -5}</span></span>
+                    <span className="text-sm font-mono">
+                      {simGaps} × {isEditMode && getFormula('engagement', 'gap_penalty') ? (
+                        <EditableValue
+                          formula={getFormula('engagement', 'gap_penalty')!}
+                          isEditing={isEditMode}
+                          onSave={handleSaveFormula}
+                          isSaving={updateMutation.isPending}
+                        />
+                      ) : gapPenalty} = <span className="text-red-500 font-bold">{simGaps * gapPenalty}</span>
+                    </span>
                   </div>
                   <Slider value={[simGaps]} onValueChange={([v]) => setSimGaps(v)} max={5} step={1} />
+                </div>
               </div>
             </div>
-          </div>
           
             <div className="p-3 rounded-lg bg-white/5 text-sm">
               <span className="text-muted-foreground">Calculation:</span>{' '}
               <span className="text-green-500">+{engagementPositive}</span>{' '}
               <span className="text-red-500">{engagementNegative}</span>{' '}
-              = {engagementRaw} → clamped to <span className="font-bold">{engagementScore}</span> (0-30 range)
+              = {engagementRaw} → clamped to <span className="font-bold">{engagementScore}</span> (0-{engagementWeight} range)
             </div>
           </div>
         </div>
 
-        {/* Factor 3: Origin (15 pts) */}
+        {/* Factor 3: Origin */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium flex items-center gap-2">
@@ -440,7 +770,7 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               3. Origin Score
             </h3>
             <Badge className="bg-green-500/20 text-green-500 border-green-500/30 text-base px-3">
-              {originScore} / 15 pts
+              {originScore} / {originWeight} pts
             </Badge>
           </div>
           
@@ -473,19 +803,19 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                   className="rounded w-5 h-5"
                 />
                 <span className="text-sm flex-1">Contact was referred by someone (has inviter)</span>
-                <span className="font-mono text-green-500 font-bold">+3</span>
+                <span className="font-mono text-green-500 font-bold">+{inviterBonus}</span>
               </label>
-              </div>
+            </div>
             
             <div className="p-3 rounded-lg bg-white/5 text-sm">
               <span className="text-muted-foreground">Calculation:</span>{' '}
-              {originBase} (base){simHasInviter && <span className="text-green-500"> +3 (inviter)</span>}{' '}
+              {originBase} (base){simHasInviter && <span className="text-green-500"> +{inviterBonus} (inviter)</span>}{' '}
               = <span className="font-bold">{originScore}</span>
             </div>
           </div>
         </div>
 
-        {/* Factor 4: Network (15 pts) */}
+        {/* Factor 4: Network */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium flex items-center gap-2">
@@ -493,7 +823,7 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               4. Network Score
             </h3>
             <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/30 text-base px-3">
-              {networkScoreCalc} / 15 pts
+              {networkScoreCalc} / {networkWeight} pts
             </Badge>
           </div>
           
@@ -510,7 +840,16 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm">Shared Contacts ({simSharedContacts})</span>
-                  <span className="text-sm font-mono">{simSharedContacts} × 1.5 = <span className="text-yellow-500 font-bold">+{(simSharedContacts * 1.5).toFixed(1)}</span></span>
+                  <span className="text-sm font-mono">
+                    {simSharedContacts} × {isEditMode && getFormula('network', 'shared_contacts_multiplier') ? (
+                      <EditableValue
+                        formula={getFormula('network', 'shared_contacts_multiplier')!}
+                        isEditing={isEditMode}
+                        onSave={handleSaveFormula}
+                        isSaving={updateMutation.isPending}
+                      />
+                    ) : sharedContactsMultiplier} = <span className="text-yellow-500 font-bold">+{(simSharedContacts * sharedContactsMultiplier).toFixed(1)}</span>
+                  </span>
                 </div>
                 <Slider value={[simSharedContacts]} onValueChange={([v]) => setSimSharedContacts(v)} max={10} step={1} />
               </div>
@@ -518,7 +857,16 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm">Shared Affiliations ({simSharedAffiliations})</span>
-                  <span className="text-sm font-mono">{simSharedAffiliations} × 1 = <span className="text-yellow-500 font-bold">+{simSharedAffiliations}</span></span>
+                  <span className="text-sm font-mono">
+                    {simSharedAffiliations} × {isEditMode && getFormula('network', 'affiliations_multiplier') ? (
+                      <EditableValue
+                        formula={getFormula('network', 'affiliations_multiplier')!}
+                        isEditing={isEditMode}
+                        onSave={handleSaveFormula}
+                        isSaving={updateMutation.isPending}
+                      />
+                    ) : affiliationsMultiplier} = <span className="text-yellow-500 font-bold">+{simSharedAffiliations * affiliationsMultiplier}</span>
+                  </span>
                 </div>
                 <Slider value={[simSharedAffiliations]} onValueChange={([v]) => setSimSharedAffiliations(v)} max={10} step={1} />
               </div>
@@ -526,7 +874,16 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm">Shared Communities ({simSharedCommunities})</span>
-                  <span className="text-sm font-mono">{simSharedCommunities} × 1 = <span className="text-yellow-500 font-bold">+{simSharedCommunities}</span></span>
+                  <span className="text-sm font-mono">
+                    {simSharedCommunities} × {isEditMode && getFormula('network', 'communities_multiplier') ? (
+                      <EditableValue
+                        formula={getFormula('network', 'communities_multiplier')!}
+                        isEditing={isEditMode}
+                        onSave={handleSaveFormula}
+                        isSaving={updateMutation.isPending}
+                      />
+                    ) : communitiesMultiplier} = <span className="text-yellow-500 font-bold">+{simSharedCommunities * communitiesMultiplier}</span>
+                  </span>
                 </div>
                 <Slider value={[simSharedCommunities]} onValueChange={([v]) => setSimSharedCommunities(v)} max={10} step={1} />
               </div>
@@ -534,8 +891,8 @@ const ConnectionStrengthAnalytics: React.FC = () => {
             
             <div className="p-3 rounded-lg bg-white/5 text-sm">
               <span className="text-muted-foreground">Calculation:</span>{' '}
-              {netInviterStrength} + {(simSharedContacts * 1.5).toFixed(1)} + {simSharedAffiliations} + {simSharedCommunities}{' '}
-              = {(netInviterStrength + (simSharedContacts * 1.5) + simSharedAffiliations + simSharedCommunities).toFixed(1)} → clamped to <span className="font-bold">{networkScoreCalc}</span>
+              {netInviterStrength} + {(simSharedContacts * sharedContactsMultiplier).toFixed(1)} + {simSharedAffiliations * affiliationsMultiplier} + {simSharedCommunities * communitiesMultiplier}{' '}
+              = {(netInviterStrength + (simSharedContacts * sharedContactsMultiplier) + simSharedAffiliations * affiliationsMultiplier + simSharedCommunities * communitiesMultiplier).toFixed(1)} → clamped to <span className="font-bold">{networkScoreCalc}</span>
             </div>
           </div>
         </div>
@@ -617,7 +974,7 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                         <span className="text-xs text-muted-foreground ml-1">
                           (<span className="text-green-500">+{engagement.positivePoints}</span>
                           <span className="text-red-500">{engagement.negativePoints}</span>)
-                          </span>
+                        </span>
                       </td>
                       <td className="py-3 px-4 text-right font-mono text-green-500">{origin.score}</td>
                       <td className="py-3 px-4 text-right font-mono text-yellow-500">{network.score}</td>
@@ -671,56 +1028,55 @@ const ConnectionStrengthAnalytics: React.FC = () => {
         <div className="space-y-4 text-sm">
           <div className="grid grid-cols-4 gap-4">
             <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <p className="font-medium text-blue-500 mb-2">⭐ Path (40 max)</p>
+              <p className="font-medium text-blue-500 mb-2">⭐ Path ({pathWeight} max)</p>
               <p className="text-xs space-y-1">
-                <span className="block text-green-500">+5 per tier level</span>
-                <span className="block text-green-500">+4 completed path</span>
-                <span className="block text-red-500">-2 skipped path</span>
+                <span className="block text-green-500">+{tierMultiplier} per tier level</span>
+                <span className="block text-green-500">+{completedPathPoints} completed path</span>
+                <span className="block text-red-500">{skippedPathPenalty} skipped path</span>
               </p>
               <p className="text-xs mt-2 text-blue-400 font-medium">Highest priority!</p>
             </div>
             
             <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-              <p className="font-medium text-primary mb-2">Engagement (30 max)</p>
+              <p className="font-medium text-primary mb-2">Engagement ({engagementWeight} max)</p>
               <p className="text-xs space-y-1">
-                <span className="block text-green-500">+6 calendar accept</span>
-                <span className="block text-green-500">+4 fast response</span>
-                <span className="block text-red-500">-6 ignored</span>
-                <span className="block text-red-500">-5 decline</span>
-                <span className="block text-red-500">-5 gap</span>
+                <span className="block text-green-500">+{calendarAcceptsPoints} calendar accept</span>
+                <span className="block text-green-500">+{fastResponsePoints} fast response</span>
+                <span className="block text-red-500">{ignoredPenalty} ignored</span>
+                <span className="block text-red-500">{declinePenalty} decline</span>
+                <span className="block text-red-500">{gapPenalty} gap</span>
               </p>
             </div>
             
             <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-              <p className="font-medium text-green-500 mb-2">Origin (15 max)</p>
+              <p className="font-medium text-green-500 mb-2">Origin ({originWeight} max)</p>
               <p className="text-xs space-y-1">
-                <span className="block">12 invite</span>
-                <span className="block">10 wizard</span>
-                <span className="block">7 manual</span>
-                <span className="block">5 import</span>
-                <span className="block">3 unknown</span>
-                <span className="block text-green-500">+3 has inviter</span>
+                <span className="block">Invite: {invitePoints}</span>
+                <span className="block">Wizard: {wizardPoints}</span>
+                <span className="block">Manual: {manualPoints}</span>
+                <span className="block">Import: {importPoints}</span>
+                <span className="block">Unknown: {unknownPoints}</span>
+                <span className="block text-green-500">+{inviterBonus} has inviter</span>
               </p>
             </div>
             
             <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-              <p className="font-medium text-yellow-500 mb-2">Network (15 max)</p>
+              <p className="font-medium text-yellow-500 mb-2">Network ({networkWeight} max)</p>
               <p className="text-xs space-y-1">
-                <span className="block">1-5 inviter strength</span>
-                <span className="block">+1.5 per shared contact</span>
-                <span className="block">+1 per affiliation</span>
-                <span className="block">+1 per community</span>
+                <span className="block">+{sharedContactsMultiplier}/shared contact</span>
+                <span className="block">+{affiliationsMultiplier}/affiliation</span>
+                <span className="block">+{communitiesMultiplier}/community</span>
               </p>
             </div>
           </div>
           
-          <div className="p-3 rounded-lg bg-white/5">
-            <p className="font-medium mb-2">Score → Strength Level</p>
-            <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1 rounded bg-yellow-500/20 text-yellow-500">Star: 75-100</span>
-              <span className="px-3 py-1 rounded bg-green-500/20 text-green-500">Flame: 50-74</span>
-              <span className="px-3 py-1 rounded bg-primary/20 text-primary">Ember: 25-49</span>
-              <span className="px-3 py-1 rounded bg-zinc-500/20 text-zinc-400">Spark: 0-24</span>
+          <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+            <p className="font-medium mb-2">Strength Thresholds</p>
+            <div className="flex items-center gap-4 text-xs">
+              <span className="text-yellow-500">★ Star: {starMin}+</span>
+              <span className="text-green-500">🔥 Flame: {flameMin}-{starMin - 1}</span>
+              <span className="text-primary">✨ Ember: {emberMin}-{flameMin - 1}</span>
+              <span className="text-zinc-400">○ Spark: 0-{emberMin - 1}</span>
             </div>
           </div>
         </div>

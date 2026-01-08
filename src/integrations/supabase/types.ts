@@ -563,6 +563,45 @@ export type Database = {
           },
         ]
       }
+      formulas: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          key: string
+          label: string
+          max_value: number | null
+          min_value: number | null
+          updated_at: string | null
+          value: number
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key: string
+          label: string
+          max_value?: number | null
+          min_value?: number | null
+          updated_at?: string | null
+          value: number
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key?: string
+          label?: string
+          max_value?: number | null
+          min_value?: number | null
+          updated_at?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
       google_import_history: {
         Row: {
           contacts_imported: number | null
