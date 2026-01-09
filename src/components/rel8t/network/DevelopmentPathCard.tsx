@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO, isPast, isToday } from "date-fns";
-import { Calendar, ExternalLink, Check, ChevronRight, Play, SkipForward, History, Clock, Settings } from "lucide-react";
+import { Calendar, ExternalLink, Check, ChevronRight, Play, SkipForward, History, Clock } from "lucide-react";
 import { Outreach } from "@/services/rel8t/outreachService";
 import { PathHistoryEntry, SkippedPathEntry } from "@/hooks/useActv8Contacts";
 import { TierProgressBar } from "./TierProgressBar";
@@ -26,7 +26,6 @@ interface DevelopmentPathCardProps {
   skippedPaths?: SkippedPathEntry[];
   onPlanTouchpoint?: (stepIndex: number) => void;
   onAdvanceStep?: () => void;
-  onChangePath?: () => void;
 }
 
 const tierLabels: Record<number, string> = {
@@ -46,7 +45,6 @@ export function DevelopmentPathCard({
   pathHistory = [],
   skippedPaths = [],
   onPlanTouchpoint,
-  onChangePath
 }: DevelopmentPathCardProps) {
   const navigate = useNavigate();
   
@@ -64,22 +62,14 @@ export function DevelopmentPathCard({
 
   if (!path) {
     return (
-      <div className="py-12 text-center bg-muted/10 rounded-2xl border border-dashed border-border/50">
-        <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-          <Play className="h-6 w-6 text-primary" />
+      <div className="py-8 text-center bg-muted/10 rounded-2xl border border-dashed border-border/50">
+        <div className="mx-auto w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+          <Play className="h-5 w-5 text-primary" />
         </div>
-        <h4 className="font-medium mb-1">No Path Active</h4>
-        <p className="text-sm text-muted-foreground mb-6 max-w-[240px] mx-auto">
-          Choose a development path to start building this relationship.
+        <h4 className="font-medium text-sm mb-1">No Path Active</h4>
+        <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">
+          Select a development path above to start building this relationship.
         </p>
-        <Button 
-          variant="default" 
-          onClick={onChangePath}
-          className="rounded-full gap-2 px-6 shadow-lg shadow-primary/20"
-        >
-          <Play className="h-4 w-4" />
-          Choose Development Path
-        </Button>
       </div>
     );
   }
@@ -176,20 +166,9 @@ export function DevelopmentPathCard({
       </p>
 
       {/* Path Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h4 className="font-medium text-sm">{path.name}</h4>
-          <p className="text-xs text-muted-foreground">{path.description}</p>
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={onChangePath} 
-          className="text-xs border-primary/30 text-primary hover:bg-primary/10 h-8 rounded-lg flex items-center gap-1.5 font-medium"
-        >
-          <Settings className="h-3.5 w-3.5" />
-          View Path Options
-        </Button>
+      <div>
+        <h4 className="font-medium text-sm">{path.name}</h4>
+        <p className="text-xs text-muted-foreground">{path.description}</p>
       </div>
 
       {/* Progress Bar - Android style */}
@@ -360,20 +339,14 @@ export function DevelopmentPathCard({
 
       {/* Path Complete State */}
       {isComplete && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center">
           <div className="flex items-center justify-center gap-2">
             <Check className="h-5 w-5 text-emerald-500" />
             <span className="font-medium text-emerald-500">Path Complete!</span>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onChangePath}
-            className="text-xs"
-          >
-            Choose Next Path
-            <ChevronRight className="h-3 w-3 ml-1" />
-          </Button>
+          <p className="text-xs text-muted-foreground mt-1">
+            Select your next path above to continue.
+          </p>
         </div>
       )}
     </div>
