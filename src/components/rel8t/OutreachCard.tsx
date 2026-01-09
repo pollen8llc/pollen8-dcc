@@ -266,11 +266,18 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
     navigate(`/rel8/outreach/${outreach.id}`);
   };
 
+  // Get border color based on priority
+  const priorityBorderColor = {
+    low: "border-blue-500/40",
+    medium: "border-yellow-500/40", 
+    high: "border-red-500/40",
+  };
+
   return (
     <Card 
       className={cn(
-        "flex flex-col cursor-pointer transition-all bg-card/80 backdrop-blur-sm border bg-gradient-to-br from-card/80 to-card/40 hover:border-primary/30 hover:shadow-primary/10 hover:shadow-xl group relative overflow-hidden", 
-        isOverdue ? "border-red-500/30" : "border-border/30"
+        "mb-4 flex flex-col cursor-pointer transition-all bg-card/80 backdrop-blur-sm border-l-4 bg-gradient-to-br from-card/80 to-card/40 hover:border-primary/30 hover:shadow-primary/10 hover:shadow-xl group relative overflow-hidden",
+        isOverdue ? "border-red-500/50 border-l-red-500" : priorityBorderColor[outreach.priority]
       )}
       onClick={handleCardClick}
     >
