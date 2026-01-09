@@ -13,7 +13,8 @@ export interface Actv8StepData {
   suggestedAction: string;
   suggestedTone: string;
   pathName: string;
-  pathId: string; // Development path ID for filtering outreaches
+  pathId: string; // Development path ID (definition)
+  pathInstanceId: string; // Unique instance ID for this path "run"
 }
 
 interface RelationshipWizardContextType {
