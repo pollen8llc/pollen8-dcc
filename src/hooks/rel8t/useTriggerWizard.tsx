@@ -13,7 +13,6 @@ export interface SimpleTriggerFormData {
   triggerTime: string;
   frequency: string;
   priority: string;
-  selectedTemplate?: string;
   outreachChannel?: string;
   channelDetails?: {
     phone?: string;
@@ -49,9 +48,8 @@ export function useTriggerWizard() {
       name: "",
       triggerDate: new Date(),
       triggerTime: "09:00",
-      frequency: "daily",
+      frequency: "weekly",
       priority: "medium",
-      selectedTemplate: undefined,
       outreachChannel: undefined,
       channelDetails: undefined
     };
