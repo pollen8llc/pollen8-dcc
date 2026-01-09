@@ -339,6 +339,8 @@ export async function activateContact(
     intentionId?: string;
     intentionNotes?: string;
     targetCompletionDate?: string;
+    startingTier?: number; // 1-4, for initial relationship assessment
+    skippedTiers?: number[]; // auto-calculated from startingTier
   }
 ): Promise<Actv8Contact> {
   const { data: { user } } = await supabase.auth.getUser();
@@ -393,6 +395,20 @@ export async function activateContact(
   } else {
     // Insert new record
     console.log('[Actv8] Creating new record for contact:', contactId);
+    
+    // Calculate starting tier and skipped paths from initial assessment
+    const startingTier = options?.startingTier || 1;
+    const skippedTiers = options?.skippedTiers || [];
+    
+    // Build skipped_paths entries for tiers that were skipped during assessment
+    const skippedPathsEntries: SkippedPathEntry[] = skippedTiers.map(tier => ({
+      path_id: `tier_${tier}_skipped`,
+      path_name: `Tier ${tier} (Initial Assessment)`,
+      skipped_at: new Date().toISOString(),
+      reason: 'already_established',
+      tier_at_skip: tier,
+    }));
+    
     const result = await supabase
       .from("rms_actv8_contacts")
       .insert({
@@ -410,9 +426,9 @@ export async function activateContact(
         status: "active",
         activated_at: new Date().toISOString(),
         path_started_at: new Date().toISOString(),
-        path_tier: 1,
+        path_tier: startingTier,
         path_history: [],
-        skipped_paths: [],
+        skipped_paths: skippedPathsEntries as unknown as Json[],
       })
       .select()
       .single();
