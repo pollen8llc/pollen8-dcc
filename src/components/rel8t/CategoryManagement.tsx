@@ -270,7 +270,11 @@ export const CategoryManagement = () => {
               </TableHeader>
               <TableBody>
                 {categories.map((category) => (
-                  <TableRow key={category.id}>
+                  <TableRow 
+                    key={category.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => navigate(`/rel8/categories/${category.id}`)}
+                  >
                     <TableCell>
                       <div 
                         className="w-6 h-6 rounded-full" 
