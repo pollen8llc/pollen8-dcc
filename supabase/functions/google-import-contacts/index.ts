@@ -155,7 +155,7 @@ serve(async (req) => {
       .eq('user_id', user.id);
 
     const existingEmails = new Set(
-      existingContacts?.map(c => c.email?.toLowerCase()).filter(Boolean) || []
+      existingContacts?.map((c: { email?: string }) => c.email?.toLowerCase()).filter(Boolean) || []
     );
 
     // Process and import contacts
@@ -280,7 +280,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in google-import-contacts:', error);
     return new Response(JSON.stringify({ 
-      error: error.message 
+      error: error instanceof Error ? error.message : 'Unknown error' 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

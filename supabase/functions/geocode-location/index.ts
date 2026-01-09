@@ -169,7 +169,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in geocode-location function:', error);
-    return new Response(JSON.stringify({ error: error.message, locations: [] }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error', locations: [] }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
