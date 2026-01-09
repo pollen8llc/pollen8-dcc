@@ -13,7 +13,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import Navbar from "@/components/Navbar";
-import { Plus, BarChart3, Loader2, Zap, Users, Calendar, CalendarCheck, RefreshCw, Bug } from "lucide-react";
+import { Plus, BarChart3, Loader2, Zap, Users, Calendar, CalendarCheck, RefreshCw, Bug, Power } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Network() {
   const [searchParams] = useSearchParams();
@@ -54,6 +56,29 @@ export default function Network() {
   const handleForceRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['actv8-contacts'] });
     refetch();
+  };
+
+  // Reactivate all inactive contacts
+  const handleReactivateAll = async () => {
+    if (!currentUser?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("rms_actv8_contacts")
+        .update({ status: "active", activated_at: new Date().toISOString() })
+        .eq("user_id", currentUser.id)
+        .eq("status", "inactive")
+        .select();
+      
+      if (error) throw error;
+      
+      toast.success(`Reactivated ${data?.length || 0} contacts`);
+      queryClient.invalidateQueries({ queryKey: ['actv8-contacts'] });
+      refetch();
+    } catch (err) {
+      console.error('[Actv8] Reactivate all error:', err);
+      toast.error('Failed to reactivate contacts');
+    }
   };
 
   const filteredContacts = useMemo(() => {
@@ -161,15 +186,25 @@ export default function Network() {
                 <p><strong>Query error:</strong> {error?.message || 'None'}</p>
                 <p><strong>Is loading:</strong> {isLoading ? 'Yes' : 'No'}</p>
               </div>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="mt-3"
-                onClick={handleForceRefresh}
-              >
-                <RefreshCw className="h-3 w-3 mr-2" />
-                Force Refresh
-              </Button>
+              <div className="flex gap-2 mt-3">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleForceRefresh}
+                >
+                  <RefreshCw className="h-3 w-3 mr-2" />
+                  Force Refresh
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="default" 
+                  onClick={handleReactivateAll}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Power className="h-3 w-3 mr-2" />
+                  Reactivate All
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
