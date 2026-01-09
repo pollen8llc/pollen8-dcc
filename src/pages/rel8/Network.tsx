@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import Navbar from "@/components/Navbar";
-import { Plus, BarChart3, Loader2, Zap, Users, Calendar, CalendarCheck, RefreshCw, Bug, Power } from "lucide-react";
+import { Plus, Loader2, Zap, Users, Calendar, CalendarCheck, RefreshCw, Bug, Power, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -165,9 +165,9 @@ export default function Network() {
               </p>
             </div>
           </div>
-          <Link to="/rel8/actv8/insights">
+          <Link to="/rel8/triggers">
             <Button variant="ghost" size="icon" className="rounded-full">
-              <BarChart3 className="h-5 w-5" />
+              <Bell className="h-5 w-5" />
             </Button>
           </Link>
         </div>

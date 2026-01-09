@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { 
   Users, 
   Building2, 
-  Zap, 
   Upload,
   Calendar,
 } from "lucide-react";
@@ -38,13 +37,6 @@ export function Rel8OnlyNavigation() {
       isActive: location.pathname === "/rel8/connect"
     },
     {
-      href: "/rel8/triggers",
-      label: "Reminders",
-      icon: Zap,
-      iconColor: "text-orange-500",
-      isActive: location.pathname.startsWith("/rel8/triggers")
-    },
-    {
       href: "/rel8/categories",
       label: "Categories",
       icon: Building2,
@@ -68,7 +60,7 @@ export function Rel8OnlyNavigation() {
       </Link>
       
       {/* Navigation Items - maintain consistent size */}
-      <div className="flex-1 grid grid-cols-5 gap-2">
+      <div className="flex-1 grid grid-cols-4 gap-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
