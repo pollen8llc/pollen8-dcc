@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useActv8Contacts, Actv8ContactDisplay } from "@/hooks/useActv8Contacts";
+import { useUser } from "@/contexts/UserContext";
 import { NetworkFilters } from "@/components/rel8t/network/NetworkFilters";
 import { NetworkContactCard } from "@/components/rel8t/network/NetworkContactCard";
 import { Actv8EmptyState } from "@/components/rel8t/network/Actv8EmptyState";
@@ -12,13 +13,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import Navbar from "@/components/Navbar";
-import { Plus, BarChart3, Loader2, Zap, Users, Calendar, CalendarCheck } from "lucide-react";
+import { Plus, BarChart3, Loader2, Zap, Users, Calendar, CalendarCheck, RefreshCw, Bug } from "lucide-react";
 
 export default function Network() {
   const [searchParams] = useSearchParams();
+  const { currentUser } = useUser();
+  const queryClient = useQueryClient();
+  
   // Support both ?tab=outreach and ?task for back navigation
   const tabParam = searchParams.get('tab');
   const hasTaskFlag = searchParams.has('task');
+  const hasDebugFlag = searchParams.has('debug');
   const initialTab = hasTaskFlag ? 'outreach' : (tabParam || 'contacts');
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,7 +32,7 @@ export default function Network() {
   const [selectedStrengths, setSelectedStrengths] = useState<string[]>([]);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  const { data: contacts = [], isLoading, error } = useActv8Contacts();
+  const { data: contacts = [], isLoading, error, refetch } = useActv8Contacts();
   
   // Get outreach counts for notification dot
   const { data: outreachCounts = { today: 0, upcoming: 0, overdue: 0, completed: 0 } } = useQuery({
@@ -44,6 +49,12 @@ export default function Network() {
       setActiveTab('outreach');
     }
   }, [searchParams]);
+
+  // Force refresh handler
+  const handleForceRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['actv8-contacts'] });
+    refetch();
+  };
 
   const filteredContacts = useMemo(() => {
     return contacts.filter(contact => {
@@ -135,6 +146,33 @@ export default function Network() {
             </Button>
           </Link>
         </div>
+
+        {/* Debug Panel - only shown with ?debug query param */}
+        {hasDebugFlag && (
+          <Card className="mb-4 border-amber-500/50 bg-amber-500/10">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Bug className="h-4 w-4 text-amber-500" />
+                <span className="font-semibold text-amber-500">Debug Info</span>
+              </div>
+              <div className="text-xs font-mono space-y-1">
+                <p><strong>User ID:</strong> {currentUser?.id || 'Not logged in'}</p>
+                <p><strong>Contacts loaded:</strong> {contacts.length}</p>
+                <p><strong>Query error:</strong> {error?.message || 'None'}</p>
+                <p><strong>Is loading:</strong> {isLoading ? 'Yes' : 'No'}</p>
+              </div>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="mt-3"
+                onClick={handleForceRefresh}
+              >
+                <RefreshCw className="h-3 w-3 mr-2" />
+                Force Refresh
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
