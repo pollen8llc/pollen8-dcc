@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathCard";
 import { DevelopmentTimeline } from "@/components/rel8t/network/DevelopmentTimeline";
-import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModal";
+import { PathSelectionAccordion } from "@/components/rel8t/network/PathSelectionAccordion";
 // Outreach linking removed - outreaches are tracked via step instances
 import { useContactAnalysis } from "@/hooks/useContactAnalysis";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
@@ -50,7 +50,7 @@ export default function NetworkProfile() {
     setPreSelectedContacts 
   } = useRelationshipWizard();
   
-  const [showPathModal, setShowPathModal] = useState(false);
+  
 
   const { data: actv8Contact, isLoading, error } = useQuery({
     queryKey: ['actv8-contact', id],
@@ -333,6 +333,17 @@ export default function NetworkProfile() {
           </div>
         </Card>
 
+        {/* Path Selection Accordion */}
+        <PathSelectionAccordion
+          onSelectPath={handleSelectPath}
+          currentPathId={contact.developmentPathId}
+          currentPathName={actv8Contact.path?.name}
+          actv8ContactId={actv8Contact.id}
+          currentTier={contact.pathTier}
+          hasCurrentPath={!!contact.developmentPathId}
+          isPathComplete={actv8Contact.path?.steps && contact.currentStepIndex >= actv8Contact.path.steps.length}
+        />
+
         {/* Development Path Section */}
         <Card className="p-4 glass-morphism border-primary/10">
           <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
@@ -349,7 +360,6 @@ export default function NetworkProfile() {
             pathHistory={contact.pathHistory}
             skippedPaths={contact.skippedPaths}
             onPlanTouchpoint={handlePlanTouchpoint}
-            onChangePath={() => setShowPathModal(true)}
           />
         </Card>
 
@@ -369,18 +379,6 @@ export default function NetworkProfile() {
           />
         </Card>
       </div>
-
-      {/* Modals */}
-      <PathSelectionModal 
-        open={showPathModal} 
-        onOpenChange={setShowPathModal} 
-        onSelectPath={handleSelectPath}
-        currentPathId={contact.developmentPathId}
-        actv8ContactId={actv8Contact.id}
-        currentTier={contact.pathTier}
-        hasCurrentPath={!!contact.developmentPathId}
-        isPathComplete={actv8Contact.path?.steps && contact.currentStepIndex >= actv8Contact.path.steps.length}
-      />
 
     </div>
   );

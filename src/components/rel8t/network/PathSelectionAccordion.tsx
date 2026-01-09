@@ -1,0 +1,378 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Loader2, Check, Coffee, Users, Handshake, CalendarCheck, Lock, SkipForward, AlertTriangle, Target } from "lucide-react";
+import { getDevelopmentPaths, getAvailablePaths, skipCurrentPath, DevelopmentPath } from "@/services/actv8Service";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+interface PathSelectionAccordionProps {
+  onSelectPath: (pathId: string) => void;
+  currentPathId?: string;
+  currentPathName?: string;
+  actv8ContactId?: string;
+  currentTier?: number;
+  hasCurrentPath?: boolean;
+  isPathComplete?: boolean;
+}
+
+const isBuildRapportPath = (pathId: string) => pathId === 'build_rapport';
+
+const getBuildRapportStepIcon = (index: number) => {
+  const icons = [Coffee, Users, Handshake, CalendarCheck];
+  return icons[index] || Coffee;
+};
+
+const tierLabels: Record<number, string> = {
+  1: "Foundation",
+  2: "Growth",
+  3: "Professional",
+  4: "Advanced",
+};
+
+const SKIP_REASONS = [
+  { id: "already_established", label: "Already have established rapport", description: "Relationship is already beyond this stage" },
+  { id: "not_relevant", label: "Path not relevant", description: "This path doesn't fit the relationship type" },
+  { id: "contact_unresponsive", label: "Contact unresponsive", description: "Unable to engage with this contact currently" },
+  { id: "priorities_changed", label: "Priorities changed", description: "Focus has shifted to other relationships" },
+] as const;
+
+export function PathSelectionAccordion({
+  onSelectPath,
+  currentPathId,
+  currentPathName,
+  actv8ContactId,
+  currentTier = 1,
+  hasCurrentPath = false,
+  isPathComplete = false
+}: PathSelectionAccordionProps) {
+  const queryClient = useQueryClient();
+  const [showSkipDialog, setShowSkipDialog] = useState(false);
+  const [skipReason, setSkipReason] = useState("");
+
+  const { data: pathData, isLoading } = useQuery({
+    queryKey: ['available-paths', actv8ContactId],
+    queryFn: async () => {
+      if (actv8ContactId) {
+        return getAvailablePaths(actv8ContactId);
+      }
+      const allPaths = await getDevelopmentPaths();
+      return {
+        available: allPaths.filter(p => p.tier <= currentTier + 1),
+        locked: allPaths.filter(p => p.tier > currentTier + 1),
+        currentTier,
+      };
+    },
+  });
+
+  const skipMutation = useMutation({
+    mutationFn: async () => {
+      if (!actv8ContactId) throw new Error("No contact ID");
+      return skipCurrentPath(actv8ContactId, skipReason || undefined);
+    },
+    onSuccess: () => {
+      toast.success("Path skipped", { description: "You can now select a new path" });
+      queryClient.invalidateQueries({ queryKey: ['actv8-contact', actv8ContactId] });
+      queryClient.invalidateQueries({ queryKey: ['available-paths', actv8ContactId] });
+      setShowSkipDialog(false);
+      setSkipReason("");
+    },
+    onError: (error) => {
+      toast.error("Failed to skip path", { description: String(error) });
+    },
+  });
+
+  const isPathInProgress = hasCurrentPath && !isPathComplete;
+
+  const handleSelect = (pathId: string) => {
+    if (isPathInProgress && pathId !== currentPathId) {
+      toast.error("Complete or skip your current path first", {
+        description: "Use the Skip Path option if you want to change paths."
+      });
+      return;
+    }
+    onSelectPath(pathId);
+  };
+
+  const handleSkipConfirm = () => {
+    skipMutation.mutate();
+  };
+
+  const strengthLabels: Record<string, string> = {
+    growing: 'Growing',
+    solid: 'Solid',
+    thick: 'Deep Bond'
+  };
+
+  const availablePaths = pathData?.available || [];
+  const lockedPaths = pathData?.locked || [];
+  const effectiveTier = pathData?.currentTier || currentTier;
+
+  const pathsByTier = availablePaths.reduce((acc, path) => {
+    const tier = path.tier || 1;
+    if (!acc[tier]) acc[tier] = [];
+    acc[tier].push(path);
+    return acc;
+  }, {} as Record<number, DevelopmentPath[]>);
+
+  return (
+    <>
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="path-selection" className="border rounded-2xl bg-card/50 backdrop-blur-sm border-primary/20 overflow-hidden">
+          <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-primary/5 transition-colors">
+            <div className="flex items-center gap-3 text-left">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <Target className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <span className="font-medium text-sm">
+                  {hasCurrentPath && currentPathName 
+                    ? currentPathName
+                    : "Choose Development Path"
+                  }
+                </span>
+                {hasCurrentPath && (
+                  <span className="block text-xs text-muted-foreground">
+                    {tierLabels[currentTier] || `Tier ${currentTier}`}
+                    {isPathComplete && " • Complete"}
+                    {isPathInProgress && " • In Progress"}
+                  </span>
+                )}
+              </div>
+            </div>
+          </AccordionTrigger>
+          
+          <AccordionContent className="px-4 pb-4">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-4 pt-2">
+                {/* Tier Progress Indicator */}
+                <div>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4].map((tier) => (
+                      <div
+                        key={tier}
+                        className={cn(
+                          "flex-1 h-2 rounded-full transition-colors",
+                          tier <= effectiveTier ? "bg-primary" : "bg-muted"
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Current Tier: {tierLabels[effectiveTier] || `Tier ${effectiveTier}`}
+                  </p>
+                </div>
+
+                {/* Path in Progress Warning */}
+                {isPathInProgress && (
+                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5">
+                    <p className="text-sm text-muted-foreground">
+                      Complete all steps or use <strong>Skip Path</strong> to change paths.
+                    </p>
+                  </div>
+                )}
+
+                {/* Skip Current Path Option */}
+                {hasCurrentPath && actv8ContactId && (
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-amber-500/30 bg-amber-500/10">
+                    <div className="flex items-center gap-2">
+                      <SkipForward className="h-4 w-4 text-amber-500" />
+                      <span className="text-sm text-amber-700 dark:text-amber-300">
+                        Want to skip the current path?
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowSkipDialog(true)}
+                      className="text-amber-600 border-amber-500/50 hover:bg-amber-500/20"
+                    >
+                      Skip Path
+                    </Button>
+                  </div>
+                )}
+
+                {/* Available Paths by Tier */}
+                {Object.entries(pathsByTier)
+                  .sort(([a], [b]) => Number(a) - Number(b))
+                  .map(([tier, paths]) => (
+                    <div key={tier}>
+                      <h3 className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
+                        {tierLabels[Number(tier)] || `Tier ${tier}`}
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {paths.map((path) => {
+                          const isCurrent = path.id === currentPathId;
+                          const isNextTier = path.tier > effectiveTier;
+                          return (
+                            <button
+                              key={path.id}
+                              onClick={() => handleSelect(path.id)}
+                              disabled={(isNextTier && !hasCurrentPath) || (isPathInProgress && !isCurrent)}
+                              className={cn(
+                                "text-left p-3 rounded-lg border transition-all",
+                                "hover:border-primary/50 hover:bg-primary/5",
+                                "focus:outline-none focus:ring-2 focus:ring-primary/20",
+                                "disabled:opacity-50 disabled:cursor-not-allowed",
+                                isCurrent 
+                                  ? 'border-primary bg-primary/10' 
+                                  : 'border-border/40 bg-card/30'
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-2 mb-1.5">
+                                <h4 className="font-medium text-sm leading-tight">{path.name}</h4>
+                                <div className="flex items-center gap-1">
+                                  {path.is_required && (
+                                    <span className="text-[10px] bg-amber-500/20 text-amber-600 px-1.5 py-0.5 rounded">
+                                      REQUIRED
+                                    </span>
+                                  )}
+                                  {isCurrent && (
+                                    <span className="shrink-0 flex items-center gap-1 text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                                      <Check className="h-3 w-3" />
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{path.description}</p>
+                              
+                              {/* Step indicators */}
+                              <div className="flex items-center gap-0.5 mb-1.5">
+                                {isBuildRapportPath(path.id) ? (
+                                  path.steps?.map((_, index) => {
+                                    const Icon = getBuildRapportStepIcon(index);
+                                    return (
+                                      <div
+                                        key={index}
+                                        className="h-5 flex-1 rounded bg-primary/10 flex items-center justify-center max-w-8"
+                                      >
+                                        <Icon className="h-3 w-3 text-primary" />
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  path.steps?.map((_, index) => (
+                                    <div
+                                      key={index}
+                                      className="h-1 flex-1 rounded-full bg-muted max-w-8"
+                                    />
+                                  ))
+                                )}
+                              </div>
+                              
+                              <div className="flex justify-between text-[10px] text-muted-foreground">
+                                <span>{path.steps?.length || 0} steps</span>
+                                <span>→ {strengthLabels[path.target_strength] || path.target_strength}</span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+
+                {/* Locked Paths */}
+                {lockedPaths.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide flex items-center gap-1">
+                      <Lock className="h-3 w-3" />
+                      Locked Paths
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {lockedPaths.map((path) => (
+                        <div
+                          key={path.id}
+                          className="text-left p-3 rounded-lg border border-border/20 bg-muted/20 opacity-60"
+                        >
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <h4 className="font-medium text-sm leading-tight text-muted-foreground">
+                              {path.name}
+                            </h4>
+                            <Lock className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{path.description}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            Unlocks at {tierLabels[path.tier] || `Tier ${path.tier}`}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      {/* Skip Path Confirmation Dialog */}
+      <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Skip Current Path?
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Skipping a path will be recorded in this contact's history. You'll advance to the next tier
+                  and can select a different path.
+                </p>
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-3">
+                    Why are you skipping this path?
+                  </p>
+                  <RadioGroup
+                    value={skipReason}
+                    onValueChange={setSkipReason}
+                    className="space-y-2"
+                  >
+                    {SKIP_REASONS.map((reason) => (
+                      <div
+                        key={reason.id}
+                        className="flex items-start space-x-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => setSkipReason(reason.id)}
+                      >
+                        <RadioGroupItem value={reason.id} id={reason.id} className="mt-0.5" />
+                        <Label htmlFor={reason.id} className="cursor-pointer flex-1">
+                          <span className="font-medium text-foreground">{reason.label}</span>
+                          <span className="block text-xs text-muted-foreground mt-0.5">
+                            {reason.description}
+                          </span>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleSkipConfirm}
+              className="bg-amber-500 hover:bg-amber-600"
+              disabled={skipMutation.isPending || !skipReason}
+            >
+              {skipMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <SkipForward className="h-4 w-4 mr-2" />
+              )}
+              Skip Path
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
