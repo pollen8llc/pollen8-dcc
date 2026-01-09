@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, MapPin } from "lucide-react";
+import { ArrowLeft, Users, MapPin, UserPlus } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
+import { CategoryContactPicker } from "@/components/rel8t/CategoryContactPicker";
 
 interface Category {
   id: string;
@@ -33,49 +34,50 @@ const CategoryDetail = () => {
   const [category, setCategory] = useState<Category | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+
+  const loadCategoryAndContacts = useCallback(async () => {
+    if (!currentUser || !id) return;
+
+    setIsLoading(true);
+    try {
+      // Load category
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('rms_contact_categories')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', currentUser.id)
+        .single();
+
+      if (categoryError) throw categoryError;
+      setCategory(categoryData);
+
+      // Load contacts for this category
+      const { data: contactsData, error: contactsError } = await supabase
+        .from('rms_contacts')
+        .select('id, name, email, organization, location, industry')
+        .eq('user_id', currentUser.id)
+        .eq('category_id', id)
+        .order('name');
+
+      if (contactsError) throw contactsError;
+      setContacts(contactsData || []);
+    } catch (error: any) {
+      console.error('Error loading category:', error);
+      toast({
+        title: "Failed to load category",
+        description: error.message,
+        variant: "destructive"
+      });
+      navigate('/rel8/categories');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentUser, id, navigate, toast]);
 
   useEffect(() => {
-    const loadCategoryAndContacts = async () => {
-      if (!currentUser || !id) return;
-
-      setIsLoading(true);
-      try {
-        // Load category
-        const { data: categoryData, error: categoryError } = await supabase
-          .from('rms_contact_categories')
-          .select('*')
-          .eq('id', id)
-          .eq('user_id', currentUser.id)
-          .single();
-
-        if (categoryError) throw categoryError;
-        setCategory(categoryData);
-
-        // Load contacts for this category
-        const { data: contactsData, error: contactsError } = await supabase
-          .from('rms_contacts')
-          .select('id, name, email, organization, location, industry')
-          .eq('user_id', currentUser.id)
-          .eq('category_id', id)
-          .order('name');
-
-        if (contactsError) throw contactsError;
-        setContacts(contactsData || []);
-      } catch (error: any) {
-        console.error('Error loading category:', error);
-        toast({
-          title: "Failed to load category",
-          description: error.message,
-          variant: "destructive"
-        });
-        navigate('/rel8/categories');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadCategoryAndContacts();
-  }, [currentUser, id]);
+  }, [loadCategoryAndContacts]);
 
   if (isLoading) {
     return (
@@ -110,26 +112,32 @@ const CategoryDetail = () => {
       
       <div className="container mx-auto max-w-6xl px-4 py-4 sm:py-8 pb-32 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mt-4 sm:mt-6">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/rel8/categories')}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <div 
-              className="w-8 h-8 rounded-full" 
-              style={{ backgroundColor: category.color || '#6366f1' }} 
-            />
-            <div>
-              <h1 className="text-2xl font-bold">{category.name}</h1>
-              <p className="text-sm text-muted-foreground">
-                {contacts.length} contact{contacts.length !== 1 ? 's' : ''} in this category
-              </p>
+        <div className="flex items-center justify-between gap-4 mt-4 sm:mt-6">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate('/rel8/categories')}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-8 h-8 rounded-full" 
+                style={{ backgroundColor: category.color || '#6366f1' }} 
+              />
+              <div>
+                <h1 className="text-2xl font-bold">{category.name}</h1>
+                <p className="text-sm text-muted-foreground">
+                  {contacts.length} contact{contacts.length !== 1 ? 's' : ''} in this category
+                </p>
+              </div>
             </div>
           </div>
+          <Button onClick={() => setIsPickerOpen(true)}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add Contacts
+          </Button>
         </div>
 
         {/* Contacts Grid */}
@@ -187,13 +195,25 @@ const CategoryDetail = () => {
               <p className="text-muted-foreground mb-4">
                 Add contacts to this category to see them here
               </p>
-              <Button onClick={() => navigate(`/rel8/contacts/new?category=${id}`)}>
-                Add Contact
+              <Button onClick={() => setIsPickerOpen(true)}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Contacts
               </Button>
             </CardContent>
           </Card>
         )}
       </div>
+
+      {/* Contact Picker Dialog */}
+      <CategoryContactPicker
+        open={isPickerOpen}
+        onOpenChange={setIsPickerOpen}
+        categoryId={id!}
+        categoryName={category.name}
+        categoryColor={category.color || '#6366f1'}
+        existingContactIds={contacts.map(c => c.id)}
+        onSave={loadCategoryAndContacts}
+      />
     </div>
   );
 };
