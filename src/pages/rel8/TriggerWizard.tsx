@@ -34,7 +34,9 @@ const TriggerWizard = () => {
   // Parse time into hours and minutes
   const [hours, minutes] = (formData.triggerTime || "09:00").split(':').map(Number);
 
-  const handleNext = () => {
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (currentStep === 1) {
       setCurrentStep(2);
     }

@@ -217,7 +217,7 @@ const handler = async (req: Request): Promise<Response> => {
       <p>Please accept or decline the attached calendar invitation.</p>
     `;
 
-    const icsBase64 = base64Encode(new TextEncoder().encode(icsContent));
+    const icsBase64 = base64Encode(icsContent);
 
     // Send email to user with detailed subject
     const userEmailResponse = await resend.emails.send({
