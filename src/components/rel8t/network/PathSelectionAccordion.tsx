@@ -53,6 +53,7 @@ export function PathSelectionAccordion({
   const queryClient = useQueryClient();
   const [showSkipDialog, setShowSkipDialog] = useState(false);
   const [skipReason, setSkipReason] = useState("");
+  const [showReasonError, setShowReasonError] = useState(false);
 
   const { data: pathData, isLoading } = useQuery({
     queryKey: ['available-paths', actv8ContactId],
@@ -99,7 +100,24 @@ export function PathSelectionAccordion({
   };
 
   const handleSkipConfirm = () => {
+    if (!skipReason) {
+      setShowReasonError(true);
+      return;
+    }
     skipMutation.mutate();
+  };
+
+  const handleReasonChange = (value: string) => {
+    setSkipReason(value);
+    setShowReasonError(false);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setShowSkipDialog(open);
+    if (!open) {
+      setSkipReason("");
+      setShowReasonError(false);
+    }
   };
 
   const strengthLabels: Record<string, string> = {
@@ -314,7 +332,7 @@ export function PathSelectionAccordion({
       </Accordion>
 
       {/* Skip Path Confirmation Dialog */}
-      <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
+      <AlertDialog open={showSkipDialog} onOpenChange={handleDialogClose}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -328,19 +346,24 @@ export function PathSelectionAccordion({
                   and can select a different path.
                 </p>
                 <div>
-                  <p className="text-sm font-medium text-foreground mb-3">
-                    Why are you skipping this path?
+                  <p className="text-sm font-medium text-foreground mb-2">
+                    Why are you skipping this path? <span className="text-red-500">*</span>
                   </p>
+                  {showReasonError && !skipReason && (
+                    <p className="text-xs text-red-500 mb-2">
+                      Please select a reason to continue
+                    </p>
+                  )}
                   <RadioGroup
                     value={skipReason}
-                    onValueChange={setSkipReason}
+                    onValueChange={handleReasonChange}
                     className="space-y-2"
                   >
                     {SKIP_REASONS.map((reason) => (
                       <div
                         key={reason.id}
                         className="flex items-start space-x-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => setSkipReason(reason.id)}
+                        onClick={() => handleReasonChange(reason.id)}
                       >
                         <RadioGroupItem value={reason.id} id={reason.id} className="mt-0.5" />
                         <Label htmlFor={reason.id} className="cursor-pointer flex-1">
@@ -361,7 +384,7 @@ export function PathSelectionAccordion({
             <AlertDialogAction
               onClick={handleSkipConfirm}
               className="bg-amber-500 hover:bg-amber-600"
-              disabled={skipMutation.isPending || !skipReason}
+              disabled={skipMutation.isPending}
             >
               {skipMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
