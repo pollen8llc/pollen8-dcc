@@ -269,12 +269,15 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   return (
     <Card 
       className={cn(
-        "mb-4 flex flex-col cursor-pointer transition-colors hover:border-primary/40", 
-        isOverdue ? "border-red-500/30" : "border-border/20"
+        "flex flex-col cursor-pointer transition-all bg-card/80 backdrop-blur-sm border bg-gradient-to-br from-card/80 to-card/40 hover:border-primary/30 hover:shadow-primary/10 hover:shadow-xl group relative overflow-hidden", 
+        isOverdue ? "border-red-500/30" : "border-border/30"
       )}
       onClick={handleCardClick}
     >
-      <CardHeader className="px-4 py-3 border-b border-border/20 bg-card">
+      {/* Gradient border effect on hover */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none" />
+      
+      <CardHeader className="px-4 py-3 border-b border-border/30 bg-transparent relative z-10">
         <div className="flex justify-between items-center">
           <div className="flex gap-2 flex-wrap items-center">
             {outreach.calendar_sync_enabled && (
@@ -326,7 +329,7 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
         </div>
       </CardHeader>
       
-      <CardContent className="p-4 flex flex-col flex-grow">
+      <CardContent className="p-4 flex flex-col flex-grow relative z-10">
         <h3 className="text-lg font-semibold mb-4">{outreach.title}</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
