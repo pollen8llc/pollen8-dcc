@@ -129,6 +129,8 @@ export const ReviewSubmitStep = ({
           // Actv8 Build Rapport linkage for step tracking
           actv8_contact_id: actv8ContactId || null,
           actv8_step_index: actv8StepIndex ?? null,
+          // Path association - outreach is specific to current development path
+          path_id: actv8StepData?.pathId || null,
         };
         
         return await createOutreach(outreach, contactIds);
