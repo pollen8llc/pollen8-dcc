@@ -1,5 +1,52 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { AssessmentLevel } from "@/components/rel8t/network/RelationshipAssessmentStep";
 import type { Json } from "@/integrations/supabase/types";
+
+/**
+ * Updates the relationship level for an Actv8 contact.
+ * This recalculates skipped tiers based on the new level.
+ */
+export async function updateRelationshipLevel(
+  actv8ContactId: string,
+  newLevel: AssessmentLevel
+): Promise<void> {
+  // Get current contact data
+  const { data: contact, error: fetchError } = await supabase
+    .from('rms_actv8_contacts')
+    .select('skipped_paths, path_history, path_tier')
+    .eq('id', actv8ContactId)
+    .single();
+  
+  if (fetchError) throw fetchError;
+  
+  const existingSkipped = (contact.skipped_paths || []) as unknown as SkippedPathEntry[];
+  const pathHistory = (contact.path_history || []) as unknown as PathHistoryEntry[];
+  // PathHistoryEntry has path_id, not tier - we need to track completed tiers differently
+  // For now, use existing skipped paths to prevent re-adding those tiers
+  // Calculate new skipped entries (don't duplicate existing skipped tiers)
+  const newSkippedEntries: SkippedPathEntry[] = newLevel.skippedTiers
+    .filter(tier => !existingSkipped.find(s => s.tier_at_skip === tier)) // Don't duplicate
+    .map(tier => ({
+      path_id: `tier_${tier}_level_assessment`,
+      path_name: `Tier ${tier} (Relationship Level)`,
+      skipped_at: new Date().toISOString(),
+      reason: 'already_established',
+      tier_at_skip: tier,
+    }));
+  
+  const { error: updateError } = await supabase
+    .from('rms_actv8_contacts')
+    .update({
+      path_tier: newLevel.startingTier,
+      skipped_paths: [...existingSkipped, ...newSkippedEntries] as unknown as Json[],
+      development_path_id: null, // Reset path selection
+      current_step_index: 0,
+      completed_steps: [],
+    })
+    .eq('id', actv8ContactId);
+  
+  if (updateError) throw updateError;
+}
 
 // Types
 export interface DevelopmentPath {
