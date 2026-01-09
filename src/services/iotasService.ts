@@ -6,7 +6,10 @@ export interface IotasData {
   rel8_contacts: number;
   cultiv8_posts: number;
   eco8_communities: number;
-  total_network_value: number;
+  total_network_value: number | null;
+  avg_connection_strength: number | null;
+  engagement_multiplier: number | null;
+  network_score: number | null;
   created_at: string;
   updated_at: string;
 }
