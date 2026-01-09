@@ -355,11 +355,14 @@ export async function activateContact(
     .eq("contact_id", contactId)
     .maybeSingle();
 
+  console.log('[Actv8] Activating contact:', contactId, 'existing?', !!existing, 'existing status:', existing?.status);
+
   let data;
   let error;
 
   if (existing) {
     // Reactivate existing record - preserve progress, just set status to active
+    console.log('[Actv8] Updating existing record:', existing.id, 'to status: active');
     const result = await supabase
       .from("rms_actv8_contacts")
       .update({
@@ -386,8 +389,10 @@ export async function activateContact(
     
     data = result.data;
     error = result.error;
+    console.log('[Actv8] Update result:', data?.status, 'error:', error?.message);
   } else {
     // Insert new record
+    console.log('[Actv8] Creating new record for contact:', contactId);
     const result = await supabase
       .from("rms_actv8_contacts")
       .insert({
@@ -414,9 +419,12 @@ export async function activateContact(
     
     data = result.data;
     error = result.error;
+    console.log('[Actv8] Insert result:', data?.status, 'id:', data?.id, 'error:', error?.message);
   }
 
   if (error) throw error;
+  
+  console.log('[Actv8] Final activation status:', data?.status, 'id:', data?.id);
   
   // Create the first step instance as "active" (only for new activations)
   if (!existing) {
