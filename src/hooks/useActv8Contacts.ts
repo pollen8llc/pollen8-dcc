@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getActiveContacts, deactivateContact, getActv8ContactByContactId } from "@/services/actv8Service";
+import { getActiveContacts, deactivateContact, getActv8ContactByContactId, getActv8ContactStatus, type Actv8ContactStatus } from "@/services/actv8Service";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
 
@@ -89,6 +89,18 @@ export function useActv8Status(contactId: string | undefined) {
   return useQuery({
     queryKey: ['actv8-status', userId, contactId],
     queryFn: () => contactId ? getActv8ContactByContactId(contactId) : null,
+    enabled: !!userId && !!contactId,
+  });
+}
+
+// Returns full status including inactive contacts
+export function useActv8FullStatus(contactId: string | undefined) {
+  const { currentUser } = useUser();
+  const userId = currentUser?.id;
+  
+  return useQuery<Actv8ContactStatus | null>({
+    queryKey: ['actv8-full-status', userId, contactId],
+    queryFn: () => contactId ? getActv8ContactStatus(contactId) : null,
     enabled: !!userId && !!contactId,
   });
 }
