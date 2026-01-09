@@ -476,6 +476,7 @@ export type Database = {
           connection_strength: string | null
           contact_id: string
           created_at: string | null
+          engagement_points: number | null
           engagement_score: number | null
           first_outreach_at: string | null
           id: string
@@ -484,12 +485,16 @@ export type Database = {
           last_note_added_at: string | null
           last_outreach_at: string | null
           last_summary_update: string | null
+          origin_points: number | null
+          overlap_points: number | null
+          path_progress_points: number | null
           pending_outreach_count: number | null
           rapport_status: string | null
           response_rate_percent: number | null
           total_notes_count: number | null
           total_notes_word_count: number | null
           total_outreach_count: number | null
+          total_strength_score: number | null
           updated_at: string | null
           user_id: string
         }
@@ -506,6 +511,7 @@ export type Database = {
           connection_strength?: string | null
           contact_id: string
           created_at?: string | null
+          engagement_points?: number | null
           engagement_score?: number | null
           first_outreach_at?: string | null
           id?: string
@@ -514,12 +520,16 @@ export type Database = {
           last_note_added_at?: string | null
           last_outreach_at?: string | null
           last_summary_update?: string | null
+          origin_points?: number | null
+          overlap_points?: number | null
+          path_progress_points?: number | null
           pending_outreach_count?: number | null
           rapport_status?: string | null
           response_rate_percent?: number | null
           total_notes_count?: number | null
           total_notes_word_count?: number | null
           total_outreach_count?: number | null
+          total_strength_score?: number | null
           updated_at?: string | null
           user_id: string
         }
@@ -536,6 +546,7 @@ export type Database = {
           connection_strength?: string | null
           contact_id?: string
           created_at?: string | null
+          engagement_points?: number | null
           engagement_score?: number | null
           first_outreach_at?: string | null
           id?: string
@@ -544,12 +555,16 @@ export type Database = {
           last_note_added_at?: string | null
           last_outreach_at?: string | null
           last_summary_update?: string | null
+          origin_points?: number | null
+          overlap_points?: number | null
+          path_progress_points?: number | null
           pending_outreach_count?: number | null
           rapport_status?: string | null
           response_rate_percent?: number | null
           total_notes_count?: number | null
           total_notes_word_count?: number | null
           total_outreach_count?: number | null
+          total_strength_score?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -732,30 +747,39 @@ export type Database = {
       }
       iotas: {
         Row: {
+          avg_connection_strength: number | null
           created_at: string
           cultiv8_posts: number
           eco8_communities: number
+          engagement_multiplier: number | null
           id: string
+          network_score: number | null
           rel8_contacts: number
           total_network_value: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          avg_connection_strength?: number | null
           created_at?: string
           cultiv8_posts?: number
           eco8_communities?: number
+          engagement_multiplier?: number | null
           id?: string
+          network_score?: number | null
           rel8_contacts?: number
           total_network_value?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          avg_connection_strength?: number | null
           created_at?: string
           cultiv8_posts?: number
           eco8_communities?: number
+          engagement_multiplier?: number | null
           id?: string
+          network_score?: number | null
           rel8_contacts?: number
           total_network_value?: number | null
           updated_at?: string
@@ -3436,6 +3460,10 @@ export type Database = {
         Args: { p_service_provider_id: string; p_service_request_id: string }
         Returns: boolean
       }
+      calculate_contact_strength: {
+        Args: { p_contact_id: string; p_user_id: string }
+        Returns: number
+      }
       calculate_evalu8_stats: {
         Args: { p_contact_id: string; p_user_id: string }
         Returns: Json
@@ -3558,10 +3586,13 @@ export type Database = {
       get_or_create_iotas: {
         Args: { p_user_id: string }
         Returns: {
+          avg_connection_strength: number | null
           created_at: string
           cultiv8_posts: number
           eco8_communities: number
+          engagement_multiplier: number | null
           id: string
+          network_score: number | null
           rel8_contacts: number
           total_network_value: number | null
           updated_at: string
@@ -3721,6 +3752,10 @@ export type Database = {
         Returns: boolean
       }
       update_network_value: { Args: { p_user_id: string }; Returns: undefined }
+      update_user_network_score: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       update_user_role: {
         Args: { p_assigner_id?: string; p_role_name: string; p_user_id: string }
         Returns: boolean
