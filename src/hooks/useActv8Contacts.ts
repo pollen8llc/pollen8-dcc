@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getActiveContacts, deactivateContact, getActv8ContactByContactId } from "@/services/actv8Service";
+import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
 
 export interface PathHistoryEntry {
@@ -42,8 +43,11 @@ export interface Actv8ContactDisplay {
 }
 
 export function useActv8Contacts() {
+  const { currentUser } = useUser();
+  const userId = currentUser?.id;
+
   return useQuery({
-    queryKey: ['actv8-contacts'],
+    queryKey: ['actv8-contacts', userId],
     queryFn: async () => {
       const contacts = await getActiveContacts();
       const strengthMap: Record<string, 'spark' | 'ember' | 'flame' | 'star'> = {
@@ -74,14 +78,18 @@ export function useActv8Contacts() {
         skippedPaths: ac.skipped_paths || [],
       }));
     },
+    enabled: !!userId,
   });
 }
 
 export function useActv8Status(contactId: string | undefined) {
+  const { currentUser } = useUser();
+  const userId = currentUser?.id;
+  
   return useQuery({
-    queryKey: ['actv8-status', contactId],
+    queryKey: ['actv8-status', userId, contactId],
     queryFn: () => contactId ? getActv8ContactByContactId(contactId) : null,
-    enabled: !!contactId,
+    enabled: !!userId && !!contactId,
   });
 }
 

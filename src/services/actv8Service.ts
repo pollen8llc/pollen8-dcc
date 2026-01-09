@@ -347,49 +347,96 @@ export async function activateContact(
   // Always start with Build Rapport (tier 1) unless explicitly overridden
   const startingPathId = pathId || DEFAULT_PATH_ID;
 
-  const { data, error } = await supabase
+  // Check if an existing record exists for this user + contact
+  const { data: existing } = await supabase
     .from("rms_actv8_contacts")
-    .insert({
-      user_id: user.id,
-      contact_id: contactId,
-      development_path_id: startingPathId,
-      current_step_index: 0,
-      completed_steps: [],
-      connection_strength: options?.connectionStrength || null,
-      relationship_type: options?.relationshipType || null,
-      warmth_level: options?.warmthLevel || null,
-      intention_id: options?.intentionId || null,
-      intention_notes: options?.intentionNotes || null,
-      target_completion_date: options?.targetCompletionDate || null,
-      status: "active",
-      activated_at: new Date().toISOString(),
-      path_started_at: new Date().toISOString(),
-      path_tier: 1,
-      path_history: [],
-      skipped_paths: [],
-    })
-    .select()
-    .single();
+    .select("id, status, current_step_index, completed_steps, path_tier, path_history, skipped_paths")
+    .eq("user_id", user.id)
+    .eq("contact_id", contactId)
+    .maybeSingle();
+
+  let data;
+  let error;
+
+  if (existing) {
+    // Reactivate existing record - preserve progress, just set status to active
+    const result = await supabase
+      .from("rms_actv8_contacts")
+      .update({
+        status: "active",
+        activated_at: new Date().toISOString(),
+        // Only reset path if they had none
+        ...(existing.current_step_index === 0 && (!existing.completed_steps || existing.completed_steps.length === 0)
+          ? {
+              development_path_id: startingPathId,
+              path_started_at: new Date().toISOString(),
+            }
+          : {}),
+        // Apply any new options if provided
+        ...(options?.connectionStrength ? { connection_strength: options.connectionStrength } : {}),
+        ...(options?.relationshipType ? { relationship_type: options.relationshipType } : {}),
+        ...(options?.warmthLevel ? { warmth_level: options.warmthLevel } : {}),
+        ...(options?.intentionId ? { intention_id: options.intentionId } : {}),
+        ...(options?.intentionNotes ? { intention_notes: options.intentionNotes } : {}),
+        ...(options?.targetCompletionDate ? { target_completion_date: options.targetCompletionDate } : {}),
+      })
+      .eq("id", existing.id)
+      .select()
+      .single();
+    
+    data = result.data;
+    error = result.error;
+  } else {
+    // Insert new record
+    const result = await supabase
+      .from("rms_actv8_contacts")
+      .insert({
+        user_id: user.id,
+        contact_id: contactId,
+        development_path_id: startingPathId,
+        current_step_index: 0,
+        completed_steps: [],
+        connection_strength: options?.connectionStrength || null,
+        relationship_type: options?.relationshipType || null,
+        warmth_level: options?.warmthLevel || null,
+        intention_id: options?.intentionId || null,
+        intention_notes: options?.intentionNotes || null,
+        target_completion_date: options?.targetCompletionDate || null,
+        status: "active",
+        activated_at: new Date().toISOString(),
+        path_started_at: new Date().toISOString(),
+        path_tier: 1,
+        path_history: [],
+        skipped_paths: [],
+      })
+      .select()
+      .single();
+    
+    data = result.data;
+    error = result.error;
+  }
 
   if (error) throw error;
   
-  // Create the first step instance as "active"
-  const path = await getDevelopmentPath(startingPathId);
-  if (path?.steps?.[0] && data) {
-    try {
-      await supabase
-        .from("rms_actv8_step_instances")
-        .insert({
-          actv8_contact_id: data.id,
-          step_id: path.steps[0].id,
-          step_index: 0,
-          path_id: startingPathId,
-          status: 'active',
-          started_at: new Date().toISOString(),
-          user_id: user.id,
-        });
-    } catch (stepError) {
-      console.log("Could not create initial step instance:", stepError);
+  // Create the first step instance as "active" (only for new activations)
+  if (!existing) {
+    const path = await getDevelopmentPath(startingPathId);
+    if (path?.steps?.[0] && data) {
+      try {
+        await supabase
+          .from("rms_actv8_step_instances")
+          .insert({
+            actv8_contact_id: data.id,
+            step_id: path.steps[0].id,
+            step_index: 0,
+            path_id: startingPathId,
+            status: 'active',
+            started_at: new Date().toISOString(),
+            user_id: user.id,
+          });
+      } catch (stepError) {
+        console.log("Could not create initial step instance:", stepError);
+      }
     }
   }
   
