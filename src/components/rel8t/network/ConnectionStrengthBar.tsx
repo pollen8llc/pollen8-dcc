@@ -1,12 +1,14 @@
 import { getConnectionStrength } from "@/data/mockNetworkData";
+import { cn } from "@/lib/utils";
 
 interface ConnectionStrengthBarProps {
   strength: 'spark' | 'ember' | 'flame' | 'star';
   showLabel?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
-export function ConnectionStrengthBar({ strength, showLabel = true, size = 'md' }: ConnectionStrengthBarProps) {
+export function ConnectionStrengthBar({ strength, showLabel = true, size = 'md', className }: ConnectionStrengthBarProps) {
   const strengthData = getConnectionStrength(strength);
   
   const heights = {
@@ -23,7 +25,7 @@ export function ConnectionStrengthBar({ strength, showLabel = true, size = 'md' 
   };
 
   return (
-    <div className="w-full">
+    <div className={cn("w-full", className)}>
       {showLabel && (
         <div className="flex justify-between items-center mb-1.5">
           <span className="text-xs text-muted-foreground">Connection Strength</span>
