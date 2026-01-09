@@ -2320,7 +2320,7 @@ export type Database = {
           contact_id: string
           created_at: string | null
           current_step_index: number | null
-          development_path_id: string
+          development_path_id: string | null
           id: string
           intention_id: string | null
           intention_notes: string | null
@@ -2343,7 +2343,7 @@ export type Database = {
           contact_id: string
           created_at?: string | null
           current_step_index?: number | null
-          development_path_id: string
+          development_path_id?: string | null
           id?: string
           intention_id?: string | null
           intention_notes?: string | null
@@ -2366,7 +2366,7 @@ export type Database = {
           contact_id?: string
           created_at?: string | null
           current_step_index?: number | null
-          development_path_id?: string
+          development_path_id?: string | null
           id?: string
           intention_id?: string | null
           intention_notes?: string | null
