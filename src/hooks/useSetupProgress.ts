@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getCategories, getContactCount } from "@/services/rel8t/contactService";
-import { getTriggers } from "@/services/rel8t/triggerService";
+
 
 export interface SetupTask {
   id: string;
@@ -90,11 +90,6 @@ export const useSetupProgress = (): SetupProgressData => {
     staleTime: 1000 * 30,
   });
 
-  const { data: triggers = [], isLoading: triggersLoading } = useQuery({
-    queryKey: ["setup-triggers"],
-    queryFn: getTriggers,
-    staleTime: 1000 * 30,
-  });
 
   const { data: actv8Count = 0, isLoading: actv8Loading } = useQuery({
     queryKey: ["setup-actv8-count"],
@@ -108,7 +103,7 @@ export const useSetupProgress = (): SetupProgressData => {
     staleTime: 1000 * 30,
   });
 
-  const isLoading = categoriesLoading || contactsLoading || categorizedLoading || triggersLoading || actv8Loading || buildRapportLoading;
+  const isLoading = categoriesLoading || contactsLoading || categorizedLoading || actv8Loading || buildRapportLoading;
 
   const tasks: SetupTask[] = [
     {
@@ -155,22 +150,6 @@ export const useSetupProgress = (): SetupProgressData => {
         "Click on a contact to view their profile",
         "Click the Category dropdown",
         "Select a category — Repeat for 3 contacts",
-      ],
-    },
-    {
-      id: "reminders",
-      title: "Create Reminders",
-      description: "Set up automated follow-up reminders",
-      target: TARGET,
-      current: Math.min(triggers.length, TARGET),
-      route: "/rel8/triggers",
-      icon: "Bell",
-      steps: [
-        "Click \"Let's Go\" to open Reminders",
-        "Click the \"Add Reminder\" button",
-        "Set the reminder type and frequency",
-        "Choose which contacts to include",
-        "Click Save — Repeat for 3 reminders",
       ],
     },
     {
