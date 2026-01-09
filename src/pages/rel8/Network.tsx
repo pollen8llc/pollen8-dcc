@@ -209,26 +209,40 @@ export default function Network() {
           </Card>
         )}
 
-        {/* Tabs */}
+        {/* Tabs - Button Style */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full h-12 p-1 bg-muted/50 backdrop-blur-sm mb-6">
-            <TabsTrigger value="contacts" className="flex-1 gap-2 data-[state=active]:bg-background">
-              <Users className="h-4 w-4" />
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <button
+              onClick={() => setActiveTab('contacts')}
+              className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl border-2 transition-all duration-200 ${
+                activeTab === 'contacts'
+                  ? 'bg-primary/20 border-primary text-primary shadow-lg shadow-primary/20 ring-2 ring-primary/20'
+                  : 'bg-muted/30 border-border/50 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:border-border'
+              }`}
+            >
+              <Users className="h-5 w-5" />
               <span>Connects</span>
-            </TabsTrigger>
-            <TabsTrigger value="outreach" className="flex-1 gap-2 data-[state=active]:bg-background">
-              <CalendarCheck className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setActiveTab('outreach')}
+              className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl border-2 transition-all duration-200 ${
+                activeTab === 'outreach'
+                  ? 'bg-teal-500/20 border-teal-500 text-teal-400 shadow-lg shadow-teal-500/20 ring-2 ring-teal-500/20'
+                  : 'bg-muted/30 border-border/50 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:border-border'
+              }`}
+            >
+              <CalendarCheck className="h-5 w-5" />
               <span>Outreach</span>
               {pendingOutreachCount > 0 && (
-                <span className="relative ml-2 inline-flex">
+                <span className="relative ml-1 inline-flex">
                   <span className="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-teal-400 opacity-60"></span>
                   <span className="relative inline-flex rounded-full h-6 w-6 bg-gradient-to-br from-teal-400 to-teal-600 text-white text-xs font-bold items-center justify-center shadow-lg shadow-teal-500/50 border-2 border-teal-300">
                     {pendingOutreachCount > 9 ? '9+' : pendingOutreachCount}
                   </span>
                 </span>
               )}
-            </TabsTrigger>
-          </TabsList>
+            </button>
+          </div>
 
           <TabsContent value="contacts" className="mt-0">
             {contacts.length === 0 ? (

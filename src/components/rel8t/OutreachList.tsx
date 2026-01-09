@@ -86,13 +86,17 @@ const OutreachList = ({
     return counts;
   }, [outreachItems]);
 
-  // Filter items by selected date if a date is selected
+  // Filter items by selected date if a date is selected, sort newest first
   const filteredItems = useMemo(() => {
-    if (!selectedDate) {
-      return outreachItems;
+    let items = outreachItems;
+    if (selectedDate) {
+      items = items.filter(item => 
+        item.due_date && isSameDay(new Date(item.due_date), selectedDate)
+      );
     }
-    return outreachItems.filter(item => 
-      item.due_date && isSameDay(new Date(item.due_date), selectedDate)
+    // Sort by created_at descending (newest first)
+    return [...items].sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
   }, [outreachItems, selectedDate]);
 
