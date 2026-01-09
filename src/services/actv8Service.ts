@@ -550,6 +550,7 @@ export async function getActv8ContactByContactId(contactId: string): Promise<Act
     .select("*")
     .eq("user_id", user.id)
     .eq("contact_id", contactId)
+    .eq("status", "active")
     .maybeSingle();
 
   if (error) throw error;

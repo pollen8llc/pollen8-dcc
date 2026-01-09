@@ -53,9 +53,9 @@ export function ContactHeader({
 
     setIsActivating(true);
     try {
-      const actv8Contact = await activateContact(contactId);
+      await activateContact(contactId);
       queryClient.invalidateQueries({ queryKey: ['actv8-contacts'] });
-      queryClient.invalidateQueries({ queryKey: ['actv8-status', contactId] });
+      queryClient.invalidateQueries({ queryKey: ['actv8-status'] });
       toast.success(`${name} added to Actv8!`);
       navigate('/rel8/actv8');
     } catch (error) {
