@@ -4,9 +4,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Heart, Edit, Trash2, Zap, ExternalLink, Loader2 } from 'lucide-react';
+import { Heart, Edit, Trash2, Zap, ExternalLink, Loader2, Power } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useActv8Status } from '@/hooks/useActv8Contacts';
+import { useActv8FullStatus } from '@/hooks/useActv8Contacts';
 import { activateContact } from '@/services/actv8Service';
 import { toast } from 'sonner';
 
@@ -38,16 +38,16 @@ export function ContactHeader({
   const queryClient = useQueryClient();
   const [isActivating, setIsActivating] = useState(false);
 
-  const { data: actv8Status } = useActv8Status(contactId);
+  const { data: actv8FullStatus } = useActv8FullStatus(contactId);
 
   const handleBuildRapport = () => {
     navigate(`/rel8/wizard?contactId=${contactId}`);
   };
 
   const handleActivate = async () => {
-    if (actv8Status) {
-      // Already activated - navigate to Actv8 profile
-      navigate(`/rel8/actv8/${actv8Status.id}/profile`);
+    if (actv8FullStatus?.isActive) {
+      // Already active - navigate to Actv8 profile
+      navigate(`/rel8/actv8/${actv8FullStatus.actv8Contact?.id}/profile`);
       return;
     }
 
@@ -55,8 +55,12 @@ export function ContactHeader({
     try {
       await activateContact(contactId);
       queryClient.invalidateQueries({ queryKey: ['actv8-contacts'] });
-      queryClient.invalidateQueries({ queryKey: ['actv8-status'] });
-      toast.success(`${name} added to Actv8!`);
+      queryClient.invalidateQueries({ queryKey: ['actv8-full-status'] });
+      
+      const message = actv8FullStatus?.exists 
+        ? `${name} reactivated in Actv8!` 
+        : `${name} added to Actv8!`;
+      toast.success(message);
       navigate('/rel8/actv8');
     } catch (error) {
       console.error('Failed to activate contact:', error);
@@ -64,6 +68,40 @@ export function ContactHeader({
     } finally {
       setIsActivating(false);
     }
+  };
+
+  // Helper to render the activate button content
+  const renderActivateButtonContent = () => {
+    if (isActivating) {
+      return (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {actv8FullStatus?.exists && !actv8FullStatus?.isActive ? 'Reactivating...' : 'Adding...'}
+        </>
+      );
+    }
+    if (actv8FullStatus?.isActive) {
+      return (
+        <>
+          <ExternalLink className="h-4 w-4" />
+          View in Actv8
+        </>
+      );
+    }
+    if (actv8FullStatus?.exists) {
+      return (
+        <>
+          <Power className="h-4 w-4" />
+          Reactivate
+        </>
+      );
+    }
+    return (
+      <>
+        <Zap className="h-4 w-4" />
+        Activate
+      </>
+    );
   };
 
   return (
@@ -101,22 +139,7 @@ export function ContactHeader({
                 className="gap-2"
                 disabled={isActivating}
               >
-                {isActivating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Adding...
-                  </>
-                ) : actv8Status ? (
-                  <>
-                    <ExternalLink className="h-4 w-4" />
-                    View in Actv8
-                  </>
-                ) : (
-                  <>
-                    <Zap className="h-4 w-4" />
-                    Activate
-                  </>
-                )}
+                {renderActivateButtonContent()}
               </Button>
               <Button onClick={onEdit} variant="outline" size="sm" className="gap-2">
                 <Edit className="h-4 w-4" />
@@ -163,22 +186,7 @@ export function ContactHeader({
                 className="flex-1 gap-2"
                 disabled={isActivating}
               >
-                {isActivating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Adding...
-                  </>
-                ) : actv8Status ? (
-                  <>
-                    <ExternalLink className="h-4 w-4" />
-                    View in Actv8
-                  </>
-                ) : (
-                  <>
-                    <Zap className="h-4 w-4" />
-                    Activate
-                  </>
-                )}
+                {renderActivateButtonContent()}
               </Button>
               <Button onClick={onEdit} variant="outline" className="flex-1 gap-2">
                 <Edit className="h-4 w-4" />

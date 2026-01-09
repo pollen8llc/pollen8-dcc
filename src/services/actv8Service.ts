@@ -567,6 +567,35 @@ export async function getActv8ContactByContactId(contactId: string): Promise<Act
   return getActv8Contact(actv8Contact.id);
 }
 
+// Get Actv8 contact status regardless of active/inactive status
+export interface Actv8ContactStatus {
+  exists: boolean;
+  isActive: boolean;
+  actv8Contact: Actv8Contact | null;
+}
+
+export async function getActv8ContactStatus(contactId: string): Promise<Actv8ContactStatus> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { data: actv8Contact, error } = await supabase
+    .from("rms_actv8_contacts")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("contact_id", contactId)
+    .maybeSingle(); // No status filter - get any record
+
+  if (error) throw error;
+  if (!actv8Contact) return { exists: false, isActive: false, actv8Contact: null };
+
+  const fullContact = await getActv8Contact(actv8Contact.id);
+  return { 
+    exists: true, 
+    isActive: actv8Contact.status === 'active', 
+    actv8Contact: fullContact 
+  };
+}
+
 export async function updateContactProgress(
   actv8ContactId: string,
   stepIndex: number,
