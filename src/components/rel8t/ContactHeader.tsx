@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Heart, Edit, Trash2, Zap, ExternalLink, Loader2, Power } from 'lucide-react';
+import { Edit, Trash2, Zap, ExternalLink, Loader2, Power } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useActv8FullStatus } from '@/hooks/useActv8Contacts';
 import { activateContact } from '@/services/actv8Service';
@@ -39,10 +39,6 @@ export function ContactHeader({
   const [isActivating, setIsActivating] = useState(false);
 
   const { data: actv8FullStatus } = useActv8FullStatus(contactId);
-
-  const handleBuildRapport = () => {
-    navigate(`/rel8/wizard?contactId=${contactId}`);
-  };
 
   const handleActivate = async () => {
     if (actv8FullStatus?.isActive) {
@@ -127,11 +123,7 @@ export function ContactHeader({
             </div>
 
             {/* Action Buttons Grid */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button onClick={handleBuildRapport} variant="default" size="sm" className="gap-2">
-                <Heart className="h-4 w-4" />
-                Build Rapport
-              </Button>
+            <div className="grid grid-cols-3 gap-2">
               <Button 
                 onClick={handleActivate} 
                 variant="default" 
@@ -176,10 +168,6 @@ export function ContactHeader({
 
             {/* Action Buttons Bar */}
             <div className="flex items-center gap-3">
-              <Button onClick={handleBuildRapport} variant="default" className="flex-1 gap-2">
-                <Heart className="h-4 w-4" />
-                Build Rapport
-              </Button>
               <Button 
                 onClick={handleActivate} 
                 variant="default" 
