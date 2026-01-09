@@ -2319,6 +2319,7 @@ export type Database = {
           connection_strength: string | null
           contact_id: string
           created_at: string | null
+          current_path_instance_id: string | null
           current_step_index: number | null
           development_path_id: string | null
           id: string
@@ -2342,6 +2343,7 @@ export type Database = {
           connection_strength?: string | null
           contact_id: string
           created_at?: string | null
+          current_path_instance_id?: string | null
           current_step_index?: number | null
           development_path_id?: string | null
           id?: string
@@ -2365,6 +2367,7 @@ export type Database = {
           connection_strength?: string | null
           contact_id?: string
           created_at?: string | null
+          current_path_instance_id?: string | null
           current_step_index?: number | null
           development_path_id?: string | null
           id?: string
@@ -2388,6 +2391,13 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_actv8_contacts_current_path_instance_id_fkey"
+            columns: ["current_path_instance_id"]
+            isOneToOne: false
+            referencedRelation: "rms_actv8_path_instances"
             referencedColumns: ["id"]
           },
         ]
@@ -2432,6 +2442,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "rms_actv8_interactions_actv8_contact_id_fkey"
+            columns: ["actv8_contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_actv8_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rms_actv8_path_instances: {
+        Row: {
+          actv8_contact_id: string
+          created_at: string
+          ended_at: string | null
+          id: string
+          path_id: string
+          started_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          actv8_contact_id: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          path_id: string
+          started_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          actv8_contact_id?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          path_id?: string
+          started_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_actv8_path_instances_actv8_contact_id_fkey"
             columns: ["actv8_contact_id"]
             isOneToOne: false
             referencedRelation: "rms_actv8_contacts"
@@ -2537,6 +2588,7 @@ export type Database = {
           notes: string | null
           outreach_id: string | null
           path_id: string
+          path_instance_id: string | null
           rapport_progress: string | null
           started_at: string | null
           status: string
@@ -2556,6 +2608,7 @@ export type Database = {
           notes?: string | null
           outreach_id?: string | null
           path_id: string
+          path_instance_id?: string | null
           rapport_progress?: string | null
           started_at?: string | null
           status?: string
@@ -2575,6 +2628,7 @@ export type Database = {
           notes?: string | null
           outreach_id?: string | null
           path_id?: string
+          path_instance_id?: string | null
           rapport_progress?: string | null
           started_at?: string | null
           status?: string
@@ -2596,6 +2650,13 @@ export type Database = {
             columns: ["outreach_id"]
             isOneToOne: false
             referencedRelation: "rms_outreach"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_actv8_step_instances_path_instance_id_fkey"
+            columns: ["path_instance_id"]
+            isOneToOne: false
+            referencedRelation: "rms_actv8_path_instances"
             referencedColumns: ["id"]
           },
         ]
@@ -3087,6 +3148,7 @@ export type Database = {
           notes: string | null
           outreach_channel: string | null
           path_id: string | null
+          path_instance_id: string | null
           priority: string | null
           raw_ics: string | null
           scheduled_at: string | null
@@ -3116,6 +3178,7 @@ export type Database = {
           notes?: string | null
           outreach_channel?: string | null
           path_id?: string | null
+          path_instance_id?: string | null
           priority?: string | null
           raw_ics?: string | null
           scheduled_at?: string | null
@@ -3145,6 +3208,7 @@ export type Database = {
           notes?: string | null
           outreach_channel?: string | null
           path_id?: string | null
+          path_instance_id?: string | null
           priority?: string | null
           raw_ics?: string | null
           scheduled_at?: string | null
@@ -3163,6 +3227,13 @@ export type Database = {
             columns: ["actv8_contact_id"]
             isOneToOne: false
             referencedRelation: "rms_actv8_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_outreach_path_instance_id_fkey"
+            columns: ["path_instance_id"]
+            isOneToOne: false
+            referencedRelation: "rms_actv8_path_instances"
             referencedColumns: ["id"]
           },
           {

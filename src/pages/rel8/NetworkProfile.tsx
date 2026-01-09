@@ -1,8 +1,8 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath } from "@/services/actv8Service";
-import { getOutreachesByActv8Contact, getOutreachesForContact, syncOutreachesToActv8 } from "@/services/rel8t/outreachService";
+import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath, advanceToPath } from "@/services/actv8Service";
+import { getOutreachesByActv8Contact, getOutreachesForContact } from "@/services/rel8t/outreachService";
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathCard";
@@ -60,14 +60,15 @@ export default function NetworkProfile() {
 
   const { data: analysis, isLoading: analysisLoading } = useContactAnalysis(actv8Contact?.contact_id);
 
+  // Fetch outreaches - filter by current path INSTANCE for proper isolation
   const { data: linkedOutreaches = [] } = useQuery({
-    queryKey: ['actv8-outreaches', id, actv8Contact?.development_path_id],
+    queryKey: ['actv8-outreaches', id, actv8Contact?.current_path_instance_id],
     queryFn: async () => {
-      // First sync any unlinked outreaches to this actv8 contact
-      await syncOutreachesToActv8(id!);
+      // NOTE: We no longer auto-sync unlinked outreaches to avoid cross-path pollution
+      // Users should create outreaches through the wizard for proper path instance association
       
-      // Fetch outreaches filtered by current development path
-      const outreaches = await getOutreachesByActv8Contact(id!, actv8Contact?.development_path_id);
+      // Fetch outreaches filtered by current path INSTANCE (not just path ID)
+      const outreaches = await getOutreachesByActv8Contact(id!, actv8Contact?.current_path_instance_id);
       return outreaches.map(o => ({
         stepIndex: o.actv8_step_index ?? 0,
         outreach: o
@@ -77,23 +78,16 @@ export default function NetworkProfile() {
   });
 
 
+  // Use advanceToPath which properly creates path instances
   const updatePathMutation = useMutation({
     mutationFn: async (pathId: string) => {
       if (!actv8Contact) throw new Error('No contact loaded');
-      const { error } = await supabase
-        .from('rms_actv8_contacts')
-        .update({ 
-          development_path_id: pathId,
-          current_step_index: 0,
-          completed_steps: [],
-          path_started_at: new Date().toISOString()
-        })
-        .eq('id', actv8Contact.id);
-      
-      if (error) throw error;
+      // Use advanceToPath which creates a new path instance for proper isolation
+      await advanceToPath(actv8Contact.id, pathId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['actv8-contact', id] });
+      queryClient.invalidateQueries({ queryKey: ['actv8-outreaches', id] });
       toast.success('Development path updated');
     },
     onError: (error: any) => {
@@ -198,6 +192,7 @@ export default function NetworkProfile() {
           suggestedTone: step.suggested_tone,
           pathName: actv8Contact.path.name,
           pathId: actv8Contact.development_path_id,
+          pathInstanceId: actv8Contact.current_path_instance_id || '', // Unique instance for path isolation
         });
         
         setPreSelectedContacts([{

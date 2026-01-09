@@ -92,6 +92,7 @@ export interface Actv8Contact {
   user_id: string;
   contact_id: string;
   development_path_id: string;
+  current_path_instance_id: string | null; // Unique instance for each path "run"
   current_step_index: number;
   completed_steps: string[];
   connection_strength: string | null;
@@ -129,9 +130,32 @@ function transformActv8Contact(data: any): Actv8Contact {
   return {
     ...data,
     path_tier: data.path_tier ?? 1,
+    current_path_instance_id: data.current_path_instance_id || null,
     path_history: (data.path_history as PathHistoryEntry[]) || [],
     skipped_paths: (data.skipped_paths as SkippedPathEntry[]) || [],
   };
+}
+
+// Helper to create a new path instance
+async function createPathInstance(
+  userId: string, 
+  actv8ContactId: string, 
+  pathId: string
+): Promise<string> {
+  const { data, error } = await supabase
+    .from("rms_actv8_path_instances")
+    .insert({
+      user_id: userId,
+      actv8_contact_id: actv8ContactId,
+      path_id: pathId,
+      status: 'active',
+      started_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+  
+  if (error) throw error;
+  return data.id;
 }
 
 export interface Actv8Strategy {
@@ -310,10 +334,25 @@ export async function advanceToPath(
     throw new Error(`Cannot select this path yet. Complete current tier first.`);
   }
 
+  // Mark current path instance as ended if exists
+  if (contact.current_path_instance_id) {
+    await supabase
+      .from("rms_actv8_path_instances")
+      .update({ 
+        status: 'ended',
+        ended_at: new Date().toISOString()
+      })
+      .eq("id", contact.current_path_instance_id);
+  }
+
+  // Create a new path instance for this "run"
+  const pathInstanceId = await createPathInstance(user.id, actv8ContactId, newPathId);
+
   const { data, error } = await supabase
     .from("rms_actv8_contacts")
     .update({
       development_path_id: newPathId,
+      current_path_instance_id: pathInstanceId,
       current_step_index: 0,
       completed_steps: [],
       path_started_at: new Date().toISOString(),
@@ -324,7 +363,7 @@ export async function advanceToPath(
 
   if (error) throw error;
   
-  // Create the first step instance for the new path
+  // Create the first step instance for the new path with path_instance_id
   if (newPath.steps?.[0] && data) {
     try {
       await supabase
@@ -334,6 +373,7 @@ export async function advanceToPath(
           step_id: newPath.steps[0].id,
           step_index: 0,
           path_id: newPathId,
+          path_instance_id: pathInstanceId,
           status: 'active',
           started_at: new Date().toISOString(),
           user_id: user.id,
@@ -456,6 +496,7 @@ export async function activateContact(
       tier_at_skip: tier,
     }));
     
+    // First insert the contact record without path_instance_id
     const result = await supabase
       .from("rms_actv8_contacts")
       .insert({
@@ -483,33 +524,45 @@ export async function activateContact(
     data = result.data;
     error = result.error;
     console.log('[Actv8] Insert result:', data?.status, 'id:', data?.id, 'error:', error?.message);
+    
+    // Now create a path instance for the initial path
+    if (data && !error) {
+      try {
+        const pathInstanceId = await createPathInstance(user.id, data.id, startingPathId);
+        
+        // Update the contact with the path instance id
+        await supabase
+          .from("rms_actv8_contacts")
+          .update({ current_path_instance_id: pathInstanceId })
+          .eq("id", data.id);
+        
+        data.current_path_instance_id = pathInstanceId;
+        
+        // Create the first step instance with path_instance_id
+        const path = await getDevelopmentPath(startingPathId);
+        if (path?.steps?.[0]) {
+          await supabase
+            .from("rms_actv8_step_instances")
+            .insert({
+              actv8_contact_id: data.id,
+              step_id: path.steps[0].id,
+              step_index: 0,
+              path_id: startingPathId,
+              path_instance_id: pathInstanceId,
+              status: 'active',
+              started_at: new Date().toISOString(),
+              user_id: user.id,
+            });
+        }
+      } catch (instanceError) {
+        console.log("Could not create path instance:", instanceError);
+      }
+    }
   }
 
   if (error) throw error;
   
   console.log('[Actv8] Final activation status:', data?.status, 'id:', data?.id);
-  
-  // Create the first step instance as "active" (only for new activations)
-  if (!existing) {
-    const path = await getDevelopmentPath(startingPathId);
-    if (path?.steps?.[0] && data) {
-      try {
-        await supabase
-          .from("rms_actv8_step_instances")
-          .insert({
-            actv8_contact_id: data.id,
-            step_id: path.steps[0].id,
-            step_index: 0,
-            path_id: startingPathId,
-            status: 'active',
-            started_at: new Date().toISOString(),
-            user_id: user.id,
-          });
-      } catch (stepError) {
-        console.log("Could not create initial step instance:", stepError);
-      }
-    }
-  }
   
   return transformActv8Contact(data);
 }
@@ -1040,10 +1093,22 @@ export async function createStepInstance(
   stepId: string,
   stepIndex: number,
   pathId: string,
-  status: 'pending' | 'active' = 'active'
+  status: 'pending' | 'active' = 'active',
+  pathInstanceId?: string | null
 ): Promise<StepInstance> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
+
+  // If no pathInstanceId provided, get it from the actv8 contact
+  let instanceId = pathInstanceId;
+  if (!instanceId) {
+    const { data: actv8Contact } = await supabase
+      .from("rms_actv8_contacts")
+      .select("current_path_instance_id")
+      .eq("id", actv8ContactId)
+      .single();
+    instanceId = actv8Contact?.current_path_instance_id;
+  }
 
   const { data, error } = await supabase
     .from("rms_actv8_step_instances")
@@ -1052,6 +1117,7 @@ export async function createStepInstance(
       step_id: stepId,
       step_index: stepIndex,
       path_id: pathId,
+      path_instance_id: instanceId || null,
       status,
       started_at: status === 'active' ? new Date().toISOString() : null,
       user_id: user.id,
