@@ -3086,6 +3086,7 @@ export type Database = {
           message: string
           notes: string | null
           outreach_channel: string | null
+          path_id: string | null
           priority: string | null
           raw_ics: string | null
           scheduled_at: string | null
@@ -3114,6 +3115,7 @@ export type Database = {
           message: string
           notes?: string | null
           outreach_channel?: string | null
+          path_id?: string | null
           priority?: string | null
           raw_ics?: string | null
           scheduled_at?: string | null
@@ -3142,6 +3144,7 @@ export type Database = {
           message?: string
           notes?: string | null
           outreach_channel?: string | null
+          path_id?: string | null
           priority?: string | null
           raw_ics?: string | null
           scheduled_at?: string | null

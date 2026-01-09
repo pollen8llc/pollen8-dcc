@@ -57,6 +57,8 @@ export interface Outreach {
   // Actv8 Build Rapport integration
   actv8_contact_id?: string | null;
   actv8_step_index?: number | null;
+  // Path association - outreach is specific to a development path
+  path_id?: string | null;
 }
 
 export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> => {
@@ -597,7 +599,9 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
         trigger_id: outreach.trigger_id || null,
         // Actv8 Build Rapport linkage
         actv8_contact_id: outreach.actv8_contact_id || null,
-        actv8_step_index: outreach.actv8_step_index ?? null
+        actv8_step_index: outreach.actv8_step_index ?? null,
+        // Path association for filtering
+        path_id: outreach.path_id || null
       }])
       .select()
       .single();
@@ -877,7 +881,7 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
   }
 };
 
-export const getOutreachesByActv8Contact = async (actv8ContactId: string): Promise<Outreach[]> => {
+export const getOutreachesByActv8Contact = async (actv8ContactId: string, pathId?: string | null): Promise<Outreach[]> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -885,17 +889,21 @@ export const getOutreachesByActv8Contact = async (actv8ContactId: string): Promi
       throw new Error('User not authenticated');
     }
     
-    // First get the contact_id from the actv8 contact record
+    // First get the contact_id and current path from the actv8 contact record
     const { data: actv8Record } = await supabase
       .from("rms_actv8_contacts")
-      .select("contact_id")
+      .select("contact_id, development_path_id")
       .eq("id", actv8ContactId)
       .single();
+    
+    // Use provided pathId or fall back to current development_path_id
+    const filterPathId = pathId !== undefined ? pathId : actv8Record?.development_path_id;
     
     const contactId = actv8Record?.contact_id;
     
     // Fetch outreaches that are directly linked via actv8_contact_id
-    const { data: directLinked, error: directError } = await supabase
+    // Filter by path_id if provided (only show outreaches for current path)
+    let query = supabase
       .from("rms_outreach")
       .select(`
         *,
@@ -910,8 +918,14 @@ export const getOutreachesByActv8Contact = async (actv8ContactId: string): Promi
         )
       `)
       .eq("user_id", user.id)
-      .eq("actv8_contact_id", actv8ContactId)
-      .order("actv8_step_index", { ascending: true });
+      .eq("actv8_contact_id", actv8ContactId);
+    
+    // Only filter by path if we have one
+    if (filterPathId) {
+      query = query.eq("path_id", filterPathId);
+    }
+    
+    const { data: directLinked, error: directError } = await query.order("actv8_step_index", { ascending: true });
     
     if (directError) throw directError;
     

@@ -61,18 +61,19 @@ export default function NetworkProfile() {
   const { data: analysis, isLoading: analysisLoading } = useContactAnalysis(actv8Contact?.contact_id);
 
   const { data: linkedOutreaches = [] } = useQuery({
-    queryKey: ['actv8-outreaches', id],
+    queryKey: ['actv8-outreaches', id, actv8Contact?.development_path_id],
     queryFn: async () => {
       // First sync any unlinked outreaches to this actv8 contact
       await syncOutreachesToActv8(id!);
       
-      const outreaches = await getOutreachesByActv8Contact(id!);
+      // Fetch outreaches filtered by current development path
+      const outreaches = await getOutreachesByActv8Contact(id!, actv8Contact?.development_path_id);
       return outreaches.map(o => ({
         stepIndex: o.actv8_step_index ?? 0,
         outreach: o
       }));
     },
-    enabled: !!id,
+    enabled: !!id && !!actv8Contact,
   });
 
 
@@ -184,7 +185,7 @@ export default function NetworkProfile() {
   };
 
   const handlePlanTouchpoint = async (stepIndex: number) => {
-    if (actv8Contact?.path?.steps) {
+    if (actv8Contact?.path?.steps && actv8Contact.development_path_id) {
       const step = actv8Contact.path.steps[stepIndex];
       if (step && actv8Contact.contact) {
         setActv8ContactId(actv8Contact.id);
@@ -196,6 +197,7 @@ export default function NetworkProfile() {
           suggestedAction: step.suggested_action,
           suggestedTone: step.suggested_tone,
           pathName: actv8Contact.path.name,
+          pathId: actv8Contact.development_path_id,
         });
         
         setPreSelectedContacts([{
