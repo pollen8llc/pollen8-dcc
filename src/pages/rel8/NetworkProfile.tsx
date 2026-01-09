@@ -9,17 +9,19 @@ import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathC
 import { DevelopmentTimeline } from "@/components/rel8t/network/DevelopmentTimeline";
 import { PathSelectionModal } from "@/components/rel8t/network/PathSelectionModal";
 // Outreach linking removed - outreaches are tracked via step instances
-import { Actv8InsightsCard } from "@/components/rel8t/network/Actv8InsightsCard";
-import { TierProgressBar } from "@/components/rel8t/network/TierProgressBar";
-
+import { useContactAnalysis } from "@/hooks/useContactAnalysis";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
-import { Loader2, Mail, Phone, Calendar, TrendingUp, Settings, MessageCircle, Edit, Heart, Zap } from "lucide-react";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { 
+  Loader2, Mail, Phone, Calendar, TrendingUp, Settings, 
+  MessageCircle, Edit, Target, Zap, BarChart3, Star,
+  ThumbsUp, ThumbsDown, Minus, TrendingDown
+} from "lucide-react";
+import { format, parseISO, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 
 const strengthLabels: Record<string, string> = {
@@ -32,8 +34,8 @@ const strengthLabels: Record<string, string> = {
 const strengthColors: Record<string, string> = {
   spark: 'text-red-500',
   ember: 'text-amber-500',
-  flame: 'text-emerald-500',
-  star: 'text-primary',
+  flame: 'text-[#00eada]',
+  star: 'text-[#00eada] font-bold',
 };
 
 export default function NetworkProfile() {
@@ -55,6 +57,8 @@ export default function NetworkProfile() {
     queryFn: () => getActv8Contact(id!),
     enabled: !!id,
   });
+
+  const { data: analysis, isLoading: analysisLoading } = useContactAnalysis(actv8Contact?.contact_id);
 
   const { data: linkedOutreaches = [] } = useQuery({
     queryKey: ['actv8-outreaches', id],
@@ -219,191 +223,122 @@ export default function NetworkProfile() {
     prospect: 'Prospect',
   };
 
+  const outcomeIcons: Record<string, React.ReactNode> = {
+    positive: <ThumbsUp className="h-3 w-3 text-emerald-500" />,
+    neutral: <Minus className="h-3 w-3 text-amber-500" />,
+    negative: <ThumbsDown className="h-3 w-3 text-red-500" />,
+  };
+
+  const rapportIcons: Record<string, React.ReactNode> = {
+    strengthened: <TrendingUp className="h-3 w-3 text-emerald-500" />,
+    maintained: <Minus className="h-3 w-3 text-amber-500" />,
+    declined: <TrendingDown className="h-3 w-3 text-red-500" />,
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 pb-32">
       <Rel8Header />
       
       <div className="container mx-auto max-w-6xl px-4 py-6 space-y-6 animate-fade-in">
-        {/* Profile Header Card - Same style as ContactProfile */}
-        <Card className="relative overflow-hidden">
-          <div className="p-4 md:p-6">
-            {/* Mobile Layout */}
-            <div className="md:hidden space-y-4">
-              {/* Avatar Row */}
-              <div className="flex items-center justify-center">
-              <UnifiedAvatar userId={actv8Contact.affiliatedUserId || actv8Contact.contact_id} size={100} className="ring-2 ring-primary/20" isContactId={!actv8Contact.affiliatedUserId} />
+        {/* Unified Profile Header Card */}
+        <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 overflow-hidden">
+          <div className="p-4 md:p-6 space-y-6">
+            {/* Top Section: Avatar, Name, Basic Info, and Edit */}
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex justify-center md:block">
+                <UnifiedAvatar 
+                  userId={actv8Contact.affiliatedUserId || actv8Contact.contact_id} 
+                  size={100} 
+                  className="ring-4 ring-primary/20 shadow-xl" 
+                  isContactId={!actv8Contact.affiliatedUserId} 
+                />
               </div>
 
-              {/* Name Row */}
-              <div className="text-center">
-                <h1 className="text-2xl font-bold">{contact.name}</h1>
-                <p className="text-muted-foreground">{contact.role} at {contact.company}</p>
-              </div>
+              <div className="flex-1 text-center md:text-left space-y-2">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h1 className="text-3xl font-bold tracking-tight">{contact.name}</h1>
+                    <p className="text-muted-foreground font-medium">
+                      {contact.role} {contact.company && <span className="opacity-70">at {contact.company}</span>}
+                    </p>
+                  </div>
+                  <Link to={`/rel8/contacts/${contact.contactId}/edit`}>
+                    <Button variant="outline" size="sm" className="gap-2 h-9 rounded-full px-4 hover:bg-primary/10">
+                      <Edit className="h-3.5 w-3.5" />
+                      Edit Profile
+                    </Button>
+                  </Link>
+                </div>
 
-              {/* Glowing Separator */}
-              <div className="relative h-px w-full">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-sm" />
-              </div>
-
-              {/* Action Buttons Grid */}
-              <div className="grid grid-cols-2 gap-2">
-                <Button onClick={() => handlePlanTouchpoint(contact.currentStepIndex ?? 0)} variant="default" size="sm" className="gap-2">
-                  <Heart className="h-4 w-4" />
-                  Plan Touchpoint
-                </Button>
-                <Link to={`/rel8/actv8/${id}/strategy`} className="w-full">
-                  <Button variant="default" size="sm" className="gap-2 w-full">
-                    <Zap className="h-4 w-4" />
-                    Strategy
-                  </Button>
-                </Link>
-                <Link to={`/rel8/contacts/${contact.contactId}/edit`} className="w-full">
-                  <Button variant="outline" size="sm" className="gap-2 w-full">
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Button>
-                </Link>
-                <Button 
-                  onClick={() => setShowPathModal(true)}
-                  variant="outline" 
-                  size="sm"
-                  className="gap-2"
-                >
-                  <Settings className="h-4 w-4" />
-                  Change Path
-                </Button>
-              </div>
-            </div>
-
-            {/* Desktop Layout */}
-            <div className="hidden md:block">
-              {/* Contact Info Section */}
-              <div className="flex items-start gap-6 mb-6">
-                <UnifiedAvatar userId={actv8Contact.affiliatedUserId || actv8Contact.contact_id} size={80} className="ring-2 ring-primary/20" isContactId={!actv8Contact.affiliatedUserId} />
-                
-                <div className="flex-1">
-                  <h1 className="text-3xl font-bold">{contact.name}</h1>
-                  <p className="text-muted-foreground">{contact.role} at {contact.company}</p>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4" />
-                      <span>{formatDistanceToNow(parseISO(contact.lastInteraction), { addSuffix: true })}</span>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2 mt-2">
+                  {contact.email && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
+                      <Mail className="h-4 w-4" />
+                      <span>{contact.email}</span>
                     </div>
-                    <div className={`flex items-center gap-1.5 ${strengthColors[contact.connectionStrength]}`}>
-                      <TrendingUp className="h-4 w-4" />
-                      <span>{strengthLabels[contact.connectionStrength]}</span>
+                  )}
+                  {contact.phone && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
+                      <Phone className="h-4 w-4" />
+                      <span>{contact.phone}</span>
                     </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>Last touch: {formatDistanceToNow(parseISO(contact.lastInteraction), { addSuffix: true })}</span>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Glowing Separator */}
-              <div className="relative h-px w-full mb-6">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-sm" />
+            {/* Middle Section: Insights & Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Relationship Summary */}
+              <div className="md:col-span-2 p-4 rounded-2xl bg-muted/30 border border-border/50 flex flex-col justify-center">
+                <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <BarChart3 className="h-3.5 w-3.5" />
+                  Insight Summary
+                </div>
+                <p className="text-sm leading-relaxed">
+                  {analysis?.summary || "No activity recorded yet."}
+                </p>
               </div>
 
-              {/* Action Buttons Bar */}
-              <div className="flex items-center gap-3">
-                <Button onClick={() => handlePlanTouchpoint(contact.currentStepIndex ?? 0)} variant="default" className="flex-1 gap-2">
-                  <Heart className="h-4 w-4" />
-                  Plan Touchpoint
-                </Button>
-                <Link to={`/rel8/actv8/${id}/strategy`} className="flex-1">
-                  <Button variant="default" className="gap-2 w-full">
-                    <Zap className="h-4 w-4" />
-                    Strategy
-                  </Button>
-                </Link>
-                <Link to={`/rel8/contacts/${contact.contactId}/edit`} className="flex-1">
-                  <Button variant="outline" className="gap-2 w-full">
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Button>
-                </Link>
-                <Button 
-                  onClick={() => setShowPathModal(true)}
-                  variant="outline" 
-                  className="flex-1 gap-2"
-                >
-                  <Settings className="h-4 w-4" />
-                  Change Path
-                </Button>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-2 md:col-span-2">
+                <div className="p-3 rounded-2xl bg-muted/20 border border-border/30 text-center">
+                  <div className="text-2xl font-bold text-primary">{analysis?.totalOutreaches || 0}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase font-bold">Total Outreaches</div>
+                </div>
+                <div className="p-3 rounded-2xl bg-muted/20 border border-border/30 text-center">
+                  <div className="text-2xl font-bold text-primary">{analysis?.engagementScore || 0}%</div>
+                  <div className="text-[10px] text-muted-foreground uppercase font-bold">Engagement</div>
+                </div>
               </div>
+            </div>
+
+            {/* Bottom Section: Connection Strength */}
+            <div className="pt-2">
+              <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center gap-2">
+                  <Zap className={`h-4 w-4 ${strengthColors[contact.connectionStrength]}`} />
+                  <span className="text-sm font-bold uppercase tracking-wider">Connection Strength</span>
+                </div>
+                <Badge variant="outline" className={`font-bold border-2 ${strengthColors[contact.connectionStrength]}`}>
+                  {strengthLabels[contact.connectionStrength]}
+                </Badge>
+              </div>
+              <ConnectionStrengthBar strength={contact.connectionStrength} size="lg" className="h-3" />
             </div>
           </div>
         </Card>
-
-        {/* Contact Info Section */}
-        {(contact.email || contact.phone) && (
-          <Card className="overflow-hidden">
-            <div className="p-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">Contact</h3>
-              <div className="space-y-3">
-                {contact.email && (
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">Email</p>
-                      <p className="text-xs text-muted-foreground truncate">{contact.email}</p>
-                    </div>
-                  </div>
-                )}
-                {contact.phone && (
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">Phone</p>
-                      <p className="text-xs text-muted-foreground">{contact.phone}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Relationship Development Journey */}
-        <Card className="p-4">
-          <h3 className="text-sm font-medium mb-3">Relationship Development Journey</h3>
-          <TierProgressBar
-            currentTier={contact.pathTier}
-            currentStepIndex={contact.currentStepIndex}
-            totalStepsInCurrentPath={4}
-            pathHistory={contact.pathHistory}
-            skippedPaths={contact.skippedPaths}
-            size="lg"
-            showLabels
-            animated
-          />
-        </Card>
-
-        {/* Connection Strength Section */}
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium">Connection Strength</h3>
-            <span className={`text-sm font-medium ${strengthColors[contact.connectionStrength]}`}>
-              {strengthLabels[contact.connectionStrength]}
-            </span>
-          </div>
-          <ConnectionStrengthBar strength={contact.connectionStrength} size="lg" />
-        </Card>
-
-        {/* Relationship Insights Section */}
-        <Actv8InsightsCard 
-          actv8ContactId={actv8Contact.id}
-          contactId={actv8Contact.contact_id}
-          intentionNotes={actv8Contact.intention_notes || undefined}
-        />
 
         {/* Development Path Section */}
-        <Card className="p-4">
-          <h3 className="text-sm font-medium mb-3">Relationship Development</h3>
+        <Card className="p-4 glass-morphism border-primary/10">
+          <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            Relationship Development
+          </h3>
           <DevelopmentPathCard
             pathId={contact.developmentPathId}
             currentStepIndex={contact.currentStepIndex}
@@ -419,8 +354,11 @@ export default function NetworkProfile() {
         </Card>
 
         {/* Timeline Section */}
-        <Card className="p-4">
-          <h3 className="text-sm font-medium mb-3">Timeline</h3>
+        <Card className="p-4 glass-morphism border-primary/10">
+          <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-primary" />
+            Timeline & History
+          </h3>
           <DevelopmentTimeline
             interactions={contact.interactions}
             pathId={contact.developmentPathId}

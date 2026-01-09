@@ -18,8 +18,8 @@ export function ConnectionStrengthBar({ strength, showLabel = true, size = 'md' 
   const strengthColors: Record<string, string> = {
     spark: 'bg-destructive',
     ember: 'bg-amber-500',
-    flame: 'bg-primary',
-    star: 'bg-emerald-500'
+    flame: 'bg-[#00eada]',
+    star: 'bg-[#00eada] shadow-[0_0_10px_rgba(0,234,218,0.5)]'
   };
 
   return (

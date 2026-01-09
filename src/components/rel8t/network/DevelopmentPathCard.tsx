@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO, isPast, isToday } from "date-fns";
-import { Calendar, ExternalLink, Check, ChevronRight, Play, SkipForward, History, Clock } from "lucide-react";
+import { Calendar, ExternalLink, Check, ChevronRight, Play, SkipForward, History, Clock, Settings } from "lucide-react";
 import { Outreach } from "@/services/rel8t/outreachService";
 import { PathHistoryEntry, SkippedPathEntry } from "@/hooks/useActv8Contacts";
 import { TierProgressBar } from "./TierProgressBar";
@@ -64,15 +64,21 @@ export function DevelopmentPathCard({
 
   if (!path) {
     return (
-      <div className="py-6 text-center">
-        <p className="text-sm text-muted-foreground mb-4">No development path assigned</p>
+      <div className="py-12 text-center bg-muted/10 rounded-2xl border border-dashed border-border/50">
+        <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+          <Play className="h-6 w-6 text-primary" />
+        </div>
+        <h4 className="font-medium mb-1">No Path Active</h4>
+        <p className="text-sm text-muted-foreground mb-6 max-w-[240px] mx-auto">
+          Choose a development path to start building this relationship.
+        </p>
         <Button 
-          variant="outline" 
+          variant="default" 
           onClick={onChangePath}
-          className="rounded-xl gap-2"
+          className="rounded-full gap-2 px-6 shadow-lg shadow-primary/20"
         >
           <Play className="h-4 w-4" />
-          Start a Path
+          Choose Development Path
         </Button>
       </div>
     );
@@ -80,7 +86,8 @@ export function DevelopmentPathCard({
 
   const stepIndex = currentStepIndex ?? 0;
   const completed = completedSteps ?? [];
-  const progress = ((stepIndex) / (path.steps?.length || 1)) * 100;
+  const totalSteps = path.steps?.length || 1;
+  const progress = (Math.min(stepIndex + 1, totalSteps) / totalSteps) * 100;
   const isComplete = path.steps && stepIndex >= path.steps.length;
 
   const getLinkedOutreach = (index: number) => {
@@ -175,12 +182,13 @@ export function DevelopmentPathCard({
           <p className="text-xs text-muted-foreground">{path.description}</p>
         </div>
         <Button 
-          variant="ghost" 
+          variant="outline" 
           size="sm" 
           onClick={onChangePath} 
-          className="text-xs text-primary h-8 rounded-lg"
+          className="text-xs border-primary/30 text-primary hover:bg-primary/10 h-8 rounded-lg flex items-center gap-1.5 font-medium"
         >
-          View Options
+          <Settings className="h-3.5 w-3.5" />
+          View Path Options
         </Button>
       </div>
 
@@ -192,7 +200,7 @@ export function DevelopmentPathCard({
         </div>
         <div className="h-2 bg-secondary rounded-full overflow-hidden">
           <div 
-            className="h-full bg-primary rounded-full transition-all duration-500"
+            className="h-2 bg-[#00eada] rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(0,234,218,0.4)]"
             style={{ width: `${progress}%` }}
           />
         </div>

@@ -24,6 +24,9 @@ const Navbar = () => {
   // Check if user is a service provider
   const isServiceProvider = currentUser?.role === 'SERVICE_PROVIDER';
   
+  // Check if user is an admin
+  const isAdmin = currentUser?.role === 'ADMIN';
+  
   // Debug logging
   React.useEffect(() => {
     console.log("🔍 Navbar state:", { 
@@ -87,14 +90,16 @@ const Navbar = () => {
             </Button>
           )}
           
-          {/* Menu button for drawer */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setDrawerOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          {/* Menu button for drawer - only visible to admins */}
+          {isAdmin && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDrawerOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
     </nav>

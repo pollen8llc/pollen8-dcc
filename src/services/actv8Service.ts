@@ -300,11 +300,13 @@ export async function advanceToPath(
 }
 
 export async function getDevelopmentPath(pathId: string): Promise<DevelopmentPath | null> {
+  if (!pathId) return null;
+  
   const { data: path, error: pathError } = await supabase
     .from("rms_actv8_paths")
     .select("*")
     .eq("id", pathId)
-    .single();
+    .maybeSingle();
 
   if (pathError) throw pathError;
   if (!path) return null;

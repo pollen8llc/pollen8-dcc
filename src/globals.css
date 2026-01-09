@@ -145,11 +145,6 @@
   }
 }
 
-/* Override Tailwind's h-full utility */
-.h-full {
-  height: auto !important;
-}
-
 /* TinyMCE Editor Dark Mode styles */
 .tox-tinymce {
   border-radius: 1rem;
@@ -1238,3 +1233,4 @@ button a {
 .ui-popover-content a {
   @apply text-foreground hover:text-foreground;
 }
+

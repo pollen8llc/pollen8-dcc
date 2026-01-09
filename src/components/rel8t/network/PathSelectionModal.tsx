@@ -82,8 +82,8 @@ export function PathSelectionModal({
     },
     onSuccess: () => {
       toast.success("Path skipped", { description: "You can now select a new path" });
-      queryClient.invalidateQueries({ queryKey: ['actv8-contacts'] });
-      queryClient.invalidateQueries({ queryKey: ['available-paths'] });
+      queryClient.invalidateQueries({ queryKey: ['actv8-contact', actv8ContactId] });
+      queryClient.invalidateQueries({ queryKey: ['available-paths', actv8ContactId] });
       setShowSkipDialog(false);
       setSkipReason("");
     },
