@@ -1,18 +1,18 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { 
   getOutreach,
   OutreachFilterTab
 } from "@/services/rel8t/outreachService";
 import { supabase } from "@/integrations/supabase/client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Loader2, Calendar, CalendarDays } from "lucide-react";
+import { Loader2, Calendar, CalendarDays, X } from "lucide-react";
 import { OutreachCard } from "./OutreachCard";
 import { isSameDay, startOfDay, format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface OutreachListProps {
   maxItems?: number;
@@ -22,22 +22,30 @@ interface OutreachListProps {
   showCalendar?: boolean;
 }
 
+const filterOptions = [
+  { value: "all", label: "All", color: "bg-primary/20 border-primary/40 text-primary hover:bg-primary/30" },
+  { value: "today", label: "Today", color: "bg-blue-500/20 border-blue-500/40 text-blue-400 hover:bg-blue-500/30" },
+  { value: "upcoming", label: "Upcoming", color: "bg-emerald-500/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30" },
+  { value: "overdue", label: "Overdue", color: "bg-red-500/20 border-red-500/40 text-red-400 hover:bg-red-500/30" },
+  { value: "completed", label: "Completed", color: "bg-amber-500/20 border-amber-500/40 text-amber-400 hover:bg-amber-500/30" },
+];
+
 const OutreachList = ({ 
   maxItems, 
   showTabs = true, 
-  defaultTab = "today", 
+  defaultTab = "all", 
   className = "",
   showCalendar = false
 }: OutreachListProps) => {
-  const [activeTab, setActiveTab] = useState<OutreachFilterTab>(defaultTab);
+  const [activeFilter, setActiveFilter] = useState<OutreachFilterTab>(defaultTab);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const isMobile = useIsMobile();
   
-  // Query to fetch outreach data based on active tab
+  // Query to fetch outreach data based on active filter
   const { data: outreachItems = [], isLoading, refetch } = useQuery({
-    queryKey: ["outreach", activeTab],
-    queryFn: () => getOutreach(activeTab),
+    queryKey: ["outreach", activeFilter],
+    queryFn: () => getOutreach(activeFilter),
     placeholderData: (previousData) => previousData,
     refetchOnMount: true,
     staleTime: 0,
@@ -134,20 +142,41 @@ const OutreachList = ({
     );
   };
 
+  const handleClearDate = () => {
+    setSelectedDate(undefined);
+  };
+
   return (
     <div className={className}>
+      {/* Filter Buttons */}
       {showTabs && (
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OutreachFilterTab)}>
-          {/* Collapsible Calendar - shown when showCalendar is true */}
+        <div className="space-y-4 mb-6">
+          {/* Selected Date Badge */}
+          {selectedDate && !showCalendar && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Filtering by:</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 border border-primary/40 text-primary text-sm">
+                {format(selectedDate, "MMM d, yyyy")}
+                <button
+                  onClick={handleClearDate}
+                  className="hover:bg-primary/30 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Collapsible Calendar */}
           {showCalendar && (
-            <div className="glass-morphism bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl border border-primary/30 rounded-xl p-3 md:p-6 mb-6 shadow-xl animate-in slide-in-from-top-2 duration-300">
+            <div className="glass-morphism bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl border border-primary/30 rounded-xl p-3 md:p-6 shadow-xl animate-in slide-in-from-top-2 duration-300">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 md:mb-4">
                 <h3 className="text-xs md:text-sm font-medium text-muted-foreground">
                   {selectedDate ? `Showing tasks for ${selectedDate.toLocaleDateString()}` : 'Select a date to filter tasks'}
                 </h3>
                 {selectedDate && (
                   <button
-                    onClick={() => setSelectedDate(undefined)}
+                    onClick={handleClearDate}
                     className="text-xs text-primary hover:underline min-h-[44px] md:min-h-0 flex items-center touch-manipulation"
                   >
                     Clear filter
@@ -171,7 +200,6 @@ const OutreachList = ({
               {/* Mobile: List View */}
               {isMobile && (
                 <div className="space-y-2">
-                  {/* Date picker button */}
                   <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <DialogTrigger asChild>
                       <Button variant="outline" className="w-full min-h-[44px] justify-start touch-manipulation glassmorphic">
@@ -220,30 +248,28 @@ const OutreachList = ({
             </div>
           )}
 
-          <TabsList className="grid grid-cols-4 mb-6 backdrop-blur-sm bg-muted/50">
-            <TabsTrigger value="today" className="data-[state=active]:bg-background">
-              Today
-            </TabsTrigger>
-            <TabsTrigger value="upcoming" className="data-[state=active]:bg-background">
-              Upcoming
-            </TabsTrigger>
-            <TabsTrigger value="overdue" className="data-[state=active]:bg-background">
-              Overdue
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="data-[state=active]:bg-background">
-              Completed
-            </TabsTrigger>
-          </TabsList>
-          
-          {(["today", "upcoming", "overdue", "completed"] as OutreachFilterTab[]).map(tab => (
-            <TabsContent key={tab} value={tab} className="mt-0 animate-fade-in">
-              {renderOutreachContent()}
-            </TabsContent>
-          ))}
-        </Tabs>
+          {/* Filter Grid - 5 button grid */}
+          <div className="grid grid-cols-5 gap-2">
+            {filterOptions.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => setActiveFilter(option.value as OutreachFilterTab)}
+                className={cn(
+                  "flex items-center justify-center px-2 py-2.5 text-xs sm:text-sm font-medium rounded-lg border transition-all duration-200",
+                  activeFilter === option.value
+                    ? cn(option.color, "shadow-md ring-1 ring-white/10")
+                    : "bg-muted/30 border-border/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
-      {!showTabs && renderOutreachContent()}
+      {/* Outreach List */}
+      {renderOutreachContent()}
     </div>
   );
 
@@ -251,7 +277,7 @@ const OutreachList = ({
     if (displayedItems.length === 0) {
       const emptyMessage = selectedDate 
         ? `No outreach tasks on ${selectedDate.toLocaleDateString()}`
-        : activeTab === "completed" 
+        : activeFilter === "completed" 
           ? "You haven't completed any outreach tasks yet." 
           : "No scheduled outreach tasks for this period.";
       
@@ -264,9 +290,13 @@ const OutreachList = ({
       );
     }
 
-    return displayedItems.map((outreach) => (
-      <OutreachCard key={outreach.id} outreach={outreach} />
-    ));
+    return (
+      <div className="space-y-3">
+        {displayedItems.map((outreach) => (
+          <OutreachCard key={outreach.id} outreach={outreach} />
+        ))}
+      </div>
+    );
   }
 };
 
