@@ -70,7 +70,7 @@ export function TierProgressBar({
     return 'future';
   };
 
-  const getSegmentClasses = (state: SegmentState, index: number) => {
+  const getSegmentClasses = (state: SegmentState) => {
     const baseClasses = cn(
       "flex-1 rounded-sm transition-all",
       animated && "duration-500"
@@ -78,28 +78,33 @@ export function TierProgressBar({
 
     switch (state) {
       case 'completed-tier':
+        // Blue - user actually completed all steps in this tier
         return cn(
           baseClasses,
           "bg-[hsl(224,76%,48%)] shadow-[0_0_8px_hsl(224,76%,48%,0.5)]"
         );
       case 'in-progress':
+        // White - steps completed within current tier
         return cn(
           baseClasses,
           "bg-white shadow-[0_0_6px_rgba(255,255,255,0.4)]"
         );
       case 'current':
+        // White with pulse - current active step
         return cn(
           baseClasses,
           "bg-white shadow-[0_0_6px_rgba(255,255,255,0.4)]",
           animated && "animate-pulse"
         );
       case 'skipped':
+        // Solid yellow/amber - tier was skipped during initial assessment
         return cn(
           baseClasses,
-          "bg-amber-500/40 bg-stripes"
+          "bg-amber-500"
         );
       case 'future':
       default:
+        // Gray - not yet reached
         return cn(
           baseClasses,
           "bg-muted/30 border border-white/5"
@@ -143,7 +148,7 @@ export function TierProgressBar({
                         key={step}
                         className={cn(
                           config.height,
-                          getSegmentClasses(state, globalIndex)
+                          getSegmentClasses(state)
                         )}
                         style={{
                           transitionDelay: animated && (state === 'in-progress' || state === 'completed-tier')
