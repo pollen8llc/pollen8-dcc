@@ -105,7 +105,6 @@ export default function ContactProfile() {
           tags={contact.tags || []}
           affiliatedUserId={affiliatedUserId}
           onEdit={handleEdit}
-          onDelete={handleDelete}
         />
 
         {/* Personal Identity & Context */}

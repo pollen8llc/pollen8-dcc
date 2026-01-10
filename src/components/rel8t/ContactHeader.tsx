@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Edit, Trash2, Zap, ExternalLink, Loader2, Power } from 'lucide-react';
+import { Edit, Zap, ExternalLink, Loader2, Power } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useActv8FullStatus } from '@/hooks/useActv8Contacts';
 import { activateContact } from '@/services/actv8Service';
@@ -19,7 +19,6 @@ interface ContactHeaderProps {
   tags?: string[];
   affiliatedUserId?: string;
   onEdit?: () => void;
-  onDelete?: () => void;
 }
 
 export function ContactHeader({
@@ -30,8 +29,7 @@ export function ContactHeader({
   status = 'active',
   tags = [],
   affiliatedUserId,
-  onEdit,
-  onDelete
+  onEdit
 }: ContactHeaderProps) {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -123,7 +121,7 @@ export function ContactHeader({
             </div>
 
             {/* Action Buttons Grid */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button 
                 onClick={handleActivate} 
                 variant="default" 
@@ -136,15 +134,6 @@ export function ContactHeader({
               <Button onClick={onEdit} variant="outline" size="sm" className="gap-2">
                 <Edit className="h-4 w-4" />
                 Edit
-              </Button>
-              <Button 
-                onClick={onDelete} 
-                variant="outline" 
-                size="sm"
-                className="gap-2 text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete
               </Button>
             </div>
           </div>
@@ -179,14 +168,6 @@ export function ContactHeader({
               <Button onClick={onEdit} variant="outline" className="flex-1 gap-2">
                 <Edit className="h-4 w-4" />
                 Edit
-              </Button>
-              <Button 
-                onClick={onDelete} 
-                variant="outline" 
-                className="flex-1 gap-2 text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete
               </Button>
             </div>
           </>
