@@ -131,6 +131,23 @@ export const updateContact = async (id: string, contact: Partial<Contact>): Prom
 };
 
 export const deleteContact = async (id: string): Promise<void> => {
+  // First, get the actv8_contact_id if one exists for this contact
+  const { data: actv8Contact } = await supabase
+    .from("rms_actv8_contacts")
+    .select("id")
+    .eq("contact_id", id)
+    .maybeSingle();
+  
+  // If there's an actv8 contact, we need to nullify the reference in rms_outreach first
+  // (because it has NO ACTION delete rule instead of CASCADE)
+  if (actv8Contact) {
+    await supabase
+      .from("rms_outreach")
+      .update({ actv8_contact_id: null })
+      .eq("actv8_contact_id", actv8Contact.id);
+  }
+  
+  // Now delete the contact - CASCADE will handle the rest
   const { error } = await supabase.from("rms_contacts").delete().eq("id", id);
   if (error) throw new Error(error.message);
 };
