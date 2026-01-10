@@ -185,37 +185,59 @@ const ContactEdit = () => {
           </Breadcrumb>
         </div>
 
-        {/* Header Section - NOT in a card */}
+        {/* Header Section - Enhanced Glassmorphic Design */}
         {contact && (
           <>
-            <div className="flex justify-between items-start mb-8">
-              <div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  Edit Contact
-                </h2>
-                <p className="text-muted-foreground mt-2">Update contact information and details</p>
+            <Card className="relative overflow-hidden glass-morphism bg-gradient-to-br from-card/90 via-card/70 to-card/50 backdrop-blur-md border-primary/20 shadow-xl mb-8">
+              {/* Ambient glow effects */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-accent/15 rounded-full blur-2xl pointer-events-none" />
+              
+              <div className="relative p-5 sm:p-6 lg:p-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div className="space-y-2">
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary to-primary/60 bg-clip-text text-transparent">
+                      Edit Contact
+                    </h2>
+                    <p className="text-sm sm:text-base text-muted-foreground font-medium">
+                      Update contact information and details
+                    </p>
+                  </div>
+                  
+                  {/* Glowing Separator - vertical on desktop, horizontal on mobile */}
+                  <div className="hidden sm:block relative w-px h-16 mx-4">
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/60 to-transparent blur-sm" />
+                  </div>
+                  <div className="sm:hidden relative h-px w-full">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/60 to-transparent blur-sm" />
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
+                    <Button 
+                      onClick={handleCancel} 
+                      variant="outline" 
+                      size="lg"
+                      className="flex-1 sm:flex-none gap-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02]"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleDelete} 
+                      variant="destructive" 
+                      size="lg"
+                      className="flex-1 sm:flex-none gap-2 shadow-lg hover:shadow-destructive/25 transition-all duration-300 hover:scale-[1.02]"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </Button>
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleCancel} 
-                  variant="outline" 
-                  size="sm"
-                  className="hover:bg-primary/10 hover:border-primary/50 transition-all"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleDelete} 
-                  variant="destructive" 
-                  size="sm"
-                  className="hover:shadow-lg hover:shadow-destructive/20 transition-all"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
-            </div>
+            </Card>
 
             {/* Form with separate cards */}
             <ContactForm
