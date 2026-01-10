@@ -99,79 +99,70 @@ export function ContactHeader({
   };
 
   return (
-    <Card className="relative overflow-hidden">
-      <div className="p-4 md:p-6">
-        {/* Mobile Layout */}
-        {isMobile ? (
-          <div className="space-y-4">
-            {/* Avatar Row */}
-            <div className="flex items-center justify-center">
-              <Avatar userId={affiliatedUserId || "UXI8000"} size={100} className="ring-2 ring-primary/20" />
-            </div>
-
-            {/* Name Row */}
-            <div className="text-center">
-              <h1 className="text-2xl font-bold">{name}</h1>
-            </div>
-
-            {/* Glowing Separator */}
-            <div className="relative h-px w-full">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-sm" />
-            </div>
-
-            {/* Action Buttons Grid */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button 
-                onClick={handleActivate} 
-                variant="default" 
-                size="sm" 
-                className="gap-2"
-                disabled={isActivating}
-              >
-                {renderActivateButtonContent()}
-              </Button>
-              <Button onClick={onEdit} variant="outline" size="sm" className="gap-2">
-                <Edit className="h-4 w-4" />
-                Edit
-              </Button>
-            </div>
+    <Card className="relative overflow-hidden glass-morphism bg-gradient-to-br from-card/90 via-card/70 to-card/50 backdrop-blur-md border-primary/20 shadow-xl">
+      {/* Ambient glow effects */}
+      <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-accent/15 rounded-full blur-2xl pointer-events-none" />
+      
+      <div className="relative p-5 sm:p-6 lg:p-8">
+        {/* Unified Responsive Layout */}
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+          {/* Avatar with enhanced ring */}
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-accent/40 rounded-full blur-md opacity-60 group-hover:opacity-80 transition-opacity" />
+            <Avatar 
+              userId={affiliatedUserId || "UXI8000"} 
+              size={isMobile ? 96 : 88} 
+              className="relative ring-2 ring-primary/30 ring-offset-2 ring-offset-background shadow-lg" 
+            />
+            {/* Status indicator */}
+            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-background shadow-md ${
+              actv8FullStatus?.isActive 
+                ? 'bg-emerald-500 animate-pulse' 
+                : 'bg-muted-foreground/40'
+            }`} />
           </div>
-        ) : (
-          /* Desktop Layout */
-          <>
-            {/* Contact Info Section */}
-            <div className="flex items-start gap-6 mb-6">
-              <Avatar userId={affiliatedUserId || "UXI8000"} size={80} className="ring-2 ring-primary/20" />
-              
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold">{name}</h1>
-              </div>
-            </div>
+          
+          {/* Name and category */}
+          <div className="flex-1 text-center sm:text-left min-w-0">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text truncate">
+              {name}
+            </h1>
+            {category && (
+              <p className="mt-1 text-sm sm:text-base text-muted-foreground font-medium">
+                {category}
+              </p>
+            )}
+          </div>
+        </div>
 
-            {/* Glowing Separator */}
-            <div className="relative h-px w-full mb-6">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-sm" />
-            </div>
+        {/* Glowing Separator */}
+        <div className="relative h-px w-full my-5 sm:my-6">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/60 to-transparent blur-sm" />
+        </div>
 
-            {/* Action Buttons Bar */}
-            <div className="flex items-center gap-3">
-              <Button 
-                onClick={handleActivate} 
-                variant="default" 
-                className="flex-1 gap-2"
-                disabled={isActivating}
-              >
-                {renderActivateButtonContent()}
-              </Button>
-              <Button onClick={onEdit} variant="outline" className="flex-1 gap-2">
-                <Edit className="h-4 w-4" />
-                Edit
-              </Button>
-            </div>
-          </>
-        )}
+        {/* Action Buttons - Responsive Grid */}
+        <div className="flex flex-col xs:flex-row gap-3">
+          <Button 
+            onClick={handleActivate} 
+            variant="default" 
+            size={isMobile ? "default" : "lg"}
+            className="flex-1 gap-2 shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-[1.02]"
+            disabled={isActivating}
+          >
+            {renderActivateButtonContent()}
+          </Button>
+          <Button 
+            onClick={onEdit} 
+            variant="outline" 
+            size={isMobile ? "default" : "lg"}
+            className="flex-1 gap-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02]"
+          >
+            <Edit className="h-4 w-4" />
+            Edit
+          </Button>
+        </div>
       </div>
     </Card>
   );
