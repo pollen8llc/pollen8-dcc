@@ -25,18 +25,12 @@ import { MoreVertical, Pause, Play, Trash2, MapPin, TrendingUp, Route } from "lu
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { relationshipTypes } from "@/services/actv8Service";
 import { TierProgressBar } from "./TierProgressBar";
+import { getStrengthConfig } from "@/config/connectionStrengthConfig";
 
 interface NetworkContactCardProps {
   contact: Actv8ContactDisplay;
   viewMode: 'grid' | 'list';
 }
-
-const strengthConfig: Record<string, { label: string; percentage: number; color: string }> = {
-  spark: { label: 'Spark', percentage: 10, color: 'from-rose-500 to-orange-500' },
-  ember: { label: 'Ember', percentage: 40, color: 'from-amber-500 to-yellow-500' },
-  flame: { label: 'Flame', percentage: 70, color: 'from-emerald-500 to-teal-500' },
-  star: { label: 'Star', percentage: 100, color: 'from-primary to-cyan-400' },
-};
 
 export function NetworkContactCard({ contact }: NetworkContactCardProps) {
   const { deactivate } = useDeactivateContact();
@@ -49,7 +43,7 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
   const relationshipType = relationshipTypes.find(rt => rt.id === contact.relationshipType);
   const currentStep = contact.currentStepIndex ?? 0;
   const totalSteps = contact.totalSteps ?? 4; // Default to 4 steps for Build Rapport
-  const strengthData = strengthConfig[contact.connectionStrength] || strengthConfig.thin;
+  const strengthData = getStrengthConfig(contact.connectionStrength);
 
   // Animate progress bars on mount
   useEffect(() => {
@@ -119,7 +113,7 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
                     />
                   </div>
                   {/* Strength indicator dot */}
-                  <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-background bg-gradient-to-r ${strengthData.color}`} />
+                  <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-background bg-gradient-to-r ${strengthData.gradientClass}`} />
                 </div>
 
                 {/* Contact info */}
@@ -190,11 +184,11 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
                     <TrendingUp className="h-3 w-3 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground">Connection Strength</span>
                   </div>
-                  <span className="text-xs font-medium text-primary">{strengthData.label}</span>
+                  <span className={`text-xs font-medium ${strengthData.textClass}`}>{strengthData.label}</span>
                 </div>
                 <div className="relative h-2 w-full rounded-full overflow-hidden backdrop-blur-md bg-muted/30 border border-white/10">
                   <div
-                    className={`h-full rounded-full bg-gradient-to-r ${strengthData.color} shadow-[0_0_10px_rgba(20,184,166,0.3)] transition-all duration-700 ease-out relative overflow-hidden`}
+                    className={`h-full rounded-full bg-gradient-to-r ${strengthData.gradientClass} shadow-[0_0_10px_rgba(20,184,166,0.3)] transition-all duration-700 ease-out relative overflow-hidden`}
                     style={{ width: `${animatedStrength}%` }}
                   >
                     {/* Animated shimmer */}
