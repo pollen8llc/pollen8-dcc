@@ -5,7 +5,7 @@ import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopme
 import { getOutreachesByActv8Contact, getOutreachesForContact } from "@/services/rel8t/outreachService";
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
-import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathCard";
+import { DevelopmentPathAccordion } from "@/components/rel8t/network/DevelopmentPathAccordion";
 import { ContactOutreachReminders } from "@/components/rel8t/network/ContactOutreachReminders";
 import { RelationshipLevelAccordion } from "@/components/rel8t/network/RelationshipLevelAccordion";
 // Outreach linking removed - outreaches are tracked via step instances
@@ -292,14 +292,19 @@ export default function NetworkProfile() {
         {/* Relationship Level Accordion */}
         <RelationshipLevelAccordion contactName={contact.name} actv8ContactId={actv8Contact.id} currentTier={contact.pathTier} skippedPaths={contact.skippedPaths} pathHistory={contact.pathHistory} currentPathId={contact.developmentPathId} currentPathName={actv8Contact.path?.name} hasCurrentPath={!!contact.developmentPathId} isPathComplete={actv8Contact.path?.steps && contact.currentStepIndex >= actv8Contact.path.steps.length} onSelectPath={handleSelectPath} />
 
-        {/* Development Path Section */}
-        <Card className="p-4 glass-morphism border-primary/10">
-          <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-primary" />
-            Relationship Development
-          </h3>
-          <DevelopmentPathCard pathId={contact.developmentPathId} currentStepIndex={contact.currentStepIndex} completedSteps={contact.completedSteps} linkedOutreaches={linkedOutreaches} actv8ContactId={actv8Contact.id} pathTier={contact.pathTier} pathHistory={contact.pathHistory} skippedPaths={contact.skippedPaths} onPlanTouchpoint={handlePlanTouchpoint} />
-        </Card>
+        {/* Development Path Accordion */}
+        <DevelopmentPathAccordion 
+          pathId={contact.developmentPathId} 
+          currentStepIndex={contact.currentStepIndex} 
+          completedSteps={contact.completedSteps} 
+          linkedOutreaches={linkedOutreaches} 
+          actv8ContactId={actv8Contact.id} 
+          pathTier={contact.pathTier} 
+          pathHistory={contact.pathHistory} 
+          skippedPaths={contact.skippedPaths}
+          totalStepsInPath={actv8Contact.path?.steps?.length || 4}
+          onPlanTouchpoint={handlePlanTouchpoint} 
+        />
 
         {/* Outreach & Reminders Section */}
         <Card className="p-4 glass-morphism border-primary/10">
