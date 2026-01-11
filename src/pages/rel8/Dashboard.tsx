@@ -9,6 +9,7 @@ import { Users, Building2, Clock, CheckCircle, Globe, ChevronDown } from "lucide
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import NetworkMapGlobe from "@/components/rel8t/NetworkMapGlobe";
 import SetupProgress from "@/components/rel8t/SetupProgress";
+import NotificationShortlist from "@/components/rel8t/NotificationShortlist";
 
 const Dashboard = () => {
   const [isNetworkMapOpen, setIsNetworkMapOpen] = useState(false);
@@ -56,6 +57,10 @@ const Dashboard = () => {
       <div className="container mx-auto max-w-6xl px-4 py-8 pb-32">
         {/* Setup Progress Onboarding */}
         <SetupProgress />
+        
+        {/* Notification Shortlist */}
+        <NotificationShortlist />
+        
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
