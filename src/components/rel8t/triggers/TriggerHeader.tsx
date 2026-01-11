@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Plus, Zap, Bell } from "lucide-react";
+import { Plus, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function TriggerHeader() {
@@ -17,12 +17,6 @@ export function TriggerHeader() {
       </div>
       
       <div className="flex gap-2">
-        <Link to="/rel8/notifications">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            Notifications
-          </Button>
-        </Link>
         <Link to="/rel8/triggers/wizard">
           <Button className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
