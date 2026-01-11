@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { createTrigger } from "@/services/rel8t/triggerService";
+import { createOutreach } from "@/services/rel8t/outreachService";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Contact } from "@/services/rel8t/contactService";
 
@@ -101,9 +102,9 @@ export function useTriggerWizard() {
   }, []);
 
   // Submit the form data and return the created trigger with ICS content
-  const handleSubmit = useCallback(async (returnTo?: string) => {
+  const handleSubmit = useCallback(async (returnTo?: string, createOutreachTask: boolean = false) => {
     try {
-      console.log("Submitting trigger with data:", formData);
+      console.log("Submitting trigger with data:", formData, "createOutreach:", createOutreachTask);
       
       // Combine date and time into a single datetime
       let executionTime: string | undefined;
@@ -138,9 +139,27 @@ export function useTriggerWizard() {
       if (result) {
         const { trigger, icsContent } = result;
         
+        // Create outreach task if requested
+        if (createOutreachTask) {
+          const outreachData = {
+            title: formData.name || `Reminder at ${formData.triggerTime}`,
+            description: `Scheduled ${formData.frequency} reminder`,
+            priority: formData.priority as 'low' | 'medium' | 'high',
+            status: 'pending' as const,
+            due_date: executionTime || new Date().toISOString(),
+            outreach_channel: formData.outreachChannel,
+            channel_details: formData.channelDetails,
+            trigger_id: trigger.id,
+          };
+          
+          await createOutreach(outreachData, contactIds);
+        }
+        
         toast({
-          title: "Trigger created successfully",
-          description: "Your automation trigger has been created."
+          title: createOutreachTask ? "Reminder & Task created" : "Reminder created",
+          description: createOutreachTask 
+            ? "Your reminder and outreach task have been created."
+            : "Your automation reminder has been created."
         });
         
         // Clear saved state after successful creation
