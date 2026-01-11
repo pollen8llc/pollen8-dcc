@@ -651,19 +651,17 @@ const TriggerWizard = () => {
 
                 {/* Calendar - fits card with equal margins */}
                 <div className="flex-1 flex items-center justify-center px-0">
-                  <div className="scale-90 origin-center">
-                    <Calendar
-                      mode="single"
-                      selected={formData.triggerDate || undefined}
-                      onSelect={handleDateSelect}
-                      disabled={(date) => {
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        return date < today;
-                      }}
-                      className="w-full pointer-events-auto [&_.rdp]:w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full"
-                    />
-                  </div>
+                  <Calendar
+                    mode="single"
+                    selected={formData.triggerDate || undefined}
+                    onSelect={handleDateSelect}
+                    disabled={(date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      return date < today;
+                    }}
+                    className="w-full pointer-events-auto [&_.rdp]:w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full"
+                  />
                 </div>
 
                 {/* Confirm Button */}
