@@ -291,12 +291,12 @@ const TriggerWizard = () => {
         <div className="container mx-auto max-w-5xl px-4 py-4 sm:py-8 pb-40">
           {/* Header */}
           <div className="flex items-center gap-3 mb-4 sm:mb-6 mt-2 sm:mt-6">
-            <div className="p-2 rounded-xl bg-primary/10 backdrop-blur-sm">
-              <Zap className="h-5 w-5 text-primary" />
+            <div className="p-2 rounded-xl bg-primary/10 backdrop-blur-sm flex-shrink-0">
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <div className="flex-1">
-              <h1 className="text-lg font-semibold">{getStepTitle()}</h1>
-              <p className="text-xs text-muted-foreground">Update your outreach task details</p>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-base sm:text-lg font-semibold truncate">{getStepTitle()}</h1>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Update your outreach task</p>
             </div>
           </div>
 
@@ -361,19 +361,22 @@ const TriggerWizard = () => {
       
       <div className="container mx-auto max-w-5xl px-4 py-4 sm:py-8 pb-40">
         {/* Compact Header */}
-        <div className="flex items-center gap-3 mb-4 sm:mb-6 mt-2 sm:mt-6">
-          <div className="p-2 rounded-xl bg-primary/10 backdrop-blur-sm">
-            <Zap className="h-5 w-5 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h1 className="text-lg font-semibold">{getStepTitle()}</h1>
-            <p className="text-xs text-muted-foreground">Step {currentStep} of 3</p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6 mt-2 sm:mt-6">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="p-2 rounded-xl bg-primary/10 backdrop-blur-sm flex-shrink-0">
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-base sm:text-lg font-semibold truncate">{getStepTitle()}</h1>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Step {currentStep} of 3</p>
+            </div>
           </div>
           
-          {/* Actv8 Build Rapport Badge */}
+          {/* Actv8 Build Rapport Badge - stacks on mobile */}
           {isActv8Mode && actv8StepData && (
-            <Badge variant="outline" className="px-3 py-1 bg-emerald-500/10 border-emerald-500 border-2 text-emerald-600 dark:text-emerald-400">
-              Build Rapport: {actv8StepData.pathName}
+            <Badge variant="outline" className="self-start sm:self-center px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs bg-emerald-500/10 border-emerald-500/50 text-emerald-600 dark:text-emerald-400 truncate max-w-full">
+              <Zap className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="truncate">{actv8StepData.pathName}</span>
             </Badge>
           )}
         </div>
