@@ -660,7 +660,7 @@ const TriggerWizard = () => {
                       today.setHours(0, 0, 0, 0);
                       return date < today;
                     }}
-                    className="w-full pointer-events-auto [&_.rdp]:w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full"
+                    className="w-full max-w-sm pointer-events-auto [&_.rdp]:w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full"
                   />
                 </div>
 
