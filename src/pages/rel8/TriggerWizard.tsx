@@ -143,7 +143,7 @@ const TriggerWizard = () => {
   };
 
   const handleCancel = () => {
-    navigate("/rel8/triggers");
+    navigate(-1);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
