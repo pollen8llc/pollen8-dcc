@@ -650,7 +650,7 @@ const TriggerWizard = () => {
                 </div>
 
                 {/* Calendar - Mobile optimized */}
-                <div className="flex-1 flex items-center justify-center overflow-hidden">
+                <div className="flex-1 flex items-center justify-center overflow-hidden w-full">
                   <Calendar
                     mode="single"
                     selected={formData.triggerDate || undefined}
@@ -660,17 +660,21 @@ const TriggerWizard = () => {
                       today.setHours(0, 0, 0, 0);
                       return date < today;
                     }}
-                    className="w-full rounded-xl border border-primary/10 bg-background/50 p-2 sm:p-4 md:p-6
-                      [&_.rdp-months]:w-full 
-                      [&_.rdp-month]:w-full 
-                      [&_.rdp-table]:w-full 
-                      [&_.rdp-head_row]:flex [&_.rdp-head_row]:w-full [&_.rdp-head_row]:justify-around
-                      [&_.rdp-row]:flex [&_.rdp-row]:w-full [&_.rdp-row]:justify-around
-                      [&_.rdp-cell]:flex-1 [&_.rdp-cell]:text-center [&_.rdp-cell]:p-0.5
-                      [&_.rdp-day]:w-full [&_.rdp-day]:h-9 [&_.rdp-day]:sm:h-11 [&_.rdp-day]:md:h-14 [&_.rdp-day]:text-xs [&_.rdp-day]:sm:text-sm [&_.rdp-day]:md:text-base
-                      [&_.rdp-caption_label]:text-sm [&_.rdp-caption_label]:sm:text-lg [&_.rdp-caption_label]:md:text-xl
-                      [&_.rdp-nav_button]:h-7 [&_.rdp-nav_button]:w-7 [&_.rdp-nav_button]:sm:h-9 [&_.rdp-nav_button]:sm:w-9 [&_.rdp-nav_button]:md:h-10 [&_.rdp-nav_button]:md:w-10
-                      [&_.rdp-head_cell]:text-[10px] [&_.rdp-head_cell]:sm:text-xs [&_.rdp-head_cell]:font-medium"
+                    className="w-full max-w-full rounded-xl border border-primary/10 bg-background/50 p-1 sm:p-3 md:p-4 pointer-events-auto
+                      [&_.rdp]:w-full [&_.rdp]:max-w-full
+                      [&_.rdp-months]:w-full [&_.rdp-months]:max-w-full
+                      [&_.rdp-month]:w-full [&_.rdp-month]:max-w-full
+                      [&_.rdp-table]:w-full [&_.rdp-table]:max-w-full [&_.rdp-table]:table-fixed
+                      [&_.rdp-caption]:flex [&_.rdp-caption]:justify-between [&_.rdp-caption]:items-center [&_.rdp-caption]:px-1
+                      [&_.rdp-head_row]:flex [&_.rdp-head_row]:w-full
+                      [&_.rdp-row]:flex [&_.rdp-row]:w-full
+                      [&_.rdp-cell]:flex-1 [&_.rdp-cell]:text-center [&_.rdp-cell]:p-0 [&_.rdp-cell]:min-w-0
+                      [&_.rdp-head_cell]:flex-1 [&_.rdp-head_cell]:text-center [&_.rdp-head_cell]:p-0 [&_.rdp-head_cell]:min-w-0
+                      [&_.rdp-day]:w-full [&_.rdp-day]:aspect-square [&_.rdp-day]:h-auto [&_.rdp-day]:max-h-10 [&_.rdp-day]:sm:max-h-11 [&_.rdp-day]:text-xs [&_.rdp-day]:sm:text-sm [&_.rdp-day]:p-0
+                      [&_.rdp-day_selected]:bg-primary [&_.rdp-day_selected]:text-primary-foreground
+                      [&_.rdp-caption_label]:text-xs [&_.rdp-caption_label]:sm:text-sm [&_.rdp-caption_label]:font-medium
+                      [&_.rdp-nav_button]:h-6 [&_.rdp-nav_button]:w-6 [&_.rdp-nav_button]:sm:h-8 [&_.rdp-nav_button]:sm:w-8
+                      [&_.rdp-head_cell]:text-[9px] [&_.rdp-head_cell]:sm:text-xs [&_.rdp-head_cell]:font-medium [&_.rdp-head_cell]:text-muted-foreground"
                   />
                 </div>
 
