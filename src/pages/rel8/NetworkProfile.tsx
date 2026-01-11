@@ -282,6 +282,10 @@ export default function NetworkProfile() {
               </div>
             </div>
 
+            {/* Connection Strength Bar */}
+            <div className="pt-2">
+              <ConnectionStrengthBar strength={contact.connectionStrength} size="lg" className="h-3" />
+            </div>
           </div>
         </Card>
 
