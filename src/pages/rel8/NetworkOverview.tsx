@@ -88,12 +88,31 @@ export default function NetworkOverview() {
                 <span className="text-sm font-medium text-muted-foreground">{userName}</span>
               </div>
               
-              {/* Network Value - Large Focus */}
+              {/* Network Value - Digital Display */}
               <div className="relative">
-                <div className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
-                  {networkScore.toLocaleString()}
+                <div className="relative rounded-2xl bg-slate-900/80 border border-primary/20 px-6 py-4 md:px-10 md:py-6 shadow-inner">
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+                  
+                  {/* Digital number display with dimmed zeros */}
+                  <div className="font-mono text-5xl sm:text-6xl md:text-7xl font-bold tabular-nums text-center relative">
+                    {(() => {
+                      const scoreStr = networkScore.toString();
+                      const maxDigits = 7; // e.g., 9,999,999
+                      const paddedScore = scoreStr.padStart(maxDigits, '0');
+                      const leadingZeros = paddedScore.slice(0, maxDigits - scoreStr.length);
+                      const actualDigits = paddedScore.slice(maxDigits - scoreStr.length);
+                      
+                      return (
+                        <span className="drop-shadow-[0_0_20px_hsl(var(--primary)/0.5)]">
+                          <span className="text-muted-foreground/20">{leadingZeros}</span>
+                          <span className="text-primary">{actualDigits}</span>
+                        </span>
+                      );
+                    })()}
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground uppercase tracking-widest mt-1">
+                <div className="text-sm text-muted-foreground uppercase tracking-widest mt-3 text-center">
                   Network Value
                 </div>
               </div>
