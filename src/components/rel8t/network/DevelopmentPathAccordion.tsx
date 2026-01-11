@@ -88,22 +88,6 @@ export function DevelopmentPathAccordion({
               <span className="text-xs text-muted-foreground">
                 Step {currentStepIndex + 1} of {totalStepsInPath}
               </span>
-              {/* 16 Progress Dots */}
-              <div className="flex items-center gap-0.5">
-                {Array.from({ length: 16 }, (_, i) => {
-                  const status = getSegmentStatus(i);
-                  return (
-                    <div
-                      key={i}
-                      className={cn(
-                        "h-2 w-2 rounded-full transition-colors",
-                        getSegmentColor(status),
-                        i > 0 && i % 4 === 0 && "ml-1"
-                      )}
-                    />
-                  );
-                })}
-              </div>
             </div>
           </div>
         </div>
