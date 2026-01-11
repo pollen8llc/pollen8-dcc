@@ -257,7 +257,7 @@ export default function NetworkProfile() {
               <Link 
                 to={actv8Contact.affiliatedUserId 
                   ? `/profile/${actv8Contact.affiliatedUserId}` 
-                  : `/rel8/contacts/${actv8Contact.contact_id}`
+                  : `/rel8/contactprofile/${actv8Contact.contact_id}`
                 }
                 className="flex justify-center md:block cursor-pointer group"
               >
