@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { Check, Loader2, Zap, AlertCircle } from "lucide-react";
+import { Check, Loader2, Zap } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
@@ -172,59 +171,76 @@ export function ContactActivationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-primary" />
-            Contact Activation Required
-          </DialogTitle>
-          <DialogDescription>
-            Creating an outreach task requires each target contact to be
-            activated in Actv8 for tracking and feedback.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-2 max-h-[300px] overflow-y-auto py-2">
-          {isLoadingStatuses ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
+        {/* Header with icon accent */}
+        <div className="relative px-5 pt-5 pb-4 bg-gradient-to-b from-primary/5 to-transparent">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+              <Zap className="h-4 w-4 text-primary" />
             </div>
-          ) : (
-            contacts.map((contact) => {
-              const status = contactStatuses.find(
-                (s) => s.contactId === contact.id
-              ) || { contactId: contact.id, isActive: false, isLoading: false };
-              
-              return (
-                <ContactStatusCard
-                  key={contact.id}
-                  contact={contact}
-                  status={status}
-                  onActivate={() => handleActivate(contact.id)}
-                />
-              );
-            })
+            <div className="flex-1 min-w-0 pt-0.5">
+              <DialogHeader className="space-y-1 text-left">
+                <DialogTitle className="text-base font-semibold leading-tight">
+                  Activate Contacts
+                </DialogTitle>
+                <DialogDescription className="text-xs leading-relaxed">
+                  Outreach tasks require contacts to be activated for tracking.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact list */}
+        <div className="px-5 py-3">
+          <div className="space-y-1.5 max-h-[240px] overflow-y-auto">
+            {isLoadingStatuses ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              contacts.map((contact) => {
+                const status = contactStatuses.find(
+                  (s) => s.contactId === contact.id
+                ) || { contactId: contact.id, isActive: false, isLoading: false };
+                
+                return (
+                  <ContactStatusCard
+                    key={contact.id}
+                    contact={contact}
+                    status={status}
+                    onActivate={() => handleActivate(contact.id)}
+                  />
+                );
+              })
+            )}
+          </div>
+
+          {!isLoadingStatuses && inactiveCount > 0 && (
+            <p className="text-[11px] text-muted-foreground mt-3 pl-0.5">
+              {inactiveCount} inactive — you can still continue with limited tracking.
+            </p>
           )}
         </div>
 
-        {!isLoadingStatuses && inactiveCount > 0 && (
-          <p className="text-sm text-muted-foreground">
-            {inactiveCount} contact{inactiveCount > 1 ? "s" : ""} not activated.
-            You can still continue, but tracking may be limited.
-          </p>
-        )}
-
-        <DialogFooter className="gap-2 sm:gap-0">
+        {/* Footer */}
+        <div className="px-5 py-3 border-t border-border/50 bg-muted/30 flex items-center justify-end gap-2">
           <Button
-            variant="outline"
+            size="sm"
+            variant="ghost"
             onClick={() => onOpenChange(false)}
+            className="text-xs h-8"
           >
             Cancel
           </Button>
-          <Button onClick={onConfirm}>
+          <Button 
+            size="sm" 
+            onClick={onConfirm}
+            className="text-xs h-8"
+          >
             {allActive ? "Continue" : "Continue Anyway"}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
