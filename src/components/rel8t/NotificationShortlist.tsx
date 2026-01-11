@@ -11,7 +11,8 @@ import {
   HelpCircle,
   Clock,
   Ban,
-  X
+  X,
+  AlertTriangle
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +35,21 @@ interface SyncLogEntry {
   } | null;
 }
 
+interface OverdueOutreach {
+  id: string;
+  title: string;
+  due_date: string;
+  priority: string | null;
+  status: string;
+  rms_outreach_contacts: Array<{
+    rms_contacts: {
+      id: string;
+      name: string | null;
+      email: string | null;
+    } | null;
+  }>;
+}
+
 const NotificationShortlist = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -53,7 +69,7 @@ const NotificationShortlist = () => {
         .eq("user_id", user.id)
         .in("sync_type", ["accepted", "declined", "tentative", "rescheduled", "cancelled"])
         .order("created_at", { ascending: false })
-        .limit(8);
+        .limit(5);
 
       if (error) throw error;
       return (data || []) as SyncLogEntry[];
@@ -62,7 +78,42 @@ const NotificationShortlist = () => {
     staleTime: 0
   });
 
-  // Real-time subscription for sync log updates
+  // Query for overdue outreach
+  const { data: overdueOutreach = [], refetch: refetchOverdue } = useQuery({
+    queryKey: ["overdue-outreach-shortlist"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const { data, error } = await supabase
+        .from("rms_outreach")
+        .select(`
+          id, 
+          title, 
+          due_date, 
+          priority, 
+          status,
+          rms_outreach_contacts(
+            rms_contacts(id, name, email)
+          )
+        `)
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .lt("due_date", today.toISOString())
+        .order("due_date", { ascending: true })
+        .limit(5);
+
+      if (error) throw error;
+      return (data || []) as OverdueOutreach[];
+    },
+    refetchOnMount: true,
+    staleTime: 0
+  });
+
+  // Real-time subscription for sync log and outreach updates
   useEffect(() => {
     const channel = supabase
       .channel('sync-log-shortlist-changes')
@@ -75,12 +126,21 @@ const NotificationShortlist = () => {
         },
         () => refetch()
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rms_outreach'
+        },
+        () => refetchOverdue()
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [refetch]);
+  }, [refetch, refetchOverdue]);
 
   const getSyncIcon = (syncType: string) => {
     switch (syncType) {
@@ -178,13 +238,32 @@ const NotificationShortlist = () => {
     deleteSyncLogMutation.mutate(id);
   };
 
+  // Helper to calculate days overdue
+  const getDaysOverdue = (dueDate: string) => {
+    const due = new Date(dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    const diffTime = today.getTime() - due.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  // Get primary contact from outreach
+  const getPrimaryContact = (outreach: OverdueOutreach) => {
+    const contacts = outreach.rms_outreach_contacts;
+    if (!contacts || contacts.length === 0) return null;
+    const contact = contacts[0]?.rms_contacts;
+    return contact?.name || contact?.email || null;
+  };
+
   if (isLoading) {
     return (
       <Card className="bg-card/60 backdrop-blur-xl border-primary/20 mb-8">
         <CardContent className="p-6">
           <div className="flex items-center justify-center gap-3">
             <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <span className="text-muted-foreground">Loading calendar responses...</span>
+            <span className="text-muted-foreground">Loading alerts...</span>
           </div>
         </CardContent>
       </Card>
@@ -192,6 +271,8 @@ const NotificationShortlist = () => {
   }
 
   const hasResponses = syncLogs && syncLogs.length > 0;
+  const hasOverdue = overdueOutreach && overdueOutreach.length > 0;
+  const totalAlerts = syncLogs.length + overdueOutreach.length;
 
   return (
     <motion.div
@@ -206,16 +287,16 @@ const NotificationShortlist = () => {
             <div className="flex items-center gap-4">
               <div className="relative w-12 h-12 flex-shrink-0 rounded-full bg-primary/10 flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-primary" />
-                {syncLogs.length > 0 && (
+                {totalAlerts > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
-                    {syncLogs.length > 9 ? "9+" : syncLogs.length}
+                    {totalAlerts > 9 ? "9+" : totalAlerts}
                   </span>
                 )}
               </div>
               <div>
-                <CardTitle className="text-xl font-bold">Calendar Responses</CardTitle>
+                <CardTitle className="text-xl font-bold">Activity Alerts</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Recent meeting invite responses
+                  Overdue tasks & calendar responses
                 </p>
               </div>
             </div>
@@ -232,15 +313,72 @@ const NotificationShortlist = () => {
         </CardHeader>
 
         <CardContent className="pt-0">
-          {!hasResponses ? (
+          {!hasResponses && !hasOverdue ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="w-10 h-10 mx-auto mb-3 opacity-40" />
-              <p className="text-sm">No calendar responses yet</p>
-              <p className="text-xs mt-1 opacity-70">Responses to your meeting invites will appear here</p>
+              <p className="text-sm">No alerts</p>
+              <p className="text-xs mt-1 opacity-70">Overdue tasks and calendar responses will appear here</p>
             </div>
           ) : (
           <div className="space-y-2">
             <AnimatePresence mode="popLayout">
+              {/* Overdue outreach items first */}
+              {overdueOutreach.map((outreach, index) => {
+                const daysOverdue = getDaysOverdue(outreach.due_date);
+                const contactName = getPrimaryContact(outreach);
+                
+                return (
+                  <motion.div
+                    key={`overdue-${outreach.id}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20, height: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    layout
+                  >
+                    <div
+                      className={cn(
+                        "w-full rounded-xl border-2 overflow-hidden transition-all duration-300 text-left group cursor-pointer",
+                        "hover:bg-destructive/10 bg-destructive/5 border-destructive/30"
+                      )}
+                      onClick={() => navigate(`/rel8/outreach/${outreach.id}`)}
+                    >
+                      <div className="px-4 py-3 flex items-center gap-4">
+                        {/* Icon */}
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-destructive/10">
+                          <AlertTriangle className="w-5 h-5 text-destructive" />
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 text-left">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-sm truncate text-destructive">
+                              Overdue
+                            </h4>
+                            <span className="text-xs text-destructive/70">
+                              {daysOverdue} {daysOverdue === 1 ? 'day' : 'days'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-xs text-foreground truncate max-w-[180px]">
+                              {outreach.title}
+                            </span>
+                          </div>
+                          {contactName && (
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs text-muted-foreground truncate max-w-[180px]">
+                                {contactName}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+
+              {/* Calendar response items */}
               {syncLogs.map((entry, index) => {
                 const Icon = getSyncIcon(entry.sync_type);
                 const iconColor = getSyncIconColor(entry.sync_type);
@@ -252,7 +390,7 @@ const NotificationShortlist = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20, height: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    transition={{ duration: 0.3, delay: (overdueOutreach.length + index) * 0.05 }}
                     layout
                   >
                     <div

@@ -9,7 +9,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, RefreshCw, ExternalLink, Mail, AlertCircle, CheckCircle2, Clock, Calendar, GitBranch, Bell, User, Building2, Trash2, List } from "lucide-react";
+import { Download, RefreshCw, ExternalLink, Mail, AlertCircle, CheckCircle2, Clock, Calendar, GitBranch, Bell, User, Building2, Trash2, List, AlertTriangle } from "lucide-react";
 import { downloadICS } from "@/utils/icsDownload";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 type NotificationStatus = "all" | "sent" | "pending" | "failed";
-type NotificationView = "all" | "platform" | "emails" | "calendar" | "inbound";
+type NotificationView = "all" | "platform" | "emails" | "calendar" | "inbound" | "overdue";
 
 export default function Notifications() {
   const navigate = useNavigate();
@@ -324,6 +324,41 @@ export default function Notifications() {
     staleTime: 0
   });
 
+  // Fetch overdue outreach items
+  const { data: overdueOutreach = [], refetch: refetchOverdueOutreach } = useQuery({
+    queryKey: ["overdue-outreach-notifications"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const { data, error } = await supabase
+        .from("rms_outreach")
+        .select(`
+          id, 
+          title, 
+          due_date, 
+          priority, 
+          status,
+          created_at,
+          rms_outreach_contacts(
+            rms_contacts(id, name, email)
+          )
+        `)
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .lt("due_date", today.toISOString())
+        .order("due_date", { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    refetchOnMount: true,
+    staleTime: 0
+  });
+
   // Real-time subscription for sync logs
   useEffect(() => {
     const channel = supabase
@@ -347,7 +382,7 @@ export default function Notifications() {
     };
   }, [refetchSyncLogs, refetchOutreach]);
 
-  // Real-time subscription for outreach tasks
+   // Real-time subscription for outreach tasks (includes overdue)
   useEffect(() => {
     const channel = supabase
       .channel('outreach-updates')
@@ -358,14 +393,17 @@ export default function Notifications() {
           schema: 'public',
           table: 'rms_outreach'
         },
-        () => refetchOutreach()
+        () => {
+          refetchOutreach();
+          refetchOverdueOutreach();
+        }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [refetchOutreach]);
+  }, [refetchOutreach, refetchOverdueOutreach]);
 
   // Retry email mutation
   const retryEmailMutation = useMutation({
@@ -435,11 +473,12 @@ export default function Notifications() {
     n => n.notification_type !== 'outreach_created'
   );
 
-  // Combined notifications for "all" view (platform + non-outreach emails + consolidated outreach)
+  // Combined notifications for "all" view (platform + non-outreach emails + consolidated outreach + overdue)
   const allNotifications = [
     ...filteredPlatformNotifications.map(n => ({ ...n, _type: 'platform' as const, _date: new Date(n.created_at) })),
     ...nonOutreachEmails.map(n => ({ ...n, _type: 'email' as const, _date: new Date(n.created_at) })),
-    ...(outreachTasks || []).map(n => ({ ...n, _type: 'outreach' as const, _date: new Date(n.created_at) }))
+    ...(outreachTasks || []).map(n => ({ ...n, _type: 'outreach' as const, _date: new Date(n.created_at) })),
+    ...overdueOutreach.map(n => ({ ...n, _type: 'overdue' as const, _date: new Date(n.due_date) }))
   ].sort((a, b) => b._date.getTime() - a._date.getTime());
 
   const filteredNotifications = nonOutreachEmails.filter(n => {
@@ -483,6 +522,25 @@ export default function Notifications() {
     if (notification.metadata?.communityName) return { type: 'community', name: notification.metadata.communityName };
     if (notification.metadata?.community_name) return { type: 'community', name: notification.metadata.community_name };
     return { type: 'general', name: 'N/A' };
+  };
+
+  // Helper to calculate days overdue
+  const getDaysOverdue = (dueDate: string) => {
+    const due = new Date(dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    const diffTime = today.getTime() - due.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  // Get primary contact from overdue outreach
+  const getOverdueContact = (outreach: any) => {
+    const contacts = outreach.rms_outreach_contacts;
+    if (!contacts || contacts.length === 0) return null;
+    const contact = contacts[0]?.rms_contacts;
+    return contact?.name || contact?.email || null;
   };
 
   const toggleOutreachExpanded = (outreachId: string) => {
@@ -537,6 +595,70 @@ export default function Notifications() {
             });
           }}
         />
+      );
+    }
+
+    if (item._type === 'overdue') {
+      const daysOverdue = getDaysOverdue(item.due_date);
+      const contactName = getOverdueContact(item);
+
+      return (
+        <Card 
+          key={`overdue-${item.id}`}
+          className="glass-morphism border-2 border-destructive/30 bg-destructive/5 backdrop-blur-md hover:bg-destructive/10 hover:shadow-lg transition-all duration-200 cursor-pointer"
+          onClick={() => navigate(`/rel8/outreach/${item.id}`)}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              {/* Status Indicator */}
+              <div className="w-2 h-2 rounded-full mt-1.5 shrink-0 bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.4)] animate-pulse" />
+              
+              {/* Icon */}
+              <div className="mt-0.5 shrink-0">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              
+              {/* Content */}
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+                  <h3 className="font-medium text-sm leading-tight text-destructive">
+                    Overdue: {item.title}
+                  </h3>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="text-xs text-destructive/80 font-medium whitespace-nowrap">
+                      {daysOverdue} {daysOverdue === 1 ? 'day' : 'days'} overdue
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  {contactName && (
+                    <>
+                      <User className="h-3 w-3" />
+                      <span>{contactName}</span>
+                    </>
+                  )}
+                  <span className="text-muted-foreground/50">|</span>
+                  <span>Due: {format(new Date(item.due_date), "MMM d, yyyy")}</span>
+                </div>
+
+                <div className="flex gap-2 mt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/rel8/outreach/${item.id}`);
+                    }}
+                  >
+                    View Task
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       );
     }
 
@@ -729,6 +851,12 @@ export default function Notifications() {
                       <span>Inbound Contacts</span>
                     </div>
                   </SelectItem>
+                  <SelectItem value="overdue">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span>Overdue ({overdueOutreach.length})</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -910,6 +1038,86 @@ export default function Notifications() {
                     <h3 className="text-lg font-semibold mb-2">No inbound contacts</h3>
                     <p className="text-muted-foreground text-center text-sm mb-6">
                       Contacts submitted via invite links will appear here for approval
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+
+          {/* OVERDUE VIEW */}
+          {activeView === "overdue" && (
+            <>
+              {outreachTasksLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+              ) : overdueOutreach && overdueOutreach.length > 0 ? (
+                <div className="space-y-3">
+                  {overdueOutreach.map((item) => {
+                    const daysOverdue = getDaysOverdue(item.due_date);
+                    const contactName = getOverdueContact(item);
+
+                    return (
+                      <Card 
+                        key={`overdue-view-${item.id}`}
+                        className="glass-morphism border-2 border-destructive/30 bg-destructive/5 backdrop-blur-md hover:bg-destructive/10 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                        onClick={() => navigate(`/rel8/outreach/${item.id}`)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-2 h-2 rounded-full mt-1.5 shrink-0 bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.4)] animate-pulse" />
+                            <div className="mt-0.5 shrink-0">
+                              <AlertTriangle className="h-5 w-5 text-destructive" />
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+                                <h3 className="font-medium text-sm leading-tight text-destructive">
+                                  {item.title}
+                                </h3>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <span className="text-xs text-destructive/80 font-medium whitespace-nowrap">
+                                    {daysOverdue} {daysOverdue === 1 ? 'day' : 'days'} overdue
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {contactName && (
+                                  <>
+                                    <User className="h-3 w-3" />
+                                    <span>{contactName}</span>
+                                    <span className="text-muted-foreground/50">|</span>
+                                  </>
+                                )}
+                                <span>Due: {format(new Date(item.due_date), "MMM d, yyyy")}</span>
+                              </div>
+                              <div className="flex gap-2 mt-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/rel8/outreach/${item.id}`);
+                                  }}
+                                >
+                                  View Task
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <Card className="glass-morphism border-0 backdrop-blur-md">
+                  <CardContent className="flex flex-col items-center justify-center py-16">
+                    <CheckCircle2 className="h-16 w-16 text-green-500/50 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">All caught up!</h3>
+                    <p className="text-muted-foreground text-center text-sm mb-6">
+                      No overdue outreach tasks
                     </p>
                   </CardContent>
                 </Card>
