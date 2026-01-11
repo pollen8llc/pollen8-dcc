@@ -430,9 +430,14 @@ export default function Notifications() {
   // Filter non-outreach emails and platform notifications
   const nonOutreachEmails = (notifications || []).filter(n => n.notification_type !== "outreach_created");
   
+  // Filter out outreach_created from platform notifications
+  const filteredPlatformNotifications = (platformNotifications || []).filter(
+    n => n.notification_type !== 'outreach_created'
+  );
+
   // Combined notifications for "all" view (platform + non-outreach emails + consolidated outreach)
   const allNotifications = [
-    ...(platformNotifications || []).map(n => ({ ...n, _type: 'platform' as const, _date: new Date(n.created_at) })),
+    ...filteredPlatformNotifications.map(n => ({ ...n, _type: 'platform' as const, _date: new Date(n.created_at) })),
     ...nonOutreachEmails.map(n => ({ ...n, _type: 'email' as const, _date: new Date(n.created_at) })),
     ...(outreachTasks || []).map(n => ({ ...n, _type: 'outreach' as const, _date: new Date(n.created_at) }))
   ].sort((a, b) => b._date.getTime() - a._date.getTime());
