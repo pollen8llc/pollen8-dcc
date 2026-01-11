@@ -660,7 +660,7 @@ const TriggerWizard = () => {
                       today.setHours(0, 0, 0, 0);
                       return date < today;
                     }}
-                    className="rounded-xl border border-primary/10 bg-background/50 p-2 sm:p-4 pointer-events-auto scale-[0.85] sm:scale-100 origin-center"
+                    className="rounded-xl bg-background/50 p-2 sm:p-4 pointer-events-auto scale-[0.85] sm:scale-100 origin-center"
                   />
                 </div>
 
