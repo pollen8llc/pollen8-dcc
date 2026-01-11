@@ -803,33 +803,6 @@ const TriggerWizard = () => {
                         </div>
                       </div>
 
-                      {/* Quick Time Presets */}
-                      <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-teal-500/10">
-                        <p className="text-[10px] sm:text-xs text-teal-500/60 uppercase tracking-widest mb-2 text-center">Quick Select</p>
-                        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
-                          {[
-                            { value: '09:00', label: '9AM' },
-                            { value: '12:00', label: '12PM' },
-                            { value: '14:00', label: '2PM' },
-                            { value: '17:00', label: '5PM' },
-                            { value: '20:00', label: '8PM' }
-                          ].map((preset) => (
-                            <button
-                              key={preset.value}
-                              type="button"
-                              onClick={() => updateFormData({ triggerTime: preset.value })}
-                              className={cn(
-                                "px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-mono text-xs sm:text-sm transition-all",
-                                formData.triggerTime === preset.value
-                                  ? "bg-teal-500/30 text-teal-200 border border-teal-500/50"
-                                  : "bg-slate-800/50 text-slate-400 border border-slate-700 hover:bg-teal-500/10 hover:text-teal-300 hover:border-teal-500/30"
-                              )}
-                            >
-                              {preset.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
