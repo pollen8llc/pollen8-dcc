@@ -10,6 +10,9 @@ import { deleteContact } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { useActv8FullStatus } from "@/hooks/useActv8Contacts";
+import { getStrengthConfig, ConnectionStrengthLevel } from "@/config/connectionStrengthConfig";
+import { cn } from "@/lib/utils";
 
 interface ContactCardProps {
   contact: Contact;
@@ -123,84 +126,151 @@ const ContactCard = ({
         </div>
       )}
 
-      <CardContent className="p-5 relative z-10 flex flex-col">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="bg-primary/10 rounded-full p-2 group-hover:bg-primary/20 transition-colors flex-shrink-0">
-              <UnifiedAvatar userId={avatarUserId} size={32} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-lg truncate group-hover:text-primary transition-colors">{contact.name}</h3>
-              {contact.organization && (
-                <p className="text-muted-foreground text-sm truncate">{contact.organization}</p>
-              )}
-              {contact.location && (
-                <div className="flex items-center gap-1 mt-1">
-                  <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                  <p className="text-xs text-muted-foreground truncate">{contact.location}</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {!isSelectionMode && (
-            <div className="flex gap-1 flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit();
-                }}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={handleDelete}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Badge Footer - Fixed height for consistent card heights */}
-        <div className="mt-3 pt-3 border-t border-border/50 min-h-[60px] flex flex-col gap-2">
-          {contact.category && (
-            <Badge 
-              variant="outline" 
-              className="text-xs w-full justify-center"
-              style={{
-                backgroundColor: `${getCategoryColor()}20`,
-                borderColor: `${getCategoryColor()}40`,
-                color: getCategoryColor()
-              }}
-            >
-              {contact.category.name}
-            </Badge>
-          )}
-          
-          {contact.industry && (
-            <Badge 
-              variant="outline" 
-              className="text-xs w-full justify-center bg-secondary/20 border-secondary/40"
-            >
-              {contact.industry}
-            </Badge>
-          )}
-          
-          {!contact.category && !contact.industry && (
-            <p className="text-xs text-muted-foreground/50 text-center">No category or industry</p>
-          )}
-        </div>
-      </CardContent>
+      <ContactCardContent 
+        contact={contact}
+        avatarUserId={avatarUserId}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onSelect={onSelect}
+        isSelected={isSelected}
+        isSelectionMode={isSelectionMode}
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
+        getCategoryColor={getCategoryColor}
+        handleCardClick={handleCardClick}
+      />
     </Card>
   );
 };
+
+// Separated inner content to use the hook
+function ContactCardContent({
+  contact,
+  avatarUserId,
+  onEdit,
+  onDelete,
+  onSelect,
+  isSelected,
+  isSelectionMode,
+  handleEdit,
+  handleDelete,
+  getCategoryColor,
+  handleCardClick
+}: {
+  contact: Contact;
+  avatarUserId: string;
+  onEdit?: (contact: Contact) => void;
+  onDelete?: (id: string) => void;
+  onSelect?: (id: string, selected: boolean) => void;
+  isSelected: boolean;
+  isSelectionMode: boolean;
+  handleEdit: () => void;
+  handleDelete: (e: React.MouseEvent) => Promise<void>;
+  getCategoryColor: () => string;
+  handleCardClick: () => void;
+}) {
+  const { data: actv8Status } = useActv8FullStatus(contact.id);
+  
+  // Determine strength indicator styling
+  const getStrengthIndicator = () => {
+    if (!actv8Status?.isActive) {
+      // Not active - show gray
+      return { gradientClass: 'from-muted-foreground/40 to-muted-foreground/30', isActive: false };
+    }
+    // Active - get strength from actv8 contact
+    const strength = actv8Status.actv8Contact?.connection_strength as ConnectionStrengthLevel || 'spark';
+    const config = getStrengthConfig(strength);
+    return { gradientClass: config.gradientClass, isActive: true };
+  };
+  
+  const strengthIndicator = getStrengthIndicator();
+
+  return (
+    <CardContent className="p-5 relative z-10 flex flex-col">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="relative flex-shrink-0">
+            <div className="bg-primary/10 rounded-full p-2 group-hover:bg-primary/20 transition-colors">
+              <UnifiedAvatar userId={avatarUserId} size={32} />
+            </div>
+            {/* Strength indicator dot */}
+            <div className={cn(
+              "absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-background bg-gradient-to-r",
+              strengthIndicator.gradientClass,
+              strengthIndicator.isActive && "shadow-md"
+            )} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-medium text-lg truncate group-hover:text-primary transition-colors">{contact.name}</h3>
+            {contact.organization && (
+              <p className="text-muted-foreground text-sm truncate">{contact.organization}</p>
+            )}
+            {contact.location && (
+              <div className="flex items-center gap-1 mt-1">
+                <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                <p className="text-xs text-muted-foreground truncate">{contact.location}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {!isSelectionMode && (
+          <div className="flex gap-1 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Badge Footer - Fixed height for consistent card heights */}
+      <div className="mt-3 pt-3 border-t border-border/50 min-h-[60px] flex flex-col gap-2">
+        {contact.category && (
+          <Badge 
+            variant="outline" 
+            className="text-xs w-full justify-center"
+            style={{
+              backgroundColor: `${getCategoryColor()}20`,
+              borderColor: `${getCategoryColor()}40`,
+              color: getCategoryColor()
+            }}
+          >
+            {contact.category.name}
+          </Badge>
+        )}
+        
+        {contact.industry && (
+          <Badge 
+            variant="outline" 
+            className="text-xs w-full justify-center bg-secondary/20 border-secondary/40"
+          >
+            {contact.industry}
+          </Badge>
+        )}
+        
+        {!contact.category && !contact.industry && (
+          <p className="text-xs text-muted-foreground/50 text-center">No category or industry</p>
+        )}
+      </div>
+    </CardContent>
+  );
+}
 
 export default ContactCard;

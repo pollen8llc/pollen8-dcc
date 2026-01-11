@@ -9,6 +9,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useActv8FullStatus } from '@/hooks/useActv8Contacts';
 import { activateContact } from '@/services/actv8Service';
 import { toast } from 'sonner';
+import { getStrengthConfig, ConnectionStrengthLevel } from '@/config/connectionStrengthConfig';
+import { cn } from '@/lib/utils';
 
 interface ContactHeaderProps {
   contactId: string;
@@ -98,6 +100,18 @@ export function ContactHeader({
     );
   };
 
+  // Get strength indicator styling
+  const getStrengthIndicator = () => {
+    if (!actv8FullStatus?.isActive) {
+      return { gradientClass: 'from-muted-foreground/40 to-muted-foreground/30', isActive: false };
+    }
+    const strength = actv8FullStatus.actv8Contact?.connection_strength as ConnectionStrengthLevel || 'spark';
+    const config = getStrengthConfig(strength);
+    return { gradientClass: config.gradientClass, isActive: true };
+  };
+  
+  const strengthIndicator = getStrengthIndicator();
+
   return (
     <Card className="relative overflow-hidden glass-morphism bg-gradient-to-br from-card/90 via-card/70 to-card/50 backdrop-blur-md border-primary/20 shadow-xl">
       {/* Ambient glow effects */}
@@ -115,12 +129,12 @@ export function ContactHeader({
               size={isMobile ? 96 : 88} 
               className="relative ring-2 ring-primary/30 ring-offset-2 ring-offset-background shadow-lg" 
             />
-            {/* Status indicator */}
-            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-background shadow-md ${
-              actv8FullStatus?.isActive 
-                ? 'bg-emerald-500 animate-pulse' 
-                : 'bg-muted-foreground/40'
-            }`} />
+            {/* Strength indicator */}
+            <div className={cn(
+              "absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-background shadow-md bg-gradient-to-r",
+              strengthIndicator.gradientClass,
+              strengthIndicator.isActive && "animate-pulse"
+            )} />
           </div>
           
           {/* Name and category */}
