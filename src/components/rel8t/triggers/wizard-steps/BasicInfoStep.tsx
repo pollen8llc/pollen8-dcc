@@ -47,7 +47,7 @@ export function BasicInfoStep({ validateAndNext }: { validateAndNext: () => void
       </FormItem>
 
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={() => window.location.href = '/rel8/wizard'}>
+        <Button type="button" variant="outline" onClick={() => window.location.href = '/rel8/triggers/wizard'}>
           Skip
         </Button>
         <Button type="button" onClick={validateAndNext}>

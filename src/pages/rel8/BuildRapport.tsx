@@ -37,7 +37,7 @@ const BuildRapport = () => {
 
   const handleSelectTrigger = (trigger: any) => {
     setSelectedTrigger(trigger);
-    navigate("/rel8/wizard");
+    navigate("/rel8/triggers/wizard");
   };
 
   return (

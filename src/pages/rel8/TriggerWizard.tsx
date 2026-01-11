@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, ArrowLeft, Clock, Zap, ArrowRight, Check, RotateCcw, ChevronUp, ChevronDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CalendarIcon, ArrowLeft, Clock, Zap, ArrowRight, Check, RotateCcw, ChevronUp, ChevronDown, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
@@ -15,16 +15,60 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { FollowUpChannelStep } from "@/components/rel8t/triggers/FollowUpChannelStep";
 import { ContactTokenInput } from "@/components/rel8t/ContactTokenInput";
 import { TriggerReviewStep } from "@/components/rel8t/triggers/TriggerReviewStep";
+import { EditDetailsStep } from "@/components/rel8t/wizard/EditDetailsStep";
+import { EditChannelStep } from "@/components/rel8t/wizard/EditChannelStep";
+import { ReviewEditStep } from "@/components/rel8t/wizard/ReviewEditStep";
+import { TriggerCreatedDialog } from "@/components/rel8t/TriggerCreatedDialog";
+import { useRelationshipWizard, Actv8StepData } from "@/contexts/RelationshipWizardContext";
+import { getOutreachById, Outreach } from "@/services/rel8t/outreachService";
+import { getContacts } from "@/services/rel8t/contactService";
+import { Trigger } from "@/services/rel8t/triggerService";
+import { useQuery } from "@tanstack/react-query";
 
 type FlipState = 'none' | 'date' | 'time';
+type WizardMode = 'create' | 'edit';
+type EditWizardStep = 'edit-details' | 'edit-channel' | 'review-edit';
+
+interface EditWizardData {
+  title: string;
+  description: string;
+  dueDate: string;
+  priority: 'low' | 'medium' | 'high';
+  outreachChannel: string | null;
+  channelDetails: Record<string, any> | null;
+}
 
 const TriggerWizard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  
+  // Detect mode from URL params
+  const mode = searchParams.get('mode');
+  const outreachId = searchParams.get('id');
+  const actv8IdParam = searchParams.get('actv8Id');
+  const stepIndexParam = searchParams.get('stepIndex');
   const returnTo = searchParams.get('returnTo');
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  
+  const isEditMode = mode === 'edit' && outreachId;
+  const isActv8Mode = !!actv8IdParam;
+
+  // Get context for Actv8 mode
+  const {
+    preSelectedContacts,
+    actv8ContactId,
+    actv8StepIndex,
+    actv8StepData,
+    clearWizardData,
+  } = useRelationshipWizard();
+
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(isActv8Mode ? 1 : 1);
+  const [editStep, setEditStep] = useState<EditWizardStep>('edit-details');
   const [flipState, setFlipState] = useState<FlipState>('none');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editData, setEditData] = useState<EditWizardData | null>(null);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [createdTrigger, setCreatedTrigger] = useState<Trigger | null>(null);
+  const [icsContent, setIcsContent] = useState<string | null>(null);
   
   const { 
     formData, 
@@ -33,6 +77,20 @@ const TriggerWizard = () => {
     frequencyOptions,
     priorityOptions
   } = useTriggerWizard();
+
+  // Fetch existing outreach data when in edit mode
+  const { data: existingOutreach, isLoading: isLoadingOutreach } = useQuery({
+    queryKey: ['outreach', outreachId],
+    queryFn: () => getOutreachById(outreachId!),
+    enabled: !!isEditMode,
+  });
+
+  // Initialize form with pre-selected contacts from context (for Actv8 mode)
+  useEffect(() => {
+    if (isActv8Mode && preSelectedContacts.length > 0) {
+      updateFormData({ selectedContacts: preSelectedContacts });
+    }
+  }, [isActv8Mode, preSelectedContacts, updateFormData]);
 
   // Parse time into hours and minutes
   const [hours, minutes] = (formData.triggerTime || "09:00").split(':').map(Number);
@@ -57,29 +115,35 @@ const TriggerWizard = () => {
 
   const handleReviewSubmit = async (createOutreach: boolean) => {
     setIsSubmitting(true);
-    const result = await handleSubmit(returnTo || undefined, createOutreach);
+    
+    // Pass Actv8 context data if in Actv8 mode
+    const result = await handleSubmit(
+      returnTo || undefined, 
+      createOutreach,
+      isActv8Mode ? {
+        actv8ContactId: actv8ContactId || actv8IdParam,
+        actv8StepIndex: actv8StepIndex ?? (stepIndexParam ? parseInt(stepIndexParam) : undefined),
+        actv8StepData,
+      } : undefined
+    );
+    
     setIsSubmitting(false);
     
     if (result) {
-      if (returnTo === 'relationship') {
-        navigate("/rel8/wizard");
-      } else {
-        navigate("/rel8/triggers");
-      }
+      // Show success dialog with calendar download option
+      setCreatedTrigger(result.trigger);
+      setIcsContent(result.icsContent);
+      setShowSuccessDialog(true);
     }
   };
 
-  // Keep for form submission fallback (shouldn't be used with new flow)
+  // Keep for form submission fallback
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   };
 
   const handleCancel = () => {
-    if (returnTo === 'relationship') {
-      navigate("/rel8/wizard");
-    } else {
-      navigate("/rel8/triggers");
-    }
+    navigate("/rel8/triggers");
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -151,6 +215,17 @@ const TriggerWizard = () => {
     return formData.selectedContacts.length > 0 && formData.triggerDate !== null;
   };
 
+  // Edit mode handlers
+  const handleEditDetailsNext = (stepData: EditWizardData) => {
+    setEditData(prev => ({ ...prev, ...stepData } as EditWizardData));
+    setEditStep('edit-channel');
+  };
+
+  const handleEditChannelNext = (stepData: { outreachChannel: string | null; channelDetails: Record<string, any> | null }) => {
+    setEditData(prev => ({ ...prev, ...stepData } as EditWizardData));
+    setEditStep('review-edit');
+  };
+
   const inputClassName = "bg-background/90 backdrop-blur-lg border border-primary/30 focus:border-primary/60 rounded-lg shadow-md h-10 sm:h-11 transition-all text-sm";
   const selectTriggerClassName = "bg-background/90 backdrop-blur-lg border border-primary/30 focus:border-primary/60 rounded-lg shadow-md h-10 sm:h-11 transition-all text-sm";
 
@@ -160,6 +235,126 @@ const TriggerWizard = () => {
   const period = hours >= 12 ? 'PM' : 'AM';
   const display12Hour = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
 
+  // Get step title based on mode
+  const getStepTitle = () => {
+    if (isEditMode) {
+      switch (editStep) {
+        case 'edit-details': return 'Edit Details';
+        case 'edit-channel': return 'Edit Channel';
+        case 'review-edit': return 'Review Changes';
+      }
+    }
+    
+    if (isActv8Mode && actv8StepData) {
+      return `Schedule: ${actv8StepData.stepName}`;
+    }
+    
+    return 'Create Reminder';
+  };
+
+  // Loading state for edit mode
+  if (isEditMode && isLoadingOutreach) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <Navbar />
+        <div className="container mx-auto max-w-5xl px-4 py-8 flex justify-center items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  // Error state for edit mode
+  if (isEditMode && !existingOutreach && !isLoadingOutreach) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <Navbar />
+        <div className="container mx-auto max-w-5xl px-4 py-8">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold">Outreach task not found</h2>
+            <p className="text-muted-foreground mt-2">The outreach task you're trying to edit doesn't exist.</p>
+            <Button onClick={() => navigate('/rel8/actv8?tab=outreach')} className="mt-4">
+              Back to Outreach
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Edit mode UI
+  if (isEditMode && existingOutreach) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <Navbar />
+        
+        <div className="container mx-auto max-w-5xl px-4 py-4 sm:py-8 pb-40">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-4 sm:mb-6 mt-2 sm:mt-6">
+            <div className="p-2 rounded-xl bg-primary/10 backdrop-blur-sm">
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-lg font-semibold">{getStepTitle()}</h1>
+              <p className="text-xs text-muted-foreground">Update your outreach task details</p>
+            </div>
+          </div>
+
+          {/* Progress Indicator */}
+          <div className="flex gap-1.5 mb-4 sm:mb-6">
+            <div className={cn(
+              "h-1 flex-1 rounded-full transition-colors",
+              editStep === 'edit-details' || editStep === 'edit-channel' || editStep === 'review-edit' ? "bg-primary" : "bg-primary/20"
+            )} />
+            <div className={cn(
+              "h-1 flex-1 rounded-full transition-colors",
+              editStep === 'edit-channel' || editStep === 'review-edit' ? "bg-primary" : "bg-primary/20"
+            )} />
+            <div className={cn(
+              "h-1 flex-1 rounded-full transition-colors",
+              editStep === 'review-edit' ? "bg-primary" : "bg-primary/20"
+            )} />
+          </div>
+
+          <Card className="backdrop-blur-md bg-card/80 border border-primary/20 rounded-xl shadow-xl mb-8">
+            <CardContent className="p-4 sm:p-6">
+              {editStep === 'edit-details' && (
+                <EditDetailsStep
+                  outreach={existingOutreach}
+                  onNext={handleEditDetailsNext}
+                />
+              )}
+
+              {editStep === 'edit-channel' && (
+                <EditChannelStep
+                  outreach={existingOutreach}
+                  onNext={handleEditChannelNext}
+                  onPrevious={() => setEditStep('edit-details')}
+                />
+              )}
+
+              {editStep === 'review-edit' && editData && (
+                <ReviewEditStep
+                  outreach={existingOutreach}
+                  updatedData={editData}
+                  onPrevious={() => setEditStep('edit-channel')}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sticky Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+          <div className="container mx-auto max-w-5xl pointer-events-auto">
+            <Rel8OnlyNavigation />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Create mode UI (default)
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
@@ -171,9 +366,16 @@ const TriggerWizard = () => {
             <Zap className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1">
-            <h1 className="text-lg font-semibold">Create Reminder</h1>
+            <h1 className="text-lg font-semibold">{getStepTitle()}</h1>
             <p className="text-xs text-muted-foreground">Step {currentStep} of 3</p>
           </div>
+          
+          {/* Actv8 Build Rapport Badge */}
+          {isActv8Mode && actv8StepData && (
+            <Badge variant="outline" className="px-3 py-1 bg-emerald-500/10 border-emerald-500 border-2 text-emerald-600 dark:text-emerald-400">
+              Build Rapport: {actv8StepData.pathName}
+            </Badge>
+          )}
         </div>
 
         {/* Progress Indicator */}
@@ -358,6 +560,7 @@ const TriggerWizard = () => {
                         onPrevious={handlePrevious}
                         isSubmitting={isSubmitting}
                         onUpdatePriority={(priority) => updateFormData({ priority })}
+                        actv8StepData={isActv8Mode && actv8StepData ? { stepName: actv8StepData.stepName, pathName: actv8StepData.pathName } : undefined}
                       />
                     )}
                   </div>
@@ -408,7 +611,7 @@ const TriggerWizard = () => {
             {flipState === 'date' && (
             <Card 
               className={cn(
-                "absolute inset-0 backdrop-blur-md bg-card/95 border-2 border-primary/20 rounded-2xl shadow-xl",
+                "absolute inset-0 backdrop-blur-md bg-card/95 border-2 border-primary/10 rounded-2xl shadow-xl",
                 "[backface-visibility:hidden] [transform:rotateX(180deg)]"
               )}
             >
@@ -654,6 +857,20 @@ const TriggerWizard = () => {
           </div>
         </div>
       </div>
+
+      {/* Success Dialog */}
+      <TriggerCreatedDialog 
+        open={showSuccessDialog}
+        onOpenChange={(open) => {
+          setShowSuccessDialog(open);
+          if (!open) {
+            clearWizardData();
+            navigate("/rel8/actv8?tab=outreach");
+          }
+        }}
+        trigger={createdTrigger}
+        icsContent={icsContent}
+      />
 
       {/* Sticky Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">

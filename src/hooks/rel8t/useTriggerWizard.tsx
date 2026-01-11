@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { createTrigger } from "@/services/rel8t/triggerService";
 import { createOutreach } from "@/services/rel8t/outreachService";
-import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
+import { useRelationshipWizard, Actv8StepData } from "@/contexts/RelationshipWizardContext";
 import { Contact } from "@/services/rel8t/contactService";
 
 const WIZARD_STATE_KEY = "trigger_wizard_state";
@@ -25,6 +25,12 @@ export interface SimpleTriggerFormData {
     meetingPlatform?: string;
     address?: string;
   };
+}
+
+export interface Actv8ContextData {
+  actv8ContactId?: string | null;
+  actv8StepIndex?: number | null;
+  actv8StepData?: Actv8StepData | null;
 }
 
 // Generate trigger name from selected contacts
@@ -102,9 +108,13 @@ export function useTriggerWizard() {
   }, []);
 
   // Submit the form data and return the created trigger with ICS content
-  const handleSubmit = useCallback(async (returnTo?: string, createOutreachTask: boolean = false) => {
+  const handleSubmit = useCallback(async (
+    returnTo?: string, 
+    createOutreachTask: boolean = false,
+    actv8Context?: Actv8ContextData
+  ) => {
     try {
-      console.log("Submitting trigger with data:", formData, "createOutreach:", createOutreachTask);
+      console.log("Submitting trigger with data:", formData, "createOutreach:", createOutreachTask, "actv8Context:", actv8Context);
       
       // Combine date and time into a single datetime
       let executionTime: string | undefined;
@@ -141,7 +151,7 @@ export function useTriggerWizard() {
         
         // Create outreach task if requested
         if (createOutreachTask) {
-          const outreachData = {
+          const outreachData: any = {
             title: formData.name || `Reminder at ${formData.triggerTime}`,
             description: `Scheduled ${formData.frequency} reminder`,
             priority: formData.priority as 'low' | 'medium' | 'high',
@@ -151,6 +161,14 @@ export function useTriggerWizard() {
             channel_details: formData.channelDetails,
             trigger_id: trigger.id,
           };
+          
+          // Add Actv8 context if provided
+          if (actv8Context?.actv8ContactId) {
+            outreachData.actv8_contact_id = actv8Context.actv8ContactId;
+          }
+          if (actv8Context?.actv8StepIndex !== undefined && actv8Context?.actv8StepIndex !== null) {
+            outreachData.actv8_step_index = actv8Context.actv8StepIndex;
+          }
           
           await createOutreach(outreachData, contactIds);
         }

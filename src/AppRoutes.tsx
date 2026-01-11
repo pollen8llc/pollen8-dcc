@@ -59,7 +59,7 @@ const ContactProfile = lazy(() => import("@/pages/rel8t/ContactProfile"));
 const Categories = lazy(() => import("@/pages/rel8/Categories"));
 const CategoryDetail = lazy(() => import("@/pages/rel8/CategoryDetail"));
 const Rel8Settings = lazy(() => import("@/pages/rel8/Settings"));
-const RelationshipWizard = lazy(() => import("@/pages/rel8/RelationshipWizard"));
+// RelationshipWizard merged into TriggerWizard
 const TriggerWizard = lazy(() => import("@/pages/rel8/TriggerWizard"));
 const EmailTest = lazy(() => import("@/pages/rel8/EmailTest"));
 const Triggers = lazy(() => import("@/pages/rel8/Triggers"));
@@ -426,7 +426,7 @@ const AppRoutes = () => {
           <Route path="/rel8/wizard" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <RelationshipWizard />
+                <TriggerWizard />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />

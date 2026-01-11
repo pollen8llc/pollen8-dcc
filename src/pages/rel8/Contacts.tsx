@@ -166,7 +166,7 @@ const Contacts = () => {
       selectedContacts.includes(contact.id)
     );
     setPreSelectedContacts(selectedContactObjects);
-    navigate("/rel8/wizard");
+    navigate("/rel8/triggers/wizard");
   };
 
   const handleActivateSelected = async () => {

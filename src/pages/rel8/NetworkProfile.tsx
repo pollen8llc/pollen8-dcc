@@ -205,7 +205,7 @@ export default function NetworkProfile() {
           updated_at: '',
         }]);
         
-        navigate(`/rel8/wizard?actv8Id=${actv8Contact.id}&stepIndex=${stepIndex}`);
+        navigate(`/rel8/triggers/wizard?actv8Id=${actv8Contact.id}&stepIndex=${stepIndex}`);
       }
     }
   };

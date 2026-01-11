@@ -318,7 +318,7 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate(`/rel8/wizard?mode=edit&id=${outreach.id}`)}
+                onClick={() => navigate(`/rel8/triggers/wizard?mode=edit&id=${outreach.id}`)}
                 className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
               >
                 <Pencil className="h-4 w-4" />
