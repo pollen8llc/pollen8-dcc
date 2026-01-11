@@ -53,12 +53,13 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
             <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
               {/* Logout Button */}
               <Button
-                variant="ghost"
-                size="icon"
+                variant="outline"
+                size="sm"
                 onClick={handleLogout}
-                className="absolute top-4 right-4 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                className="absolute top-4 right-4 gap-2 border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors"
               >
                 <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
               
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-8">
