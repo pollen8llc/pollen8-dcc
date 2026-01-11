@@ -179,15 +179,15 @@ export function RelationshipLevelAccordion({
         </div>
       </AccordionTrigger>
       
-      <AccordionContent className="px-4 pb-4">
+      <AccordionContent className="px-2 sm:px-4 pb-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-6">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className="space-y-6 pt-2">
+          <div className="space-y-4 sm:space-y-6 pt-2">
             {/* Relationship Level Selection */}
-            <div className="p-4 rounded-xl border border-border/50 bg-muted/20">
+            <div className="p-2 sm:p-4 rounded-xl border border-border/50 bg-muted/20">
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                 How well do you know {contactName}?
               </h4>
@@ -203,7 +203,7 @@ export function RelationshipLevelAccordion({
                     <div
                       key={level.id}
                       className={cn(
-                        "flex items-center space-x-3 rounded-lg border p-3 cursor-pointer transition-all",
+                        "flex items-center space-x-2 sm:space-x-3 rounded-lg border p-2 sm:p-3 cursor-pointer transition-all",
                         "hover:border-primary/50 hover:bg-primary/5",
                         isSelected
                           ? "border-primary bg-primary/10"
@@ -219,7 +219,7 @@ export function RelationshipLevelAccordion({
                         >
                           <div
                             className={cn(
-                              "h-7 w-7 rounded-full flex items-center justify-center",
+                              "h-6 w-6 sm:h-7 sm:w-7 rounded-full flex items-center justify-center flex-shrink-0",
                               isSelected
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted text-muted-foreground"
@@ -227,11 +227,11 @@ export function RelationshipLevelAccordion({
                           >
                             {level.icon}
                           </div>
-                          <div className="flex-1">
-                            <span className="font-medium text-sm block">
+                          <div className="flex-1 min-w-0">
+                            <span className="font-medium text-sm block truncate">
                               {level.label}
                             </span>
-                            <span className="text-[10px] text-muted-foreground">
+                            <span className="text-[10px] text-muted-foreground line-clamp-1">
                               {level.description}
                             </span>
                           </div>
