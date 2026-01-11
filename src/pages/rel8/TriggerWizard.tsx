@@ -164,7 +164,7 @@ const TriggerWizard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto max-w-lg px-4 py-4 sm:py-8 pb-32">
+      <div className="container mx-auto max-w-5xl px-4 py-4 sm:py-8 pb-32">
         {/* Compact Header */}
         <div className="flex items-center gap-3 mb-4 sm:mb-6 mt-2 sm:mt-6">
           <div className="p-2 rounded-xl bg-primary/10 backdrop-blur-sm">
