@@ -151,8 +151,8 @@ const TriggerWizard = () => {
     return formData.selectedContacts.length > 0 && formData.triggerDate !== null;
   };
 
-  const inputClassName = "bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all";
-  const selectTriggerClassName = "bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all";
+  const inputClassName = "bg-background/90 backdrop-blur-lg border border-primary/30 focus:border-primary/60 rounded-lg shadow-md h-10 sm:h-11 transition-all text-sm";
+  const selectTriggerClassName = "bg-background/90 backdrop-blur-lg border border-primary/30 focus:border-primary/60 rounded-lg shadow-md h-10 sm:h-11 transition-all text-sm";
 
   // Format display time
   const displayHours = hours.toString().padStart(2, '0');
@@ -164,20 +164,20 @@ const TriggerWizard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto max-w-5xl px-4 py-8 pb-32">
-        {/* Minimal Header */}
-        <div className="flex items-center gap-3 mb-8 mt-6">
+      <div className="container mx-auto max-w-lg px-4 py-4 sm:py-8 pb-32">
+        {/* Compact Header */}
+        <div className="flex items-center gap-3 mb-4 sm:mb-6 mt-2 sm:mt-6">
           <div className="p-2 rounded-xl bg-primary/10 backdrop-blur-sm">
-            <Zap className="h-6 w-6 text-primary" />
+            <Zap className="h-5 w-5 text-primary" />
           </div>
-          <div>
-            <h1 className="text-xl font-semibold">Create Reminder</h1>
-            <p className="text-sm text-muted-foreground">Step {currentStep} of 3</p>
+          <div className="flex-1">
+            <h1 className="text-lg font-semibold">Create Reminder</h1>
+            <p className="text-xs text-muted-foreground">Step {currentStep} of 3</p>
           </div>
         </div>
 
         {/* Progress Indicator */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-1.5 mb-4 sm:mb-6">
           <div className={cn(
             "h-1 flex-1 rounded-full transition-colors",
             currentStep >= 1 ? "bg-primary" : "bg-primary/20"
@@ -208,39 +208,39 @@ const TriggerWizard = () => {
             {/* Front Face - Form */}
             <Card 
               className={cn(
-                "backdrop-blur-md bg-card/80 border-2 border-primary/20 rounded-2xl shadow-xl",
+                "backdrop-blur-md bg-card/80 border border-primary/20 rounded-xl shadow-xl",
                 "[backface-visibility:hidden]"
               )}
             >
-              <CardContent className="p-6">
-                <form onSubmit={onSubmit} className="space-y-8">
-                  <div className="min-h-[350px]">
+              <CardContent className="p-4 sm:p-6">
+                <form onSubmit={onSubmit} className="space-y-5">
+                  <div className="min-h-[280px] sm:min-h-[320px]">
                     {currentStep === 1 && (
-                      <div className="space-y-6 animate-fade-in">
+                      <div className="space-y-4 animate-fade-in">
                         {/* Step Title */}
-                        <div className="mb-6">
-                          <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                        <div className="mb-4">
+                          <h2 className="text-base sm:text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                             Reminder Details
                           </h2>
-                          <p className="text-sm text-muted-foreground mt-1">Configure when and how often to be reminded</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Configure when and how often</p>
                         </div>
 
                         {/* Target Contacts */}
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-foreground/70 pl-2">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-foreground/70 pl-1">
                             Target Contacts <span className="text-destructive">*</span>
                           </Label>
                           <ContactTokenInput
                             selectedContacts={formData.selectedContacts}
                             onContactsChange={(contacts) => updateFormData({ selectedContacts: contacts })}
-                            placeholder="Search and add contacts..."
+                            placeholder="Search contacts..."
                             required
                           />
                         </div>
 
                         {/* Start Date - Click to Flip Vertical */}
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-foreground/70 pl-2">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-foreground/70 pl-1">
                             Start Date <span className="text-destructive">*</span>
                           </Label>
                           <Button
@@ -248,7 +248,7 @@ const TriggerWizard = () => {
                             variant="outline"
                             onClick={() => setFlipState('date')}
                             className={cn(
-                              "w-full justify-start text-left font-normal group",
+                              "w-full justify-start text-left font-normal group text-sm",
                               inputClassName,
                               !formData.triggerDate && "text-muted-foreground"
                             )}
@@ -257,17 +257,14 @@ const TriggerWizard = () => {
                             {formData.triggerDate ? (
                               format(formData.triggerDate, "PPP")
                             ) : (
-                              <span>Click to select date</span>
+                              <span>Select date</span>
                             )}
-                            <span className="ml-auto text-xs text-muted-foreground group-hover:text-primary transition-colors">
-                              ↕ Flip
-                            </span>
                           </Button>
                         </div>
 
                         {/* Trigger Time - Click to Flip Horizontal */}
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-foreground/70 pl-2">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-foreground/70 pl-1">
                             Time <span className="text-destructive">*</span>
                           </Label>
                           <Button
@@ -275,25 +272,22 @@ const TriggerWizard = () => {
                             variant="outline"
                             onClick={() => setFlipState('time')}
                             className={cn(
-                              "w-full justify-start text-left font-normal group",
+                              "w-full justify-start text-left font-normal group text-sm",
                               inputClassName
                             )}
                           >
                             <Clock className="mr-2 h-4 w-4 group-hover:text-teal-400 transition-colors" />
-                            <span className="font-mono text-base">
+                            <span className="font-mono">
                               {display12Hour}:{displayMinutes} {period}
-                            </span>
-                            <span className="ml-auto text-xs text-muted-foreground group-hover:text-teal-400 transition-colors">
-                              ↔ Flip
                             </span>
                           </Button>
                         </div>
 
                         {/* Frequency & Priority Row */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-3">
                           {/* Frequency */}
-                          <div className="space-y-2">
-                            <Label htmlFor="frequency" className="text-sm font-medium text-foreground/70 pl-2">
+                          <div className="space-y-1.5">
+                            <Label htmlFor="frequency" className="text-xs font-medium text-foreground/70 pl-1">
                               Frequency
                             </Label>
                             <Select
@@ -301,7 +295,7 @@ const TriggerWizard = () => {
                               onValueChange={(value) => updateFormData({ frequency: value })}
                             >
                               <SelectTrigger className={selectTriggerClassName}>
-                                <SelectValue placeholder="Select frequency" />
+                                <SelectValue placeholder="Frequency" />
                               </SelectTrigger>
                               <SelectContent>
                                 {frequencyOptions.map((option) => (
@@ -314,8 +308,8 @@ const TriggerWizard = () => {
                           </div>
 
                           {/* Priority */}
-                          <div className="space-y-2">
-                            <Label className="text-sm font-medium text-foreground/70 pl-2">
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-foreground/70 pl-1">
                               Priority
                             </Label>
                             <Select
@@ -323,7 +317,7 @@ const TriggerWizard = () => {
                               onValueChange={(value) => updateFormData({ priority: value })}
                             >
                               <SelectTrigger className={selectTriggerClassName}>
-                                <SelectValue placeholder="Select priority" />
+                                <SelectValue placeholder="Priority" />
                               </SelectTrigger>
                               <SelectContent>
                                 {priorityOptions.map((option) => (
@@ -341,11 +335,11 @@ const TriggerWizard = () => {
                     {currentStep === 2 && (
                       <div className="animate-fade-in">
                         {/* Step Title */}
-                        <div className="mb-6">
-                          <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                        <div className="mb-4">
+                          <h2 className="text-base sm:text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                             Follow-Up Channel
                           </h2>
-                          <p className="text-sm text-muted-foreground mt-1">Choose how you'll reach out (optional)</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Choose how you'll reach out (optional)</p>
                         </div>
 
                         <FollowUpChannelStep
@@ -369,40 +363,40 @@ const TriggerWizard = () => {
 
                   {/* Action Buttons - Hide on Step 3 since TriggerReviewStep has its own */}
                   {currentStep < 3 && (
-                  <div className="flex items-center justify-between pt-6 border-t border-primary/20">
-                    <div className="flex gap-3">
+                  <div className="flex items-center justify-between pt-4 border-t border-primary/10">
+                    <div className="flex gap-2">
                       <Button
                         type="button"
                         variant="ghost"
+                        size="sm"
                         onClick={handleCancel}
-                        className="backdrop-blur-sm"
+                        className="text-muted-foreground"
                       >
                         Cancel
                       </Button>
                       {currentStep > 1 && (
                         <Button
                           type="button"
-                          variant="outline"
+                          variant="ghost"
+                          size="sm"
                           onClick={handlePrevious}
-                          className="backdrop-blur-sm bg-background/50 border-primary/30"
                         >
-                          <ArrowLeft className="w-4 h-4 mr-2" />
+                          <ArrowLeft className="w-4 h-4 mr-1" />
                           Back
                         </Button>
                       )}
                     </div>
 
-                    <div>
-                      <Button
-                        type="button"
-                        onClick={handleNext}
-                        disabled={currentStep === 1 ? !canProceed() : (formData.outreachChannel && !isChannelDetailsValid())}
-                        className="backdrop-blur-sm shadow-lg"
-                      >
-                        Next
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleNext}
+                      disabled={currentStep === 1 ? !canProceed() : (formData.outreachChannel && !isChannelDetailsValid())}
+                      className="shadow-md"
+                    >
+                      Next
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
                   </div>
                   )}
                 </form>
