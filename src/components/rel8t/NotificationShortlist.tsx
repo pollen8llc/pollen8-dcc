@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { 
   Bell, 
@@ -11,13 +11,14 @@ import {
   UserPlus,
   Mail,
   Calendar,
-  MessageSquare
+  MessageSquare,
+  X
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 
 interface Notification {
   id: string;
@@ -106,6 +107,33 @@ const NotificationShortlist = () => {
     return null;
   };
 
+  // Delete notification mutation
+  const deleteNotificationMutation = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await supabase
+        .from("cross_platform_notifications")
+        .delete()
+        .eq("id", notificationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Notification cleared",
+      });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-notifications-shortlist"] });
+      queryClient.invalidateQueries({ queryKey: ["cross-platform-notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-notifications"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to clear notification",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleNotificationClick = async (notification: Notification) => {
     // Mark as read if unread
     if (!notification.is_read) {
@@ -120,6 +148,11 @@ const NotificationShortlist = () => {
     
     // Navigate to notifications page
     navigate("/rel8/notifications");
+  };
+
+  const handleDeleteNotification = (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation();
+    deleteNotificationMutation.mutate(notificationId);
   };
 
   if (isLoading) {
@@ -179,74 +212,94 @@ const NotificationShortlist = () => {
 
         <CardContent className="pt-0">
           <div className="space-y-2">
-            {notifications.map((notification, index) => {
-              const Icon = getNotificationIcon(notification.notification_type);
-              const reference = getReference(notification);
-              const ReferenceIcon = reference?.type === 'community' ? Building2 : User;
+            <AnimatePresence mode="popLayout">
+              {notifications.map((notification, index) => {
+                const Icon = getNotificationIcon(notification.notification_type);
+                const reference = getReference(notification);
+                const ReferenceIcon = reference?.type === 'community' ? Building2 : User;
 
-              return (
-                <motion.div
-                  key={notification.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                >
-                  <button
-                    onClick={() => handleNotificationClick(notification)}
-                    className={cn(
-                      "w-full rounded-xl border-2 overflow-hidden transition-all duration-300 text-left",
-                      "hover:bg-muted/30",
-                      notification.is_read
-                        ? "bg-card/40 border-border/50"
-                        : "bg-primary/5 border-primary/30"
-                    )}
+                return (
+                  <motion.div
+                    key={notification.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20, height: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    layout
                   >
-                    <div className="px-4 py-3 flex items-center gap-4">
-                      {/* Icon */}
-                      <div className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                    <div
+                      className={cn(
+                        "w-full rounded-xl border-2 overflow-hidden transition-all duration-300 text-left group",
+                        "hover:bg-muted/30",
                         notification.is_read
-                          ? "bg-muted/50 text-muted-foreground"
-                          : "bg-primary/20 text-primary"
-                      )}>
-                        <Icon className="w-5 h-5" />
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className={cn(
-                            "font-semibold text-sm truncate",
-                            notification.is_read && "text-muted-foreground"
-                          )}>
-                            {notification.title}
-                          </h4>
-                          {!notification.is_read && (
-                            <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                          ? "bg-card/40 border-border/50"
+                          : "bg-primary/5 border-primary/30"
+                      )}
+                    >
+                      <div className="px-4 py-3 flex items-center gap-4">
+                        {/* Icon */}
+                        <button
+                          onClick={() => handleNotificationClick(notification)}
+                          className={cn(
+                            "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                            notification.is_read
+                              ? "bg-muted/50 text-muted-foreground"
+                              : "bg-primary/20 text-primary"
                           )}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                          {notification.message}
-                        </p>
-                      </div>
+                        >
+                          <Icon className="w-5 h-5" />
+                        </button>
 
-                      {/* Metadata */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {reference && (
-                          <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
-                            <ReferenceIcon className="w-3 h-3" />
-                            <span className="max-w-[80px] truncate">{reference.name}</span>
+                        {/* Content - clickable */}
+                        <button
+                          onClick={() => handleNotificationClick(notification)}
+                          className="flex-1 min-w-0 text-left"
+                        >
+                          <div className="flex items-center gap-2">
+                            <h4 className={cn(
+                              "font-semibold text-sm truncate",
+                              notification.is_read && "text-muted-foreground"
+                            )}>
+                              {notification.title}
+                            </h4>
+                            {!notification.is_read && (
+                              <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                            )}
                           </div>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(notification.created_at), "MMM d")}
-                        </span>
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                            {notification.message}
+                          </p>
+                        </button>
+
+                        {/* Metadata */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {reference && (
+                            <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
+                              <ReferenceIcon className="w-3 h-3" />
+                              <span className="max-w-[80px] truncate">{reference.name}</span>
+                            </div>
+                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(notification.created_at), "MMM d")}
+                          </span>
+                          
+                          {/* Delete button */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            onClick={(e) => handleDeleteNotification(e, notification.id)}
+                            disabled={deleteNotificationMutation.isPending}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </button>
-                </motion.div>
-              );
-            })}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         </CardContent>
       </Card>
