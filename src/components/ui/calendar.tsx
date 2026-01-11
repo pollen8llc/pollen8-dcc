@@ -12,12 +12,14 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  fixedWeeks = false,
   ...props
 }: CalendarProps) {
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-4 md:p-6 w-full", className)}
+      fixedWeeks={fixedWeeks}
+      className={cn("p-3 sm:p-4 md:p-6 w-full", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
         month: "space-y-4 w-full",
@@ -38,7 +40,7 @@ function Calendar({
         cell: "flex-1 text-center text-sm md:text-base p-0.5 md:p-1 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "min-h-[44px] h-11 w-full md:h-14 p-0 font-medium aria-selected:opacity-100 hover:bg-primary/10 active:scale-95 md:hover:scale-105 transition-all touch-manipulation"
+          "min-h-[40px] h-10 sm:h-11 md:h-14 w-full p-0 font-medium aria-selected:opacity-100 hover:bg-primary/10 active:scale-95 md:hover:scale-105 transition-all touch-manipulation"
         ),
         day_range_end: "day-range-end",
         day_selected:

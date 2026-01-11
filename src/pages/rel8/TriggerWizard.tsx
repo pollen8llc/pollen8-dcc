@@ -69,6 +69,7 @@ const TriggerWizard = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdTrigger, setCreatedTrigger] = useState<Trigger | null>(null);
   const [icsContent, setIcsContent] = useState<string | null>(null);
+  const [use24Hour, setUse24Hour] = useState(false);
   
   const { 
     formData, 
@@ -402,9 +403,10 @@ const TriggerWizard = () => {
           className="relative w-full mb-8"
           style={{ perspective: "1500px" }}
         >
+          {/* Min height ensures space for calendar (6 weeks) on all devices */}
           <div
             className={cn(
-              "relative w-full transition-transform duration-700 ease-in-out",
+              "relative w-full transition-transform duration-700 ease-in-out min-h-[480px] sm:min-h-[520px]",
               "[transform-style:preserve-3d]",
               flipState === 'date' && "[transform:rotateX(180deg)]",
               flipState === 'time' && "[transform:rotateY(180deg)]"
@@ -413,13 +415,13 @@ const TriggerWizard = () => {
             {/* Front Face - Form */}
             <Card 
               className={cn(
-                "backdrop-blur-md bg-card/80 border border-primary/20 rounded-xl shadow-xl",
+                "backdrop-blur-md bg-card/80 border border-primary/20 rounded-xl shadow-xl h-full",
                 "[backface-visibility:hidden]"
               )}
             >
-              <CardContent className="p-4 sm:p-6">
-                <form onSubmit={onSubmit} className="space-y-5">
-                  <div className="min-h-[280px] sm:min-h-[320px]">
+              <CardContent className="p-4 sm:p-6 h-full flex flex-col">
+                <form onSubmit={onSubmit} className="space-y-5 flex-1 flex flex-col">
+                  <div className="flex-1">
                     {currentStep === 1 && (
                       <div className="space-y-4 animate-fade-in">
                         {/* Step Title */}
@@ -619,13 +621,13 @@ const TriggerWizard = () => {
             {flipState === 'date' && (
             <Card 
               className={cn(
-                "absolute inset-0 backdrop-blur-md bg-card/95 border-2 border-primary/10 rounded-2xl shadow-xl",
+                "absolute inset-0 backdrop-blur-md bg-card/95 border-2 border-primary/10 rounded-2xl shadow-xl overflow-hidden",
                 "[backface-visibility:hidden] [transform:rotateX(180deg)]"
               )}
             >
               <CardContent className="p-3 sm:p-6 h-full flex flex-col">
                 {/* Calendar Header */}
-                <div className="flex items-center justify-between mb-3 sm:mb-6">
+                <div className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">
                   <div className="min-w-0 flex-1">
                     <h2 className="text-base sm:text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                       Select Date
@@ -642,19 +644,20 @@ const TriggerWizard = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setFlipState('none')}
-                    className="backdrop-blur-sm bg-background/50 border-primary/30 gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
+                    className="backdrop-blur-sm bg-background/50 border-primary/30 gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3 flex-shrink-0"
                   >
                     <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
                     Back
                   </Button>
                 </div>
 
-                {/* Calendar - fits card with equal margins */}
-                <div className="flex-1 flex items-center justify-center px-0">
+                {/* Calendar - scroll only on very small screens if needed */}
+                <div className="flex-1 flex items-center justify-center px-0 max-sm:overflow-y-auto max-sm:min-h-0 sm:overflow-visible">
                   <Calendar
                     mode="single"
                     selected={formData.triggerDate || undefined}
                     onSelect={handleDateSelect}
+                    fixedWeeks
                     disabled={(date) => {
                       const today = new Date();
                       today.setHours(0, 0, 0, 0);
@@ -665,7 +668,7 @@ const TriggerWizard = () => {
                 </div>
 
                 {/* Confirm Button */}
-                <div className="pt-3 sm:pt-6 border-t border-primary/20 flex justify-end">
+                <div className="pt-2 sm:pt-4 border-t border-primary/20 flex justify-end flex-shrink-0">
                   <Button
                     type="button"
                     size="sm"
@@ -685,13 +688,13 @@ const TriggerWizard = () => {
             {flipState === 'time' && (
             <Card 
               className={cn(
-                "absolute inset-0 backdrop-blur-md bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900/50 border-2 border-teal-500/30 rounded-2xl shadow-xl shadow-teal-500/10",
+                "absolute inset-0 backdrop-blur-md bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900/50 border-2 border-teal-500/30 rounded-2xl shadow-xl shadow-teal-500/10 overflow-hidden",
                 "[backface-visibility:hidden] [transform:rotateY(180deg)]"
               )}
             >
               <CardContent className="p-3 sm:p-6 h-full flex flex-col">
                 {/* Time Header */}
-                <div className="flex items-center justify-between mb-3 sm:mb-6">
+                <div className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">
                   <div className="min-w-0 flex-1">
                     <h2 className="text-base sm:text-lg font-semibold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
                       Set Time
@@ -705,110 +708,141 @@ const TriggerWizard = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setFlipState('none')}
-                    className="backdrop-blur-sm bg-slate-800/50 border-teal-500/30 text-teal-300 hover:bg-teal-500/20 hover:text-teal-200 gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
+                    className="backdrop-blur-sm bg-slate-800/50 border-teal-500/30 text-teal-300 hover:bg-teal-500/20 hover:text-teal-200 gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3 flex-shrink-0"
                   >
                     <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
                     Back
                   </Button>
                 </div>
 
-                {/* Digital Clock Interface - Compact */}
-                <div className="flex-1 flex items-center justify-center overflow-hidden">
-                  <div className="w-full">
-                    {/* Clock Display */}
-                    <div className="relative rounded-xl bg-slate-900/80 border border-teal-500/20 p-3 sm:p-6 shadow-inner">
-                      {/* Glow effect */}
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-b from-teal-500/5 to-transparent pointer-events-none" />
-                      
-                      {/* Time Display */}
-                      <div className="flex items-center justify-center gap-2 sm:gap-4">
-                        {/* Hours */}
-                        <div className="flex flex-col items-center gap-1 sm:gap-2">
-                          <button
-                            type="button"
-                            onClick={incrementHour}
-                            className="p-1.5 sm:p-2 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 hover:border-teal-500/40 transition-all group"
-                          >
-                            <ChevronUp className="w-4 h-4 sm:w-6 sm:h-6 text-teal-400 group-hover:text-teal-300" />
-                          </button>
-                          <div className="relative">
-                            <div className="font-mono text-3xl sm:text-5xl md:text-6xl font-bold text-teal-400 tracking-wider tabular-nums drop-shadow-[0_0_20px_rgba(20,184,166,0.5)]">
-                              {display12Hour.toString().padStart(2, '0')}
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={decrementHour}
-                            className="p-1.5 sm:p-2 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 hover:border-teal-500/40 transition-all group"
-                          >
-                            <ChevronDown className="w-4 h-4 sm:w-6 sm:h-6 text-teal-400 group-hover:text-teal-300" />
-                          </button>
-                        </div>
-
-                        {/* Separator */}
-                        <div className="flex flex-col gap-2 sm:gap-3">
-                          <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.8)]" />
-                          <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.8)]" />
-                        </div>
-
-                        {/* Minutes */}
-                        <div className="flex flex-col items-center gap-1 sm:gap-2">
-                          <button
-                            type="button"
-                            onClick={incrementMinute}
-                            className="p-1.5 sm:p-2 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 hover:border-teal-500/40 transition-all group"
-                          >
-                            <ChevronUp className="w-4 h-4 sm:w-6 sm:h-6 text-teal-400 group-hover:text-teal-300" />
-                          </button>
-                          <div className="relative">
-                            <div className="font-mono text-3xl sm:text-5xl md:text-6xl font-bold text-teal-400 tracking-wider tabular-nums drop-shadow-[0_0_20px_rgba(20,184,166,0.5)]">
-                              {displayMinutes}
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={decrementMinute}
-                            className="p-1.5 sm:p-2 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 hover:border-teal-500/40 transition-all group"
-                          >
-                            <ChevronDown className="w-4 h-4 sm:w-6 sm:h-6 text-teal-400 group-hover:text-teal-300" />
-                          </button>
-                        </div>
-
-                        {/* AM/PM Toggle */}
-                        <div className="flex flex-col items-center gap-1.5 sm:gap-2 ml-2 sm:ml-4">
-                          <button
-                            type="button"
-                            onClick={() => toggleAMPM('AM')}
-                            className={cn(
-                              "px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg font-mono text-sm sm:text-base font-bold transition-all cursor-pointer",
-                              period === 'AM' 
-                                ? "bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-[0_0_15px_rgba(20,184,166,0.3)]" 
-                                : "bg-slate-800/50 text-slate-500 border border-slate-700 hover:bg-slate-700/50 hover:text-slate-400"
-                            )}
-                          >
-                            AM
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => toggleAMPM('PM')}
-                            className={cn(
-                              "px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg font-mono text-sm sm:text-base font-bold transition-all cursor-pointer",
-                              period === 'PM' 
-                                ? "bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-[0_0_15px_rgba(20,184,166,0.3)]" 
-                                : "bg-slate-800/50 text-slate-500 border border-slate-700 hover:bg-slate-700/50 hover:text-slate-400"
-                            )}
-                          >
-                            PM
-                          </button>
-                        </div>
+                {/* Digital Clock Interface - Fill available space */}
+                <div className="flex-1 flex items-center justify-center min-h-0 px-2 sm:px-4">
+                  {/* Clock Display - full width */}
+                  <div className="relative rounded-2xl bg-slate-900/80 border border-teal-500/20 p-4 sm:p-8 md:p-10 shadow-inner w-full h-full flex items-center justify-center">
+                    {/* Glow effect */}
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-teal-500/5 to-transparent pointer-events-none" />
+                    
+                    {/* Time Display - Grid layout for consistent alignment */}
+                    <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-2 sm:gap-4 w-full max-w-xl mx-auto">
+                      {/* 12H/24H Toggle - Left side */}
+                      <div className="flex flex-col items-center justify-center gap-2 sm:gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setUse24Hour(false)}
+                          className={cn(
+                            "w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl font-mono text-xs sm:text-sm font-bold transition-all cursor-pointer",
+                            !use24Hour 
+                              ? "bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-[0_0_15px_rgba(20,184,166,0.3)]" 
+                              : "bg-slate-800/50 text-slate-500 border border-slate-700 hover:bg-slate-700/50 hover:text-slate-400"
+                          )}
+                        >
+                          12H
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setUse24Hour(true)}
+                          className={cn(
+                            "w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl font-mono text-xs sm:text-sm font-bold transition-all cursor-pointer",
+                            use24Hour 
+                              ? "bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-[0_0_15px_rgba(20,184,166,0.3)]" 
+                              : "bg-slate-800/50 text-slate-500 border border-slate-700 hover:bg-slate-700/50 hover:text-slate-400"
+                          )}
+                        >
+                          24H
+                        </button>
                       </div>
 
+                      {/* Hours Column - Fixed width for alignment */}
+                      <div className="flex flex-col items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={incrementHour}
+                          className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 hover:border-teal-500/40 transition-all group"
+                        >
+                          <ChevronUp className="w-6 h-6 sm:w-8 sm:h-8 text-teal-400 group-hover:text-teal-300" />
+                        </button>
+                        <div className="py-3 sm:py-6">
+                          <div className="font-mono text-5xl sm:text-7xl md:text-8xl font-bold text-teal-400 tabular-nums drop-shadow-[0_0_20px_rgba(20,184,166,0.5)] text-center w-[2ch]">
+                            {use24Hour ? displayHours : display12Hour.toString().padStart(2, '0')}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={decrementHour}
+                          className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 hover:border-teal-500/40 transition-all group"
+                        >
+                          <ChevronDown className="w-6 h-6 sm:w-8 sm:h-8 text-teal-400 group-hover:text-teal-300" />
+                        </button>
+                      </div>
+
+                      {/* Separator */}
+                      <div className="flex flex-col items-center justify-center gap-3 sm:gap-5 self-center">
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.8)]" />
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.8)]" />
+                      </div>
+
+                      {/* Minutes Column - Fixed width for alignment */}
+                      <div className="flex flex-col items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={incrementMinute}
+                          className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 hover:border-teal-500/40 transition-all group"
+                        >
+                          <ChevronUp className="w-6 h-6 sm:w-8 sm:h-8 text-teal-400 group-hover:text-teal-300" />
+                        </button>
+                        <div className="py-3 sm:py-6">
+                          <div className="font-mono text-5xl sm:text-7xl md:text-8xl font-bold text-teal-400 tabular-nums drop-shadow-[0_0_20px_rgba(20,184,166,0.5)] text-center w-[2ch]">
+                            {displayMinutes}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={decrementMinute}
+                          className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 hover:border-teal-500/40 transition-all group"
+                        >
+                          <ChevronDown className="w-6 h-6 sm:w-8 sm:h-8 text-teal-400 group-hover:text-teal-300" />
+                        </button>
+                      </div>
+
+                      {/* AM/PM Toggle - Right side (faded in 24H mode) */}
+                      <div className={cn(
+                        "flex flex-col items-center justify-center gap-2 sm:gap-3 transition-opacity",
+                        use24Hour ? "opacity-30 pointer-events-none" : "opacity-100"
+                      )}>
+                        <button
+                          type="button"
+                          onClick={() => toggleAMPM('AM')}
+                          disabled={use24Hour}
+                          className={cn(
+                            "w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl font-mono text-xs sm:text-sm font-bold transition-all cursor-pointer",
+                            period === 'AM' && !use24Hour
+                              ? "bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-[0_0_15px_rgba(20,184,166,0.3)]" 
+                              : "bg-slate-800/50 text-slate-500 border border-slate-700 hover:bg-slate-700/50 hover:text-slate-400"
+                          )}
+                        >
+                          AM
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleAMPM('PM')}
+                          disabled={use24Hour}
+                          className={cn(
+                            "w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl font-mono text-xs sm:text-sm font-bold transition-all cursor-pointer",
+                            period === 'PM' && !use24Hour
+                              ? "bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-[0_0_15px_rgba(20,184,166,0.3)]" 
+                              : "bg-slate-800/50 text-slate-500 border border-slate-700 hover:bg-slate-700/50 hover:text-slate-400"
+                          )}
+                        >
+                          PM
+                        </button>
+                      </div>
                     </div>
+
                   </div>
                 </div>
 
                 {/* Confirm Button */}
-                <div className="pt-3 sm:pt-6 border-t border-teal-500/20 flex justify-end">
+                <div className="pt-2 sm:pt-4 border-t border-teal-500/20 flex justify-end flex-shrink-0">
                   <Button
                     type="button"
                     size="sm"
