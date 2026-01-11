@@ -6,7 +6,7 @@ import { getOutreachesByActv8Contact, getOutreachesForContact } from "@/services
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { DevelopmentPathCard } from "@/components/rel8t/network/DevelopmentPathCard";
-import { DevelopmentTimeline } from "@/components/rel8t/network/DevelopmentTimeline";
+import { ContactOutreachReminders } from "@/components/rel8t/network/ContactOutreachReminders";
 import { RelationshipLevelAccordion } from "@/components/rel8t/network/RelationshipLevelAccordion";
 // Outreach linking removed - outreaches are tracked via step instances
 import { useContactAnalysis } from "@/hooks/useContactAnalysis";
@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
-import { Loader2, Mail, Phone, Calendar, TrendingUp, Settings, MessageCircle, Edit, Target, Zap, BarChart3, Star, ThumbsUp, ThumbsDown, Minus, TrendingDown } from "lucide-react";
+import { Loader2, Mail, Phone, Calendar, TrendingUp, Settings, MessageCircle, MessageSquare, Edit, Target, Zap, BarChart3, Star, ThumbsUp, ThumbsDown, Minus, TrendingDown } from "lucide-react";
 import { format, parseISO, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 const strengthLabels: Record<string, string> = {
@@ -270,29 +270,15 @@ export default function NetworkProfile() {
               </div>
             </div>
 
-            {/* Middle Section: Insights & Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Relationship Summary */}
-              <div className="md:col-span-2 p-4 rounded-2xl bg-muted/30 border border-border/50 flex flex-col justify-center">
-                <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  <BarChart3 className="h-3.5 w-3.5" />
-                  Insight Summary
-                </div>
-                <p className="text-sm leading-relaxed">
-                  {analysis?.summary || "No activity recorded yet."}
-                </p>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-3 rounded-2xl bg-muted/20 border border-border/30 text-center">
+                <div className="text-2xl font-bold text-primary">{analysis?.totalOutreaches || 0}</div>
+                <div className="text-[10px] text-muted-foreground uppercase font-bold">Total Outreaches</div>
               </div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-2 md:col-span-2">
-                <div className="p-3 rounded-2xl bg-muted/20 border border-border/30 text-center">
-                  <div className="text-2xl font-bold text-primary">{analysis?.totalOutreaches || 0}</div>
-                  <div className="text-[10px] text-muted-foreground uppercase font-bold">Total Outreaches</div>
-                </div>
-                <div className="p-3 rounded-2xl bg-muted/20 border border-border/30 text-center">
-                  <div className="text-2xl font-bold text-primary">{analysis?.engagementScore || 0}%</div>
-                  <div className="text-[10px] text-muted-foreground uppercase font-bold">Engagement</div>
-                </div>
+              <div className="p-3 rounded-2xl bg-muted/20 border border-border/30 text-center">
+                <div className="text-2xl font-bold text-primary">{analysis?.engagementScore || 0}%</div>
+                <div className="text-[10px] text-muted-foreground uppercase font-bold">Engagement</div>
               </div>
             </div>
 
@@ -324,13 +310,18 @@ export default function NetworkProfile() {
           <DevelopmentPathCard pathId={contact.developmentPathId} currentStepIndex={contact.currentStepIndex} completedSteps={contact.completedSteps} linkedOutreaches={linkedOutreaches} actv8ContactId={actv8Contact.id} pathTier={contact.pathTier} pathHistory={contact.pathHistory} skippedPaths={contact.skippedPaths} onPlanTouchpoint={handlePlanTouchpoint} />
         </Card>
 
-        {/* Timeline Section */}
+        {/* Outreach & Reminders Section */}
         <Card className="p-4 glass-morphism border-primary/10">
           <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-primary" />
-            Timeline & History
+            <MessageSquare className="h-4 w-4 text-primary" />
+            Outreach & Reminders
           </h3>
-          <DevelopmentTimeline interactions={contact.interactions} pathId={contact.developmentPathId} currentStepIndex={contact.currentStepIndex} completedSteps={contact.completedSteps} pathStartedAt={contact.pathStartedAt} linkedOutreaches={linkedOutreaches} />
+          <ContactOutreachReminders 
+            contactId={actv8Contact.contact_id} 
+            actv8ContactId={actv8Contact.id} 
+            pathInstanceId={actv8Contact.current_path_instance_id}
+            linkedOutreaches={linkedOutreaches}
+          />
         </Card>
       </div>
 
