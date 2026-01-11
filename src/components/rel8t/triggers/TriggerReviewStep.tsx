@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
 import { 
   Users, 
@@ -30,6 +30,7 @@ interface TriggerReviewStepProps {
   onSubmit: (createOutreach: boolean) => void;
   onPrevious: () => void;
   isSubmitting: boolean;
+  onUpdatePriority?: (priority: string) => void;
 }
 
 const channelIcons: Record<string, React.ReactNode> = {
@@ -69,10 +70,17 @@ export function TriggerReviewStep({
   formData, 
   onSubmit, 
   onPrevious,
-  isSubmitting 
+  isSubmitting,
+  onUpdatePriority
 }: TriggerReviewStepProps) {
   const [createOutreach, setCreateOutreach] = useState(false);
   const [showActivationDialog, setShowActivationDialog] = useState(false);
+
+  const priorityOptions = [
+    { value: "low", label: "Low" },
+    { value: "medium", label: "Medium" },
+    { value: "high", label: "High" }
+  ];
 
   const getChannelDetails = () => {
     if (!formData.outreachChannel || !formData.channelDetails) return null;
@@ -158,17 +166,33 @@ export function TriggerReviewStep({
           </div>
           
           {/* Frequency & Priority - Inline */}
-          <div className="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-primary/10">
+          <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-primary/10">
             <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-xs">
               <Repeat className="w-3 h-3 text-primary" />
               <span>{frequencyLabels[formData.frequency] || formData.frequency}</span>
             </div>
-            <div className={cn(
-              "flex items-center gap-1 px-2 py-0.5 rounded border text-xs",
-              priorityColors[formData.priority] || "text-muted-foreground bg-muted/10 border-muted/30"
-            )}>
-              <Zap className="w-3 h-3" />
-              <span className="capitalize">{formData.priority}</span>
+            
+            {/* Editable Priority Select */}
+            <div className="flex items-center gap-1.5">
+              <Zap className="w-3 h-3 text-muted-foreground" />
+              <Select
+                value={formData.priority}
+                onValueChange={(value) => onUpdatePriority?.(value)}
+              >
+                <SelectTrigger className={cn(
+                  "h-6 w-[90px] px-2 text-xs border rounded",
+                  priorityColors[formData.priority] || "text-muted-foreground bg-muted/10 border-muted/30"
+                )}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {priorityOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value} className="text-xs">
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
