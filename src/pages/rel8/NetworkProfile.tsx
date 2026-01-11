@@ -17,8 +17,9 @@ import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
-import { Loader2, Mail, Phone, Calendar, TrendingUp, Settings, MessageCircle, MessageSquare, Edit, Target, Zap, BarChart3, Star, ThumbsUp, ThumbsDown, Minus, TrendingDown } from "lucide-react";
+import { Loader2, Mail, Phone, Calendar, TrendingUp, Settings, MessageCircle, MessageSquare, Target, Zap, BarChart3, Star, ThumbsUp, ThumbsDown, Minus, TrendingDown } from "lucide-react";
 import { format, parseISO, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 const strengthLabels: Record<string, string> = {
@@ -251,26 +252,27 @@ export default function NetworkProfile() {
         {/* Unified Profile Header Card */}
         <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 overflow-hidden py-[32px]">
           <div className="p-4 md:p-6 space-y-6">
-            {/* Top Section: Avatar, Name, Basic Info, and Edit */}
+            {/* Top Section: Avatar, Name, Basic Info */}
             <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex justify-center md:block">
-                <UnifiedAvatar userId={actv8Contact.affiliatedUserId || actv8Contact.contact_id} size={100} className="ring-4 ring-primary/20 shadow-xl" isContactId={!actv8Contact.affiliatedUserId} />
-              </div>
+              <Link 
+                to={actv8Contact.affiliatedUserId 
+                  ? `/profile/${actv8Contact.affiliatedUserId}` 
+                  : `/rel8/contacts/${actv8Contact.contact_id}`
+                }
+                className="flex justify-center md:block cursor-pointer group"
+              >
+                <div className="relative transition-transform group-hover:scale-105">
+                  <UnifiedAvatar userId={actv8Contact.affiliatedUserId || actv8Contact.contact_id} size={100} className="ring-4 ring-primary/20 shadow-xl" isContactId={!actv8Contact.affiliatedUserId} />
+                  <div className="absolute inset-0 rounded-full ring-2 ring-transparent group-hover:ring-primary/50 transition-all" />
+                </div>
+              </Link>
 
               <div className="flex-1 text-center md:text-left space-y-2">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <h1 className="text-3xl font-bold tracking-tight">{contact.name}</h1>
-                    <p className="text-muted-foreground font-medium">
-                      {contact.role} {contact.company && <span className="opacity-70">at {contact.company}</span>}
-                    </p>
-                  </div>
-                  <Link to={`/rel8/contacts/${contact.contactId}/edit`}>
-                    <Button variant="outline" size="sm" className="gap-2 h-9 rounded-full px-4 hover:bg-primary/10">
-                      <Edit className="h-3.5 w-3.5" />
-                      Edit Profile
-                    </Button>
-                  </Link>
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">{contact.name}</h1>
+                  <p className="text-muted-foreground font-medium">
+                    {contact.role} {contact.company && <span className="opacity-70">at {contact.company}</span>}
+                  </p>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2 mt-2">
@@ -291,6 +293,8 @@ export default function NetworkProfile() {
                 </div>
               </div>
             </div>
+
+            <Separator className="bg-border/50" />
 
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-2">
