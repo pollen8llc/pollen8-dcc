@@ -112,8 +112,10 @@ export default function Network() {
             <p className="text-sm text-muted-foreground">Loading contacts...</p>
           </div>
         </div>
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl">
-          <Rel8OnlyNavigation />
+        <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+          <div className="container mx-auto max-w-6xl pointer-events-auto">
+            <Rel8OnlyNavigation />
+          </div>
         </div>
       </div>
     );
@@ -133,8 +135,10 @@ export default function Network() {
             Try Again
           </Button>
         </div>
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl">
-          <Rel8OnlyNavigation />
+        <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+          <div className="container mx-auto max-w-6xl pointer-events-auto">
+            <Rel8OnlyNavigation />
+          </div>
         </div>
       </div>
     );
@@ -340,8 +344,10 @@ export default function Network() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl">
-        <Rel8OnlyNavigation />
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+        <div className="container mx-auto max-w-6xl pointer-events-auto">
+          <Rel8OnlyNavigation />
+        </div>
       </div>
     </div>
   );
