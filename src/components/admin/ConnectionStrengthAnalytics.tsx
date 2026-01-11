@@ -304,17 +304,17 @@ const ConnectionStrengthAnalytics: React.FC = () => {
     <div className="space-y-8 max-w-4xl mx-auto">
       
       {/* Edit Mode Toggle */}
-      <div className="flex items-center justify-between p-4 rounded-xl bg-card/60 border border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-card/60 border border-border">
         <div>
-          <h2 className="font-semibold">Formula Configuration</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="font-semibold text-sm sm:text-base">Formula Configuration</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {isEditMode ? 'Click on any value to edit it' : 'Enable edit mode to modify formula values'}
           </p>
         </div>
         <Button
           variant={isEditMode ? 'default' : 'outline'}
           onClick={() => setIsEditMode(!isEditMode)}
-          className="gap-2"
+          className="gap-2 text-sm w-full sm:w-auto"
         >
           {isEditMode ? (
             <>
@@ -332,12 +332,12 @@ const ConnectionStrengthAnalytics: React.FC = () => {
 
       {/* Category Weights Section */}
       {isEditMode && (
-        <div className="p-6 rounded-2xl border border-primary/30 bg-primary/5">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <div className="p-4 sm:p-6 rounded-2xl border border-primary/30 bg-primary/5">
+          <h2 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
             <Calculator className="w-5 h-5 text-primary" />
             Category Weights (must sum to 100)
           </h2>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {[
               { key: 'path_weight', label: 'Path', color: 'blue' },
               { key: 'engagement_weight', label: 'Engagement', color: 'primary' },
@@ -369,144 +369,164 @@ const ConnectionStrengthAnalytics: React.FC = () => {
       )}
       
       {/* SECTION 1: Network Score Preview with Dynamic Avatar */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border border-primary/30">
-        <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-primary" />
-          Network Score → Avatar Mapping
-        </h2>
-        <p className="text-sm text-muted-foreground mb-6">Edit the values below to see how different network sizes affect avatar complexity</p>
+      <div className="p-4 sm:p-8 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/30 relative overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
         
-        {/* Editable Formula Row */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-          {/* Connections Input */}
-          <div className="p-3 rounded-xl bg-white/10 text-center">
-            <input
-              type="number"
-              value={nsConnections}
-              onChange={(e) => setNsConnections(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-24 text-2xl font-bold text-center bg-transparent border-b-2 border-primary/50 focus:border-primary outline-none"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Connections</p>
-          </div>
-          <span className="text-xl text-muted-foreground">×</span>
+        <div className="relative">
+          <h2 className="text-base sm:text-xl font-semibold mb-2 flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-primary/20">
+              <Zap className="w-5 h-5 text-primary" />
+            </div>
+            Network Score → Avatar Mapping
+          </h2>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-6 sm:mb-8">Edit the values below to see how different network sizes affect avatar complexity</p>
           
-          {/* Avg Strength Input */}
-          <div className="p-3 rounded-xl bg-white/10 text-center">
-            <input
-              type="number"
-              value={nsAvgStrength}
-              onChange={(e) => setNsAvgStrength(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))}
-              className="w-16 text-2xl font-bold text-center bg-transparent border-b-2 border-primary/50 focus:border-primary outline-none"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Avg Strength</p>
-          </div>
-          <span className="text-xl text-muted-foreground">×</span>
-          
-          {/* Multiplier Input */}
-          <div className="p-3 rounded-xl bg-white/10 text-center">
-            <input
-              type="number"
-              step="0.01"
-              value={nsMultiplier}
-              onChange={(e) => setNsMultiplier(Math.max(0, parseFloat(e.target.value) || 0))}
-              className="w-16 text-2xl font-bold text-center bg-transparent border-b-2 border-primary/50 focus:border-primary outline-none"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Multiplier</p>
-          </div>
-          <span className="text-xl text-muted-foreground">=</span>
-          
-          {/* Calculated Score */}
-          <div className="p-3 rounded-xl bg-primary/30 text-center min-w-[100px]">
-            <p className="text-2xl font-bold text-primary">{networkScoreCalculated.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">Network Score</p>
-          </div>
-          <span className="text-xl text-muted-foreground">=</span>
-          
-          {/* Dynamic Avatar Result */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-white/10 border-2 border-primary/50">
-            <SolarSystem systemId={currentAvatar.id} size={72} />
-            <div className="text-left">
-              <p className="font-mono text-sm text-primary font-bold">{currentAvatar.id}</p>
-              <p className="text-sm font-medium">{avatarConfig?.name}</p>
-              <p className="text-xs text-muted-foreground">Tier {currentAvatar.tier} • {currentAvatar.planets} planet{currentAvatar.planets !== 1 ? 's' : ''}</p>
+          {/* Desktop: Single row formula | Mobile: Stacked grid */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-4 lg:gap-6 mb-6 sm:mb-8">
+            {/* Formula Inputs Group */}
+            <div className="flex items-center justify-center gap-2 sm:gap-4">
+              {/* Connections Input */}
+              <div className="p-3 sm:p-4 rounded-xl bg-white/10 backdrop-blur-sm text-center min-w-[80px] sm:min-w-[110px]">
+                <input
+                  type="number"
+                  value={nsConnections}
+                  onChange={(e) => setNsConnections(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-full text-xl sm:text-3xl font-bold text-center bg-transparent border-b-2 border-primary/50 focus:border-primary outline-none"
+                />
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5">Connections</p>
+              </div>
+              <span className="text-lg sm:text-2xl text-muted-foreground font-light">×</span>
+              
+              {/* Avg Strength Input */}
+              <div className="p-3 sm:p-4 rounded-xl bg-white/10 backdrop-blur-sm text-center min-w-[70px] sm:min-w-[90px]">
+                <input
+                  type="number"
+                  value={nsAvgStrength}
+                  onChange={(e) => setNsAvgStrength(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))}
+                  className="w-full text-xl sm:text-3xl font-bold text-center bg-transparent border-b-2 border-primary/50 focus:border-primary outline-none"
+                />
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5">Avg Strength</p>
+              </div>
+              <span className="text-lg sm:text-2xl text-muted-foreground font-light">×</span>
+              
+              {/* Multiplier Input */}
+              <div className="p-3 sm:p-4 rounded-xl bg-white/10 backdrop-blur-sm text-center min-w-[60px] sm:min-w-[80px]">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={nsMultiplier}
+                  onChange={(e) => setNsMultiplier(Math.max(0, parseFloat(e.target.value) || 0))}
+                  className="w-full text-xl sm:text-3xl font-bold text-center bg-transparent border-b-2 border-primary/50 focus:border-primary outline-none"
+                />
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5">Multiplier</p>
+              </div>
+            </div>
+            
+            {/* Equals & Results */}
+            <div className="flex items-center justify-center gap-3 sm:gap-4">
+              <span className="text-lg sm:text-2xl text-muted-foreground font-light">=</span>
+              
+              {/* Calculated Score */}
+              <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-br from-primary/40 to-primary/20 text-center min-w-[100px] sm:min-w-[120px] shadow-lg shadow-primary/20">
+                <p className="text-2xl sm:text-4xl font-bold text-primary">{networkScoreCalculated.toLocaleString()}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Network Score</p>
+              </div>
+              
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
+              
+              {/* Dynamic Avatar Result */}
+              <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white/10 backdrop-blur-sm border-2 border-primary/40 shadow-lg">
+                <div className="flex-shrink-0">
+                  <SolarSystem systemId={currentAvatar.id} size={72} />
+                </div>
+                <div className="text-left">
+                  <p className="font-mono text-sm sm:text-base text-primary font-bold">{currentAvatar.id}</p>
+                  <p className="text-sm sm:text-base font-medium">{avatarConfig?.name}</p>
+                  <p className="text-xs text-muted-foreground">Tier {currentAvatar.tier} • {currentAvatar.planets} planet{currentAvatar.planets !== 1 ? 's' : ''}</p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
         
-        {/* Quick Presets */}
-        <div className="flex flex-wrap gap-2 mb-6 justify-center">
-          <p className="text-sm text-muted-foreground mr-2 self-center">Quick presets:</p>
-          {[
-            { label: 'New User', connections: 10, strength: 30 },
-            { label: 'Active', connections: 50, strength: 45 },
-            { label: 'Networker', connections: 150, strength: 55 },
-            { label: 'Connector', connections: 500, strength: 60 },
-            { label: 'Super Connector', connections: 1500, strength: 65 },
-            { label: 'Network Leader', connections: 5000, strength: 70 },
-          ].map((preset) => (
-            <button
-              key={preset.label}
-              onClick={() => {
-                setNsConnections(preset.connections);
-                setNsAvgStrength(preset.strength);
-              }}
-              className="px-3 py-1.5 text-xs rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-primary/30 transition-all"
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
-        
-        {/* Avatar Tier Scale */}
-        <div className="border-t border-white/10 pt-4">
-          <p className="text-sm text-muted-foreground mb-3">Avatar Complexity Tiers (by Network Score):</p>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center text-xs">
-            {AVATAR_SCORE_THRESHOLDS.map((threshold) => {
-              const sampleAvatars: Record<number, string> = {
-                0: 'UXI8018', 1: 'UXI8001', 2: 'UXI8003', 
-                3: 'UXI8005', 4: 'UXI8006', 5: 'UXI8016'
-              };
-              return (
-                <div 
-                  key={threshold.tier} 
-                  className={`p-3 rounded-lg border transition-all ${
-                    currentAvatar.tier === threshold.tier 
-                      ? 'border-primary bg-primary/20 scale-105' 
-                      : 'border-white/10 bg-white/5'
-                  }`}
-                >
-                  <SolarSystem systemId={sampleAvatars[threshold.tier]} size={44} className="mx-auto mb-2" />
-                  <p className={`font-bold text-sm ${currentAvatar.tier === threshold.tier ? 'text-primary' : ''}`}>
-                    {threshold.label}
-                  </p>
-                  <p className="text-muted-foreground">
-                    {threshold.planets} planet{threshold.planets !== 1 ? 's' : ''}
-                  </p>
-                  <p className="text-muted-foreground opacity-60">
-                    Tier {threshold.tier}
-                  </p>
-                </div>
-              );
-            })}
+          {/* Quick Presets */}
+          <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8 justify-center items-center">
+            <p className="text-xs sm:text-sm text-muted-foreground w-full sm:w-auto text-center sm:text-left">Quick presets:</p>
+            {[
+              { label: 'New User', connections: 10, strength: 30 },
+              { label: 'Active', connections: 50, strength: 45 },
+              { label: 'Networker', connections: 150, strength: 55 },
+              { label: 'Connector', connections: 500, strength: 60 },
+              { label: 'Super Connector', connections: 1500, strength: 65 },
+              { label: 'Network Leader', connections: 5000, strength: 70 },
+            ].map((preset) => (
+              <button
+                key={preset.label}
+                onClick={() => {
+                  setNsConnections(preset.connections);
+                  setNsAvgStrength(preset.strength);
+                }}
+                className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg bg-white/5 border border-white/10 hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-all duration-200"
+              >
+                {preset.label}
+              </button>
+            ))}
           </div>
-        </div>
-        
-        {/* Formula explanation */}
-        <div className="mt-4 p-3 rounded-lg bg-white/5 text-xs text-muted-foreground">
-          <strong>Formula:</strong> Network Score = Connections × Average Connection Strength × Multiplier
-          <br />
-          <strong>Example:</strong> A user with {nsConnections.toLocaleString()} connections at {nsAvgStrength} avg strength = {networkScoreCalculated.toLocaleString()} score → <span className="text-primary font-medium">{currentAvatar.id}</span> ({currentAvatar.planets} planet avatar)
+          
+          {/* Avatar Tier Scale */}
+          <div className="border-t border-white/10 pt-6">
+            <p className="text-sm sm:text-base text-muted-foreground mb-4">Avatar Complexity Tiers (by Network Score):</p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 text-center">
+              {AVATAR_SCORE_THRESHOLDS.map((threshold) => {
+                const sampleAvatars: Record<number, string> = {
+                  0: 'UXI8018', 1: 'UXI8001', 2: 'UXI8003', 
+                  3: 'UXI8005', 4: 'UXI8006', 5: 'UXI8016'
+                };
+                const isActive = currentAvatar.tier === threshold.tier;
+                return (
+                  <div 
+                    key={threshold.tier} 
+                    className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 ${
+                      isActive 
+                        ? 'border-primary bg-primary/20 scale-105 shadow-lg shadow-primary/20' 
+                        : 'border-white/10 bg-white/5 hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="mx-auto mb-2">
+                    <SolarSystem systemId={sampleAvatars[threshold.tier]} size={44} />
+                  </div>
+                    <p className={`font-bold text-sm sm:text-base ${isActive ? 'text-primary' : ''}`}>
+                      {threshold.label}
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      {threshold.planets} planet{threshold.planets !== 1 ? 's' : ''}
+                    </p>
+                    <p className="text-xs text-muted-foreground opacity-60">
+                      Tier {threshold.tier}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Formula explanation */}
+          <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 text-xs sm:text-sm text-muted-foreground">
+            <p><strong className="text-foreground">Formula:</strong> Network Score = Connections × Average Strength × Multiplier</p>
+            <p className="mt-1"><strong className="text-foreground">Current:</strong> {nsConnections.toLocaleString()} × {nsAvgStrength} × {nsMultiplier} = <span className="text-primary font-bold">{networkScoreCalculated.toLocaleString()}</span> → <span className="text-primary font-medium">{currentAvatar.id}</span> ({currentAvatar.planets} planet{currentAvatar.planets !== 1 ? 's' : ''})</p>
+          </div>
         </div>
       </div>
 
       {/* SECTION 2: Strength Distribution */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Current Distribution ({mockContacts.length} contacts)</h2>
-        <div className="grid grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl border-2 border-yellow-500/30 bg-yellow-500/10 text-center">
-            <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-            <p className="text-3xl font-bold text-yellow-500">{distribution.star}</p>
-            <p className="text-sm text-muted-foreground">
+        <h2 className="text-base sm:text-lg font-semibold mb-4">Current Distribution ({mockContacts.length} contacts)</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="p-3 sm:p-4 rounded-xl border-2 border-yellow-500/30 bg-yellow-500/10 text-center">
+            <Star className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 mx-auto mb-2" />
+            <p className="text-2xl sm:text-3xl font-bold text-yellow-500">{distribution.star}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Star ({isEditMode && getFormula('thresholds', 'star_min') ? (
                 <EditableValue
                   formula={getFormula('thresholds', 'star_min')!}
@@ -517,10 +537,10 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               ) : starMin}-100)
             </p>
           </div>
-          <div className="p-4 rounded-xl border-2 border-green-500/30 bg-green-500/10 text-center">
-            <Flame className="w-8 h-8 text-green-500 mx-auto mb-2" />
-            <p className="text-3xl font-bold text-green-500">{distribution.flame}</p>
-            <p className="text-sm text-muted-foreground">
+          <div className="p-3 sm:p-4 rounded-xl border-2 border-green-500/30 bg-green-500/10 text-center">
+            <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 mx-auto mb-2" />
+            <p className="text-2xl sm:text-3xl font-bold text-green-500">{distribution.flame}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Flame ({isEditMode && getFormula('thresholds', 'flame_min') ? (
                 <EditableValue
                   formula={getFormula('thresholds', 'flame_min')!}
@@ -531,10 +551,10 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               ) : flameMin}-{starMin - 1})
             </p>
           </div>
-          <div className="p-4 rounded-xl border-2 border-primary/30 bg-primary/10 text-center">
-            <Sparkles className="w-8 h-8 text-primary mx-auto mb-2" />
-            <p className="text-3xl font-bold text-primary">{distribution.ember}</p>
-            <p className="text-sm text-muted-foreground">
+          <div className="p-3 sm:p-4 rounded-xl border-2 border-primary/30 bg-primary/10 text-center">
+            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary mx-auto mb-2" />
+            <p className="text-2xl sm:text-3xl font-bold text-primary">{distribution.ember}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Ember ({isEditMode && getFormula('thresholds', 'ember_min') ? (
                 <EditableValue
                   formula={getFormula('thresholds', 'ember_min')!}
@@ -545,37 +565,37 @@ const ConnectionStrengthAnalytics: React.FC = () => {
               ) : emberMin}-{flameMin - 1})
             </p>
           </div>
-          <div className="p-4 rounded-xl border-2 border-zinc-500/30 bg-zinc-500/10 text-center">
-            <CircleDot className="w-8 h-8 text-zinc-400 mx-auto mb-2" />
-            <p className="text-3xl font-bold text-zinc-400">{distribution.spark}</p>
-            <p className="text-sm text-muted-foreground">Spark (0-{emberMin - 1})</p>
+          <div className="p-3 sm:p-4 rounded-xl border-2 border-zinc-500/30 bg-zinc-500/10 text-center">
+            <CircleDot className="w-6 h-6 sm:w-8 sm:h-8 text-zinc-400 mx-auto mb-2" />
+            <p className="text-2xl sm:text-3xl font-bold text-zinc-400">{distribution.spark}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Spark (0-{emberMin - 1})</p>
           </div>
         </div>
       </div>
             
       {/* SECTION 3: Connection Strength Calculator */}
-      <div className="p-6 rounded-2xl border border-white/10 bg-card/40">
-        <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+      <div className="p-4 sm:p-6 rounded-2xl border border-white/10 bg-card/40">
+        <h2 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 flex items-center gap-2">
           <Calculator className="w-5 h-5" />
           Connection Strength Calculator
         </h2>
 
         {/* Factor 1: Path Progress */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium flex items-center gap-2">
-              <Route className="w-4 h-4 text-blue-500" />
-              1. Path Progress
-              <Badge variant="outline" className="ml-2 text-xs bg-blue-500/10 text-blue-500 border-blue-500/30">HIGHEST PRIORITY</Badge>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+              <Route className="w-4 h-4 text-blue-500 flex-shrink-0" />
+              <span>1. Path Progress</span>
+              <Badge variant="outline" className="hidden sm:inline-flex text-xs bg-blue-500/10 text-blue-500 border-blue-500/30">HIGHEST PRIORITY</Badge>
             </h3>
-            <Badge className="bg-blue-500/20 text-blue-500 border-blue-500/30 text-base px-3">
+            <Badge className="bg-blue-500/20 text-blue-500 border-blue-500/30 text-sm sm:text-base px-2 sm:px-3 self-start sm:self-auto">
               {pathScore.toFixed(1)} / {pathWeight} pts
             </Badge>
           </div>
           
-          <div className="space-y-4 pl-6 border-l-2 border-blue-500/30">
-            <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-4">
-              <p className="text-sm text-blue-400 font-medium">Relationship development through tier progression is the most valuable factor</p>
+          <div className="space-y-4 pl-3 sm:pl-6 border-l-2 border-blue-500/30">
+            <div className="p-3 sm:p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-4">
+              <p className="text-xs sm:text-sm text-blue-400 font-medium">Relationship development through tier progression is the most valuable factor</p>
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm">Current Tier (T{simCurrentTier})</span>
@@ -638,21 +658,21 @@ const ConnectionStrengthAnalytics: React.FC = () => {
         </div>
 
         {/* Factor 2: Engagement */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium flex items-center gap-2">
-              <Users className="w-4 h-4 text-primary" />
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+              <Users className="w-4 h-4 text-primary flex-shrink-0" />
               2. Engagement Score
             </h3>
-            <Badge className="bg-primary/20 text-primary border-primary/30 text-base px-3">
+            <Badge className="bg-primary/20 text-primary border-primary/30 text-sm sm:text-base px-2 sm:px-3 self-start sm:self-auto">
               {engagementScore} / {engagementWeight} pts
             </Badge>
           </div>
           
-          <div className="space-y-4 pl-6 border-l-2 border-primary/30">
+          <div className="space-y-4 pl-3 sm:pl-6 border-l-2 border-primary/30">
             {/* Positive factors */}
-            <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20">
-              <p className="text-sm font-medium text-green-500 mb-3 flex items-center gap-1">
+            <div className="p-3 sm:p-4 rounded-xl bg-green-500/5 border border-green-500/20">
+              <p className="text-xs sm:text-sm font-medium text-green-500 mb-3 flex items-center gap-1">
                 <Plus className="w-4 h-4" /> Positive Actions = +{engagementPositive}
               </p>
               
@@ -694,8 +714,8 @@ const ConnectionStrengthAnalytics: React.FC = () => {
             </div>
             
             {/* Negative factors */}
-            <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/20">
-              <p className="text-sm font-medium text-red-500 mb-3 flex items-center gap-1">
+            <div className="p-3 sm:p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+              <p className="text-xs sm:text-sm font-medium text-red-500 mb-3 flex items-center gap-1">
                 <Minus className="w-4 h-4" /> Negative Actions = {engagementNegative}
               </p>
               
@@ -763,34 +783,34 @@ const ConnectionStrengthAnalytics: React.FC = () => {
         </div>
 
         {/* Factor 3: Origin */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium flex items-center gap-2">
-              <Link2 className="w-4 h-4 text-green-500" />
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+              <Link2 className="w-4 h-4 text-green-500 flex-shrink-0" />
               3. Origin Score
             </h3>
-            <Badge className="bg-green-500/20 text-green-500 border-green-500/30 text-base px-3">
+            <Badge className="bg-green-500/20 text-green-500 border-green-500/30 text-sm sm:text-base px-2 sm:px-3 self-start sm:self-auto">
               {originScore} / {originWeight} pts
             </Badge>
           </div>
           
-          <div className="space-y-4 pl-6 border-l-2 border-green-500/30">
-            <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20">
-              <p className="text-sm text-muted-foreground mb-3">How was this contact added?</p>
+          <div className="space-y-4 pl-3 sm:pl-6 border-l-2 border-green-500/30">
+            <div className="p-3 sm:p-4 rounded-xl bg-green-500/5 border border-green-500/20">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3">How was this contact added?</p>
               
-              <div className="grid grid-cols-5 gap-2 mb-4">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
                 {(['invite', 'wizard', 'manual', 'import', 'unknown'] as const).map((type) => (
                   <button
                     key={type}
                     onClick={() => setSimOriginType(type)}
-                    className={`p-3 rounded-lg border text-center transition-all ${
+                    className={`p-2 sm:p-3 rounded-lg border text-center transition-all ${
                       simOriginType === type 
                         ? 'bg-green-500/20 border-green-500/50 text-green-500' 
                         : 'bg-white/5 border-white/10 hover:bg-white/10'
                     }`}
                   >
-                    <p className="text-lg font-bold">{originPointsScaled[type]}</p>
-                    <p className="text-xs capitalize">{type}</p>
+                    <p className="text-base sm:text-lg font-bold">{originPointsScaled[type]}</p>
+                    <p className="text-[10px] sm:text-xs capitalize">{type}</p>
                   </button>
                 ))}
               </div>
@@ -816,19 +836,19 @@ const ConnectionStrengthAnalytics: React.FC = () => {
         </div>
 
         {/* Factor 4: Network */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium flex items-center gap-2">
-              <Clock className="w-4 h-4 text-yellow-500" />
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+              <Clock className="w-4 h-4 text-yellow-500 flex-shrink-0" />
               4. Network Score
             </h3>
-            <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/30 text-base px-3">
+            <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/30 text-sm sm:text-base px-2 sm:px-3 self-start sm:self-auto">
               {networkScoreCalc} / {networkWeight} pts
             </Badge>
           </div>
           
-          <div className="space-y-4 pl-6 border-l-2 border-yellow-500/30">
-            <div className="p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/20 space-y-4">
+          <div className="space-y-4 pl-3 sm:pl-6 border-l-2 border-yellow-500/30">
+            <div className="p-3 sm:p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/20 space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm">Inviter's Strength (2-10 → scaled)</span>
@@ -898,42 +918,43 @@ const ConnectionStrengthAnalytics: React.FC = () => {
         </div>
 
         {/* TOTAL */}
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-500/20 to-transparent border border-blue-500/30">
-          <h3 className="font-medium mb-4">Total Connection Strength (Path-Prioritized)</h3>
+        <div className="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-500/20 to-transparent border border-blue-500/30">
+          <h3 className="font-medium mb-4 text-sm sm:text-base">Total Connection Strength</h3>
           
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <div className="px-4 py-2 rounded-lg bg-blue-500/20 text-blue-500 font-mono font-bold">
+          {/* Mobile: 2x2 grid + result, Desktop: inline flex */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3 mb-4">
+            <div className="px-3 sm:px-4 py-2 rounded-lg bg-blue-500/20 text-blue-500 font-mono font-bold text-center text-sm sm:text-base">
               {pathScore.toFixed(1)}
-              <span className="text-xs ml-1 opacity-70">path</span>
+              <span className="text-[10px] sm:text-xs ml-1 opacity-70">path</span>
             </div>
-            <span className="text-xl">+</span>
-            <div className="px-4 py-2 rounded-lg bg-primary/20 text-primary font-mono">
+            <span className="hidden sm:block text-xl">+</span>
+            <div className="px-3 sm:px-4 py-2 rounded-lg bg-primary/20 text-primary font-mono text-center text-sm sm:text-base">
               {engagementScore}
-              <span className="text-xs ml-1 opacity-70">eng</span>
+              <span className="text-[10px] sm:text-xs ml-1 opacity-70">eng</span>
             </div>
-            <span className="text-xl">+</span>
-            <div className="px-4 py-2 rounded-lg bg-green-500/20 text-green-500 font-mono">
+            <span className="hidden sm:block text-xl">+</span>
+            <div className="px-3 sm:px-4 py-2 rounded-lg bg-green-500/20 text-green-500 font-mono text-center text-sm sm:text-base">
               {originScore}
-              <span className="text-xs ml-1 opacity-70">ori</span>
+              <span className="text-[10px] sm:text-xs ml-1 opacity-70">ori</span>
             </div>
-            <span className="text-xl">+</span>
-            <div className="px-4 py-2 rounded-lg bg-yellow-500/20 text-yellow-500 font-mono">
+            <span className="hidden sm:block text-xl">+</span>
+            <div className="px-3 sm:px-4 py-2 rounded-lg bg-yellow-500/20 text-yellow-500 font-mono text-center text-sm sm:text-base">
               {networkScoreCalc}
-              <span className="text-xs ml-1 opacity-70">net</span>
+              <span className="text-[10px] sm:text-xs ml-1 opacity-70">net</span>
             </div>
-            <span className="text-xl">=</span>
-            <div className="px-6 py-3 rounded-xl bg-white/10 font-bold text-2xl">
+            <span className="hidden sm:block text-xl">=</span>
+            <div className="col-span-2 sm:col-span-1 px-4 sm:px-6 py-3 rounded-xl bg-white/10 font-bold text-xl sm:text-2xl text-center">
               {totalScore.toFixed(1)}
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <span className="text-muted-foreground">Strength Level:</span>
-            <Badge className={`${getStrengthBadgeClass(simulatedStrength)} text-lg px-4 py-2 capitalize`}>
-              {simulatedStrength === 'star' && <Star className="w-4 h-4 mr-2" />}
-              {simulatedStrength === 'flame' && <Flame className="w-4 h-4 mr-2" />}
-              {simulatedStrength === 'ember' && <Sparkles className="w-4 h-4 mr-2" />}
-              {simulatedStrength === 'spark' && <CircleDot className="w-4 h-4 mr-2" />}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+            <span className="text-muted-foreground text-sm">Strength Level:</span>
+            <Badge className={`${getStrengthBadgeClass(simulatedStrength)} text-sm sm:text-lg px-3 sm:px-4 py-1.5 sm:py-2 capitalize`}>
+              {simulatedStrength === 'star' && <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />}
+              {simulatedStrength === 'flame' && <Flame className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />}
+              {simulatedStrength === 'ember' && <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />}
+              {simulatedStrength === 'spark' && <CircleDot className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />}
               {simulatedStrength}
             </Badge>
           </div>
@@ -942,21 +963,21 @@ const ConnectionStrengthAnalytics: React.FC = () => {
       
       {/* SECTION 4: Sample Contacts Data */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Sample Contact Data ({sortedContacts.length} contacts)</h2>
+        <h2 className="text-base sm:text-lg font-semibold mb-4">Sample Contact Data ({sortedContacts.length} contacts)</h2>
         
         <div className="rounded-xl border border-white/10 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <table className="w-full text-xs sm:text-sm min-w-[640px]">
               <thead className="bg-white/5">
                 <tr>
-                  <th className="text-left py-3 px-4 font-medium">#</th>
-                  <th className="text-left py-3 px-4 font-medium">Contact</th>
-                  <th className="text-right py-3 px-4 font-medium text-primary">Engagement</th>
-                  <th className="text-right py-3 px-4 font-medium text-green-500">Origin</th>
-                  <th className="text-right py-3 px-4 font-medium text-yellow-500">Network</th>
-                  <th className="text-right py-3 px-4 font-medium text-blue-500">Path</th>
-                  <th className="text-right py-3 px-4 font-medium">Total</th>
-                  <th className="text-center py-3 px-4 font-medium">Strength</th>
+                  <th className="text-left py-2 sm:py-3 px-2 sm:px-4 font-medium">#</th>
+                  <th className="text-left py-2 sm:py-3 px-2 sm:px-4 font-medium">Contact</th>
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium text-primary">Eng</th>
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium text-green-500">Ori</th>
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium text-yellow-500">Net</th>
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium text-blue-500">Path</th>
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium">Total</th>
+                  <th className="text-center py-2 sm:py-3 px-2 sm:px-4 font-medium">Str</th>
                 </tr>
               </thead>
               <tbody>
@@ -964,24 +985,24 @@ const ConnectionStrengthAnalytics: React.FC = () => {
                   const { engagement, origin, network, path, total, strength } = contact.scoreBreakdown;
                   return (
                     <tr key={contact.id} className="border-t border-white/5 hover:bg-white/5">
-                      <td className="py-3 px-4 text-muted-foreground">{index + 1}</td>
-                      <td className="py-3 px-4">
-                          <p className="font-medium">{contact.name}</p>
-                          <p className="text-xs text-muted-foreground">{contact.email}</p>
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-muted-foreground">{index + 1}</td>
+                      <td className="py-2 sm:py-3 px-2 sm:px-4">
+                          <p className="font-medium truncate max-w-[100px] sm:max-w-none">{contact.name}</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[100px] sm:max-w-none">{contact.email}</p>
                       </td>
-                      <td className="py-3 px-4 text-right font-mono">
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right font-mono">
                         <span className="text-primary">{engagement.score.toFixed(0)}</span>
-                        <span className="text-xs text-muted-foreground ml-1">
+                        <span className="hidden sm:inline text-xs text-muted-foreground ml-1">
                           (<span className="text-green-500">+{engagement.positivePoints}</span>
                           <span className="text-red-500">{engagement.negativePoints}</span>)
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right font-mono text-green-500">{origin.score}</td>
-                      <td className="py-3 px-4 text-right font-mono text-yellow-500">{network.score}</td>
-                      <td className="py-3 px-4 text-right font-mono text-blue-500">{path.score.toFixed(0)}</td>
-                      <td className="py-3 px-4 text-right font-mono font-bold">{total.toFixed(0)}</td>
-                      <td className="py-3 px-4 text-center">
-                        <Badge className={`${getStrengthBadgeClass(strength)} capitalize`}>
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right font-mono text-green-500">{origin.score}</td>
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right font-mono text-yellow-500">{network.score}</td>
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right font-mono text-blue-500">{path.score.toFixed(0)}</td>
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right font-mono font-bold">{total.toFixed(0)}</td>
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-center">
+                        <Badge className={`${getStrengthBadgeClass(strength)} capitalize text-[10px] sm:text-xs px-1.5 sm:px-2`}>
                           {strength}
                         </Badge>
                       </td>
@@ -994,85 +1015,84 @@ const ConnectionStrengthAnalytics: React.FC = () => {
         </div>
         
         {/* Averages */}
-        <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
-          <h3 className="font-medium mb-3">Averages Across All Contacts</h3>
-          <div className="grid grid-cols-5 gap-4 text-center">
+        <div className="mt-4 p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10">
+          <h3 className="font-medium mb-3 text-sm sm:text-base">Averages Across All Contacts</h3>
+          <div className="grid grid-cols-5 gap-2 sm:gap-4 text-center">
             <div>
-              <p className="text-xl font-bold text-primary">{averages.engagement}</p>
-              <p className="text-xs text-muted-foreground">Engagement</p>
+              <p className="text-base sm:text-xl font-bold text-primary">{averages.engagement}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Eng</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-green-500">{averages.origin}</p>
-              <p className="text-xs text-muted-foreground">Origin</p>
+              <p className="text-base sm:text-xl font-bold text-green-500">{averages.origin}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Ori</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-yellow-500">{averages.network}</p>
-              <p className="text-xs text-muted-foreground">Network</p>
+              <p className="text-base sm:text-xl font-bold text-yellow-500">{averages.network}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Net</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-blue-500">{averages.path}</p>
-              <p className="text-xs text-muted-foreground">Path</p>
+              <p className="text-base sm:text-xl font-bold text-blue-500">{averages.path}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Path</p>
             </div>
             <div>
-              <p className="text-xl font-bold">{averages.total}</p>
-              <p className="text-xs text-muted-foreground">Total Avg</p>
+              <p className="text-base sm:text-xl font-bold">{averages.total}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Avg</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* SECTION 5: Formula Reference */}
-      <div className="p-6 rounded-2xl border border-white/10 bg-card/40">
-        <h2 className="text-lg font-semibold mb-4">Quick Formula Reference (Path-Prioritized)</h2>
+      <div className="p-4 sm:p-6 rounded-2xl border border-white/10 bg-card/40">
+        <h2 className="text-base sm:text-lg font-semibold mb-4">Quick Formula Reference</h2>
         
-        <div className="space-y-4 text-sm">
-          <div className="grid grid-cols-4 gap-4">
-            <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <p className="font-medium text-blue-500 mb-2">⭐ Path ({pathWeight} max)</p>
-              <p className="text-xs space-y-1">
-                <span className="block text-green-500">+{tierMultiplier} per tier level</span>
-                <span className="block text-green-500">+{completedPathPoints} completed path</span>
-                <span className="block text-red-500">{skippedPathPenalty} skipped path</span>
+        <div className="space-y-4 text-xs sm:text-sm">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="p-2 sm:p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <p className="font-medium text-blue-500 mb-2 text-xs sm:text-sm">⭐ Path ({pathWeight})</p>
+              <p className="text-[10px] sm:text-xs space-y-1">
+                <span className="block text-green-500">+{tierMultiplier}/tier</span>
+                <span className="block text-green-500">+{completedPathPoints} completed</span>
+                <span className="block text-red-500">{skippedPathPenalty} skipped</span>
               </p>
-              <p className="text-xs mt-2 text-blue-400 font-medium">Highest priority!</p>
+              <p className="text-[10px] sm:text-xs mt-2 text-blue-400 font-medium">Highest priority!</p>
             </div>
             
-            <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-              <p className="font-medium text-primary mb-2">Engagement ({engagementWeight} max)</p>
-              <p className="text-xs space-y-1">
-                <span className="block text-green-500">+{calendarAcceptsPoints} calendar accept</span>
-                <span className="block text-green-500">+{fastResponsePoints} fast response</span>
+            <div className="p-2 sm:p-3 rounded-lg bg-primary/10 border border-primary/20">
+              <p className="font-medium text-primary mb-2 text-xs sm:text-sm">Engagement ({engagementWeight})</p>
+              <p className="text-[10px] sm:text-xs space-y-1">
+                <span className="block text-green-500">+{calendarAcceptsPoints} calendar</span>
+                <span className="block text-green-500">+{fastResponsePoints} fast resp</span>
                 <span className="block text-red-500">{ignoredPenalty} ignored</span>
                 <span className="block text-red-500">{declinePenalty} decline</span>
                 <span className="block text-red-500">{gapPenalty} gap</span>
               </p>
             </div>
             
-            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-              <p className="font-medium text-green-500 mb-2">Origin ({originWeight} max)</p>
-              <p className="text-xs space-y-1">
+            <div className="p-2 sm:p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+              <p className="font-medium text-green-500 mb-2 text-xs sm:text-sm">Origin ({originWeight})</p>
+              <p className="text-[10px] sm:text-xs space-y-1">
                 <span className="block">Invite: {invitePoints}</span>
                 <span className="block">Wizard: {wizardPoints}</span>
                 <span className="block">Manual: {manualPoints}</span>
                 <span className="block">Import: {importPoints}</span>
-                <span className="block">Unknown: {unknownPoints}</span>
-                <span className="block text-green-500">+{inviterBonus} has inviter</span>
+                <span className="block text-green-500">+{inviterBonus} inviter</span>
               </p>
             </div>
             
-            <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-              <p className="font-medium text-yellow-500 mb-2">Network ({networkWeight} max)</p>
-              <p className="text-xs space-y-1">
-                <span className="block">+{sharedContactsMultiplier}/shared contact</span>
-                <span className="block">+{affiliationsMultiplier}/affiliation</span>
+            <div className="p-2 sm:p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+              <p className="font-medium text-yellow-500 mb-2 text-xs sm:text-sm">Network ({networkWeight})</p>
+              <p className="text-[10px] sm:text-xs space-y-1">
+                <span className="block">+{sharedContactsMultiplier}/contact</span>
+                <span className="block">+{affiliationsMultiplier}/affil</span>
                 <span className="block">+{communitiesMultiplier}/community</span>
               </p>
             </div>
           </div>
           
-          <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-            <p className="font-medium mb-2">Strength Thresholds</p>
-            <div className="flex items-center gap-4 text-xs">
+          <div className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10">
+            <p className="font-medium mb-2 text-xs sm:text-sm">Strength Thresholds</p>
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-4 text-[10px] sm:text-xs">
               <span className="text-yellow-500">★ Star: {starMin}+</span>
               <span className="text-green-500">🔥 Flame: {flameMin}-{starMin - 1}</span>
               <span className="text-primary">✨ Ember: {emberMin}-{flameMin - 1}</span>
