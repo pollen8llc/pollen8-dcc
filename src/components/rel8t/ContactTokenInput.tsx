@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Search, User } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UnifiedAvatar } from "@/components/ui/unified-avatar";
 import { cn } from "@/lib/utils";
 import { getContacts, Contact } from "@/services/rel8t/contactService";
 import { useQuery } from "@tanstack/react-query";
@@ -92,15 +92,6 @@ export function ContactTokenInput({
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const getDisplayName = (contact: Contact) => {
     return contact.name || contact.email || "Unknown Contact";
   };
@@ -123,11 +114,11 @@ export function ContactTokenInput({
             variant="secondary"
             className="flex items-center gap-1.5 py-1 px-2 bg-primary/10 hover:bg-primary/20 border border-primary/20"
           >
-            <Avatar className="h-5 w-5">
-              <AvatarFallback className="text-[10px] bg-primary/20">
-                {getInitials(getDisplayName(contact))}
-              </AvatarFallback>
-            </Avatar>
+            <UnifiedAvatar 
+              userId={contact.id} 
+              size={20} 
+              isContactId={true}
+            />
             <span className="text-sm max-w-[120px] truncate">
               {getDisplayName(contact)}
             </span>
@@ -194,11 +185,11 @@ export function ContactTokenInput({
                   index === highlightedIndex && "bg-primary/10"
                 )}
               >
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary/20 text-xs">
-                    {getInitials(getDisplayName(contact))}
-                  </AvatarFallback>
-                </Avatar>
+                <UnifiedAvatar 
+                  userId={contact.id} 
+                  size={32} 
+                  isContactId={true}
+                />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
                     {getDisplayName(contact)}
