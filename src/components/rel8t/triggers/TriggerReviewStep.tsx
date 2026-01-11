@@ -31,6 +31,10 @@ interface TriggerReviewStepProps {
   onPrevious: () => void;
   isSubmitting: boolean;
   onUpdatePriority?: (priority: string) => void;
+  actv8StepData?: {
+    stepName: string;
+    pathName: string;
+  } | null;
 }
 
 const channelIcons: Record<string, React.ReactNode> = {
@@ -71,7 +75,8 @@ export function TriggerReviewStep({
   onSubmit, 
   onPrevious,
   isSubmitting,
-  onUpdatePriority
+  onUpdatePriority,
+  actv8StepData
 }: TriggerReviewStepProps) {
   const [createOutreach, setCreateOutreach] = useState(false);
   const [showActivationDialog, setShowActivationDialog] = useState(false);

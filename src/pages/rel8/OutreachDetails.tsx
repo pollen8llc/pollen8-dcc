@@ -479,7 +479,7 @@ export default function OutreachDetails() {
           {outreach.status !== 'completed' && (
             <Button
               variant="outline"
-              onClick={() => navigate(`/rel8/wizard?mode=edit&id=${id}`)}
+              onClick={() => navigate(`/rel8/triggers/wizard?mode=edit&id=${id}`)}
               className="flex items-center gap-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all"
             >
               <Edit className="h-4 w-4" />
