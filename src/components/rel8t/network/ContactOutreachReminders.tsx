@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getTriggersByContactId, Trigger } from "@/services/rel8t/triggerService";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,14 +40,52 @@ export function ContactOutreachReminders({
   linkedOutreaches
 }: ContactOutreachRemindersProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"outreach" | "reminders">("outreach");
 
   // Fetch reminders/triggers for this contact
-  const { data: triggers = [], isLoading: triggersLoading } = useQuery({
+  const { data: triggers = [], isLoading: triggersLoading, refetch: refetchTriggers } = useQuery({
     queryKey: ['contact-triggers', contactId],
     queryFn: () => getTriggersByContactId(contactId),
     enabled: !!contactId,
+    refetchOnMount: true,
+    staleTime: 0
   });
+
+  // Real-time subscription for trigger updates
+  useEffect(() => {
+    if (!contactId) return;
+
+    const channel = supabase
+      .channel(`contact-triggers-${contactId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rms_triggers'
+        },
+        () => {
+          refetchTriggers();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rms_trigger_contacts'
+        },
+        () => {
+          refetchTriggers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [contactId, refetchTriggers]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {

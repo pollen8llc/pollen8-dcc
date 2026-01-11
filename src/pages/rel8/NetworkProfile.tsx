@@ -82,7 +82,8 @@ export default function NetworkProfile() {
 
   // Fetch outreaches - filter by current path INSTANCE for proper isolation
   const {
-    data: linkedOutreaches = []
+    data: linkedOutreaches = [],
+    refetch: refetchOutreaches
   } = useQuery({
     queryKey: ['actv8-outreaches', id, actv8Contact?.current_path_instance_id],
     queryFn: async () => {
@@ -96,8 +97,45 @@ export default function NetworkProfile() {
         outreach: o
       }));
     },
-    enabled: !!id && !!actv8Contact
+    enabled: !!id && !!actv8Contact,
+    refetchOnMount: true,
+    staleTime: 0
   });
+
+  // Real-time subscription for outreach updates
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel(`actv8-outreach-profile-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rms_outreach'
+        },
+        () => {
+          refetchOutreaches();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rms_triggers'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['contact-triggers'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, refetchOutreaches, queryClient]);
 
   // Use advanceToPath which properly creates path instances
   const updatePathMutation = useMutation({
