@@ -455,3 +455,47 @@ export const getTriggerStatsByType = async () => {
     };
   }
 };
+
+export const getTriggersByContactId = async (contactId: string): Promise<Trigger[]> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.warn("getTriggersByContactId called without authenticated user");
+      return [];
+    }
+
+    // First get trigger IDs associated with this contact
+    const { data: triggerContacts, error: junctionError } = await supabase
+      .from("rms_trigger_contacts")
+      .select("trigger_id")
+      .eq("contact_id", contactId);
+
+    if (junctionError) throw junctionError;
+    
+    if (!triggerContacts || triggerContacts.length === 0) {
+      return [];
+    }
+
+    const triggerIds = triggerContacts.map(tc => tc.trigger_id);
+
+    // Now fetch the full trigger data
+    const { data, error } = await supabase
+      .from("rms_triggers")
+      .select("*")
+      .in("id", triggerIds)
+      .eq("user_id", user.id)
+      .order("next_execution_at", { ascending: true });
+
+    if (error) throw error;
+    
+    return ((data || []).map((trigger: any) => ({
+      ...trigger,
+      condition: JSON.stringify(trigger.condition || {}),
+      recurrence_pattern: trigger.recurrence_pattern as RecurrencePattern
+    })) as Trigger[]);
+  } catch (error: any) {
+    console.error("Error fetching triggers for contact:", error);
+    return [];
+  }
+};
