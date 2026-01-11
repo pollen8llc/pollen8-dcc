@@ -1,17 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { 
-  Bell, 
-  User, 
-  Building2, 
+  Calendar, 
   ArrowRight,
-  UserPlus,
-  Mail,
-  Calendar,
-  MessageSquare,
+  CheckCircle,
+  XCircle,
+  HelpCircle,
+  Clock,
+  Ban,
   X
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,50 +19,59 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
-interface Notification {
+interface SyncLogEntry {
   id: string;
-  title: string;
-  message: string;
-  notification_type: string;
-  is_read: boolean;
+  outreach_id: string;
+  sync_type: string;
+  changes: Record<string, any> | null;
+  email_from: string | null;
+  email_subject: string | null;
   created_at: string;
-  metadata: Record<string, any> | null;
+  outreach: {
+    id: string;
+    title: string;
+    due_date: string;
+  } | null;
 }
 
 const NotificationShortlist = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: notifications, isLoading, refetch } = useQuery({
-    queryKey: ["dashboard-notifications-shortlist"],
+  const { data: syncLogs = [], isLoading, refetch } = useQuery({
+    queryKey: ["outreach-sync-logs-shortlist"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) return [];
 
       const { data, error } = await supabase
-        .from("cross_platform_notifications")
-        .select("*")
+        .from("rms_outreach_sync_log")
+        .select(`
+          *,
+          outreach:rms_outreach(id, title, due_date)
+        `)
         .eq("user_id", user.id)
+        .in("sync_type", ["accepted", "declined", "tentative", "rescheduled", "cancelled"])
         .order("created_at", { ascending: false })
         .limit(8);
 
       if (error) throw error;
-      return data as Notification[];
+      return (data || []) as SyncLogEntry[];
     },
     refetchOnMount: true,
     staleTime: 0
   });
 
-  // Real-time subscription
+  // Real-time subscription for sync log updates
   useEffect(() => {
     const channel = supabase
-      .channel('dashboard-notifications-updates')
+      .channel('sync-log-shortlist-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'cross_platform_notifications'
+          table: 'rms_outreach_sync_log'
         },
         () => refetch()
       )
@@ -74,85 +82,100 @@ const NotificationShortlist = () => {
     };
   }, [refetch]);
 
-  const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
-
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "invite_contact":
-        return UserPlus;
-      case "email":
-        return Mail;
-      case "calendar":
-        return Calendar;
-      case "message":
-        return MessageSquare;
+  const getSyncIcon = (syncType: string) => {
+    switch (syncType) {
+      case "accepted":
+        return CheckCircle;
+      case "declined":
+        return XCircle;
+      case "tentative":
+        return HelpCircle;
+      case "rescheduled":
+        return Clock;
+      case "cancelled":
+        return Ban;
       default:
-        return Bell;
+        return Calendar;
     }
   };
 
-  const getReference = (notification: Notification) => {
-    const metadata = notification.metadata;
-    if (!metadata) return null;
-    
-    if (metadata.contactName || metadata.contact_name) {
-      return { type: 'contact', name: metadata.contactName || metadata.contact_name };
+  const getSyncIconColor = (syncType: string) => {
+    switch (syncType) {
+      case "accepted":
+        return "text-green-500";
+      case "declined":
+      case "cancelled":
+        return "text-red-500";
+      case "tentative":
+        return "text-yellow-500";
+      case "rescheduled":
+        return "text-blue-500";
+      default:
+        return "text-muted-foreground";
     }
-    if (metadata.userName || metadata.user_name) {
-      return { type: 'user', name: metadata.userName || metadata.user_name };
+  };
+
+  const getSyncTitle = (syncType: string) => {
+    switch (syncType) {
+      case "accepted":
+        return "Meeting Accepted";
+      case "declined":
+        return "Meeting Declined";
+      case "tentative":
+        return "Tentative Response";
+      case "rescheduled":
+        return "Meeting Rescheduled";
+      case "cancelled":
+        return "Meeting Cancelled";
+      default:
+        return "Calendar Update";
     }
-    if (metadata.communityName || metadata.community_name) {
-      return { type: 'community', name: metadata.communityName || metadata.community_name };
+  };
+
+  const getResponder = (entry: SyncLogEntry): string | null => {
+    if (entry.changes?.responder?.email) {
+      return entry.changes.responder.email;
+    }
+    if (entry.email_from) {
+      return entry.email_from;
     }
     return null;
   };
 
-  // Delete notification mutation
-  const deleteNotificationMutation = useMutation({
-    mutationFn: async (notificationId: string) => {
+  // Delete sync log mutation
+  const deleteSyncLogMutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("cross_platform_notifications")
+        .from("rms_outreach_sync_log")
         .delete()
-        .eq("id", notificationId);
-
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast({
-        title: "Notification cleared",
+        title: "Response cleared",
       });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-notifications-shortlist"] });
-      queryClient.invalidateQueries({ queryKey: ["cross-platform-notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["unread-notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["outreach-sync-logs-shortlist"] });
+      queryClient.invalidateQueries({ queryKey: ["outreach-sync-logs"] });
     },
     onError: (error) => {
       toast({
-        title: "Failed to clear notification",
+        title: "Failed to clear response",
         description: error.message,
         variant: "destructive"
       });
     }
   });
 
-  const handleNotificationClick = async (notification: Notification) => {
-    // Mark as read if unread
-    if (!notification.is_read) {
-      await supabase
-        .from("cross_platform_notifications")
-        .update({ is_read: true })
-        .eq("id", notification.id);
-      
-      queryClient.invalidateQueries({ queryKey: ["dashboard-notifications-shortlist"] });
-      queryClient.invalidateQueries({ queryKey: ["unread-notifications"] });
+  const handleEntryClick = (entry: SyncLogEntry) => {
+    if (entry.outreach_id) {
+      navigate(`/rel8/outreach/${entry.outreach_id}`);
     }
-    
-    // Navigate to notifications page
-    navigate("/rel8/notifications");
   };
 
-  const handleDeleteNotification = (e: React.MouseEvent, notificationId: string) => {
+  const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    deleteNotificationMutation.mutate(notificationId);
+    deleteSyncLogMutation.mutate(id);
   };
 
   if (isLoading) {
@@ -161,14 +184,14 @@ const NotificationShortlist = () => {
         <CardContent className="p-6">
           <div className="flex items-center justify-center gap-3">
             <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <span className="text-muted-foreground">Loading notifications...</span>
+            <span className="text-muted-foreground">Loading calendar responses...</span>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (!notifications || notifications.length === 0) {
+  if (!syncLogs || syncLogs.length === 0) {
     return null;
   }
 
@@ -184,17 +207,17 @@ const NotificationShortlist = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="relative w-12 h-12 flex-shrink-0 rounded-full bg-primary/10 flex items-center justify-center">
-                <Bell className="w-6 h-6 text-primary" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold flex items-center justify-center">
-                    {unreadCount > 9 ? "9+" : unreadCount}
+                <Calendar className="w-6 h-6 text-primary" />
+                {syncLogs.length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                    {syncLogs.length > 9 ? "9+" : syncLogs.length}
                   </span>
                 )}
               </div>
               <div>
-                <CardTitle className="text-xl font-bold">Recent Notifications</CardTitle>
+                <CardTitle className="text-xl font-bold">Calendar Responses</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {unreadCount > 0 ? `${unreadCount} unread` : "All caught up!"}
+                  Recent meeting invite responses
                 </p>
               </div>
             </div>
@@ -213,14 +236,14 @@ const NotificationShortlist = () => {
         <CardContent className="pt-0">
           <div className="space-y-2">
             <AnimatePresence mode="popLayout">
-              {notifications.map((notification, index) => {
-                const Icon = getNotificationIcon(notification.notification_type);
-                const reference = getReference(notification);
-                const ReferenceIcon = reference?.type === 'community' ? Building2 : User;
+              {syncLogs.map((entry, index) => {
+                const Icon = getSyncIcon(entry.sync_type);
+                const iconColor = getSyncIconColor(entry.sync_type);
+                const responder = getResponder(entry);
 
                 return (
                   <motion.div
-                    key={notification.id}
+                    key={entry.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20, height: 0 }}
@@ -229,58 +252,44 @@ const NotificationShortlist = () => {
                   >
                     <div
                       className={cn(
-                        "w-full rounded-xl border-2 overflow-hidden transition-all duration-300 text-left group",
-                        "hover:bg-muted/30",
-                        notification.is_read
-                          ? "bg-card/40 border-border/50"
-                          : "bg-primary/5 border-primary/30"
+                        "w-full rounded-xl border-2 overflow-hidden transition-all duration-300 text-left group cursor-pointer",
+                        "hover:bg-muted/30 bg-card/40 border-border/50"
                       )}
+                      onClick={() => handleEntryClick(entry)}
                     >
                       <div className="px-4 py-3 flex items-center gap-4">
                         {/* Icon */}
-                        <button
-                          onClick={() => handleNotificationClick(notification)}
+                        <div
                           className={cn(
-                            "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
-                            notification.is_read
-                              ? "bg-muted/50 text-muted-foreground"
-                              : "bg-primary/20 text-primary"
+                            "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-muted/50"
                           )}
                         >
-                          <Icon className="w-5 h-5" />
-                        </button>
+                          <Icon className={cn("w-5 h-5", iconColor)} />
+                        </div>
 
-                        {/* Content - clickable */}
-                        <button
-                          onClick={() => handleNotificationClick(notification)}
-                          className="flex-1 min-w-0 text-left"
-                        >
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 text-left">
                           <div className="flex items-center gap-2">
-                            <h4 className={cn(
-                              "font-semibold text-sm truncate",
-                              notification.is_read && "text-muted-foreground"
-                            )}>
-                              {notification.title}
+                            <h4 className="font-semibold text-sm truncate">
+                              {getSyncTitle(entry.sync_type)}
                             </h4>
-                            {!notification.is_read && (
-                              <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
-                            )}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                            {notification.message}
-                          </p>
-                        </button>
+                          {entry.outreach?.title && (
+                            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                              {entry.outreach.title}
+                            </p>
+                          )}
+                        </div>
 
                         {/* Metadata */}
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {reference && (
-                            <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
-                              <ReferenceIcon className="w-3 h-3" />
-                              <span className="max-w-[80px] truncate">{reference.name}</span>
-                            </div>
+                          {responder && (
+                            <span className="hidden sm:block text-xs text-muted-foreground max-w-[120px] truncate">
+                              {responder}
+                            </span>
                           )}
                           <span className="text-xs text-muted-foreground">
-                            {format(new Date(notification.created_at), "MMM d")}
+                            {format(new Date(entry.created_at), "MMM d")}
                           </span>
                           
                           {/* Delete button */}
@@ -288,8 +297,8 @@ const NotificationShortlist = () => {
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            onClick={(e) => handleDeleteNotification(e, notification.id)}
-                            disabled={deleteNotificationMutation.isPending}
+                            onClick={(e) => handleDelete(e, entry.id)}
+                            disabled={deleteSyncLogMutation.isPending}
                           >
                             <X className="h-4 w-4" />
                           </Button>
