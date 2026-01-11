@@ -179,8 +179,7 @@ export function ContactActivationDialog({
             Contact Activation Required
           </DialogTitle>
           <DialogDescription>
-            Creating an outreach task requires each target contact to be
-            activated in Actv8 for tracking and feedback.
+            Outreach tasks require activated contacts for tracking.
           </DialogDescription>
         </DialogHeader>
 
@@ -208,9 +207,8 @@ export function ContactActivationDialog({
         </div>
 
         {!isLoadingStatuses && inactiveCount > 0 && (
-          <p className="text-sm text-muted-foreground">
-            {inactiveCount} contact{inactiveCount > 1 ? "s" : ""} not activated.
-            You can still continue, but tracking may be limited.
+          <p className="text-xs text-muted-foreground">
+            {inactiveCount} inactive — you can still continue.
           </p>
         )}
 
