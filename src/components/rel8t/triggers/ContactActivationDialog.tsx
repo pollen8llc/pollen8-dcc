@@ -184,7 +184,7 @@ export function ContactActivationDialog({
                   Activate Contacts
                 </DialogTitle>
                 <DialogDescription className="text-xs leading-relaxed">
-                  Outreach tasks require contacts to be activated for tracking.
+                  Outreach tasks require contacts to be activated for engagement tracking and reminders.
                 </DialogDescription>
               </DialogHeader>
             </div>
