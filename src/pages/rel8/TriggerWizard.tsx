@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FollowUpChannelStep } from "@/components/rel8t/triggers/FollowUpChannelStep";
+import { ContactTokenInput } from "@/components/rel8t/ContactTokenInput";
 
 type FlipState = 'none' | 'date' | 'time';
 
@@ -135,7 +136,7 @@ const TriggerWizard = () => {
   };
 
   const canProceed = () => {
-    return formData.name.trim() !== "" && formData.triggerDate !== null;
+    return formData.selectedContacts.length > 0 && formData.triggerDate !== null;
   };
 
   const inputClassName = "bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all";
@@ -208,19 +209,16 @@ const TriggerWizard = () => {
                           <p className="text-sm text-muted-foreground mt-1">Configure when and how often to be reminded</p>
                         </div>
 
-                        {/* Reminder Name */}
+                        {/* Target Contacts */}
                         <div className="space-y-2">
-                          <Label htmlFor="name" className="text-sm font-medium text-foreground/70 pl-2">
-                            Reminder Name <span className="text-destructive">*</span>
+                          <Label className="text-sm font-medium text-foreground/70 pl-2">
+                            Target Contacts <span className="text-destructive">*</span>
                           </Label>
-                          <Input
-                            id="name"
-                            type="text"
-                            placeholder="e.g., Weekly Check-in, Birthday Reminder"
-                            value={formData.name}
-                            onChange={(e) => updateFormData({ name: e.target.value })}
+                          <ContactTokenInput
+                            selectedContacts={formData.selectedContacts}
+                            onContactsChange={(contacts) => updateFormData({ selectedContacts: contacts })}
+                            placeholder="Search and add contacts..."
                             required
-                            className={inputClassName}
                           />
                         </div>
 
@@ -382,7 +380,7 @@ const TriggerWizard = () => {
                       ) : (
                         <Button
                           type="submit"
-                          disabled={!formData.name.trim() || (formData.outreachChannel && !isChannelDetailsValid())}
+                          disabled={formData.selectedContacts.length === 0 || (formData.outreachChannel && !isChannelDetailsValid())}
                           className="backdrop-blur-sm shadow-lg"
                         >
                           <Check className="w-4 h-4 mr-2" />

@@ -35,6 +35,21 @@ export interface RecurrencePattern {
   [key: string]: any;    // Add index signature to match Json type
 }
 
+export interface TriggerContact {
+  id: string;
+  trigger_id: string;
+  contact_id: string;
+  created_at: string;
+  contact?: {
+    id: string;
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    avatar_url?: string;
+    organization?: string;
+  };
+}
+
 export interface Trigger {
   id: string;
   user_id: string;
@@ -53,6 +68,7 @@ export interface Trigger {
   calendar_event_uid?: string;
   outreach_channel?: string;
   channel_details?: Record<string, any>;
+  contacts?: TriggerContact[];
 }
 
 export interface TriggerStats {
@@ -128,7 +144,10 @@ export const getTrigger = async (id: string): Promise<Trigger | null> => {
   }
 };
 
-export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "created_at" | "updated_at" | "system_email" | "calendar_event_uid">): Promise<{ trigger: Trigger; icsContent: string } | null> => {
+export const createTrigger = async (
+  trigger: Omit<Trigger, "id" | "user_id" | "created_at" | "updated_at" | "system_email" | "calendar_event_uid" | "contacts">,
+  contactIds?: string[]
+): Promise<{ trigger: Trigger; icsContent: string } | null> => {
   try {
     // Get the current user's ID
     const { data: { user } } = await supabase.auth.getUser();
@@ -166,11 +185,28 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
 
     if (error) throw error;
 
-    // Step 2: Generate system email and calendar UID
+    // Step 2: Insert trigger-contact associations
+    if (contactIds && contactIds.length > 0) {
+      const triggerContacts = contactIds.map(contactId => ({
+        trigger_id: data.id,
+        contact_id: contactId
+      }));
+
+      const { error: contactsError } = await supabase
+        .from("rms_trigger_contacts")
+        .insert(triggerContacts);
+
+      if (contactsError) {
+        console.error("Error linking contacts to trigger:", contactsError);
+        // Don't throw - trigger was created, contacts are optional
+      }
+    }
+
+    // Step 3: Generate system email and calendar UID
     const systemEmail = generateSystemEmail(user.id, data.id);
     const calendarEventUID = `trigger-${data.id}@ecosystembuilder.app`;
 
-    // Step 3: Update trigger with calendar integration fields
+    // Step 4: Update trigger with calendar integration fields
     const { data: updatedTrigger, error: updateError } = await supabase
       .from("rms_triggers")
       .update({
@@ -183,7 +219,7 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
 
     if (updateError) throw updateError;
 
-    // Step 4: Generate ICS file
+    // Step 5: Generate ICS file
     const icsEventData = triggerToICSEventData(
       { ...updatedTrigger, time_trigger_type: trigger.action },
       profile.email,

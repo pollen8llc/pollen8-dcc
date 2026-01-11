@@ -3343,6 +3343,42 @@ export type Database = {
           },
         ]
       }
+      rms_trigger_contacts: {
+        Row: {
+          contact_id: string
+          created_at: string
+          id: string
+          trigger_id: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          id?: string
+          trigger_id: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          id?: string
+          trigger_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_trigger_contacts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_trigger_contacts_trigger_id_fkey"
+            columns: ["trigger_id"]
+            isOneToOne: false
+            referencedRelation: "rms_triggers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rms_triggers: {
         Row: {
           action: string
