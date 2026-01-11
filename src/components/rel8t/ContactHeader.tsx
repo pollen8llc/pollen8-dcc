@@ -4,39 +4,45 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Edit, Zap, ExternalLink, Loader2, Power } from 'lucide-react';
+import { Edit, Zap, ExternalLink, Loader2, Power, Pencil } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useActv8FullStatus } from '@/hooks/useActv8Contacts';
 import { activateContact } from '@/services/actv8Service';
 import { toast } from 'sonner';
 import { getStrengthConfig, ConnectionStrengthLevel } from '@/config/connectionStrengthConfig';
 import { cn } from '@/lib/utils';
+import { CategorySelectorDialog } from './CategorySelectorDialog';
 
 interface ContactHeaderProps {
   contactId: string;
   name: string;
   category?: string;
+  categoryId?: string;
   avatar?: string;
   status?: 'active' | 'inactive';
   tags?: string[];
   affiliatedUserId?: string;
   onEdit?: () => void;
+  onCategoryChange?: (categoryId: string | null) => void;
 }
 
 export function ContactHeader({
   contactId,
   name,
   category,
+  categoryId,
   avatar,
   status = 'active',
   tags = [],
   affiliatedUserId,
-  onEdit
+  onEdit,
+  onCategoryChange
 }: ContactHeaderProps) {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isActivating, setIsActivating] = useState(false);
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
 
   const { data: actv8FullStatus } = useActv8FullStatus(contactId);
 
@@ -142,13 +148,34 @@ export function ContactHeader({
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text truncate">
               {name}
             </h1>
-            {category && (
+            {onCategoryChange ? (
+              <button
+                onClick={() => setIsCategoryDialogOpen(true)}
+                className="group inline-flex items-center gap-1.5 mt-1 hover:text-primary transition-colors cursor-pointer"
+              >
+                <span className="text-sm sm:text-base text-muted-foreground font-medium group-hover:text-primary group-hover:underline underline-offset-2 transition-colors">
+                  {category || "Uncategorized"}
+                </span>
+                <Pencil className="h-3 w-3 text-muted-foreground/50 opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all" />
+              </button>
+            ) : category ? (
               <p className="mt-1 text-sm sm:text-base text-muted-foreground font-medium">
                 {category}
               </p>
-            )}
+            ) : null}
           </div>
         </div>
+
+        {/* Category Selector Dialog */}
+        {onCategoryChange && (
+          <CategorySelectorDialog
+            open={isCategoryDialogOpen}
+            onOpenChange={setIsCategoryDialogOpen}
+            currentCategoryId={categoryId}
+            contactName={name}
+            onSubmit={onCategoryChange}
+          />
+        )}
 
         {/* Glowing Separator */}
         <div className="relative h-px w-full my-5 sm:my-6">

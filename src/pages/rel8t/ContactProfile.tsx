@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Rel8Header } from '@/components/rel8t/Rel8Header';
 import { ContactHeader } from '@/components/rel8t/ContactHeader';
 import { AnalyzeCard } from '@/components/rel8t/AnalyzeCard';
@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ProfileCard from '@/components/connections/ProfileCard';
 import { Mail, Phone, MapPin, Building2, Tag, Heart, Loader2, User, UserPlus, Cake, Calendar, Target, Users } from 'lucide-react';
-import { getContactById } from "@/services/rel8t/contactService";
+import { getContactById, updateContact } from "@/services/rel8t/contactService";
 import { format } from "date-fns";
+import { toast } from 'sonner';
 
 // Helper to show placeholder text for empty fields
 const EmptyPlaceholder = ({ text }: { text: string }) => (
@@ -19,6 +20,7 @@ const EmptyPlaceholder = ({ text }: { text: string }) => (
 export default function ContactProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: contact, isLoading } = useQuery({
     queryKey: ["contact", id],
@@ -28,6 +30,18 @@ export default function ContactProfile() {
 
   const handleEdit = () => {
     navigate(`/rel8/contacts/${id}/edit`);
+  };
+
+  const handleCategoryChange = async (categoryId: string | null) => {
+    if (!contact) return;
+    try {
+      await updateContact(contact.id, { category_id: categoryId });
+      queryClient.invalidateQueries({ queryKey: ["contact", id] });
+      toast.success("Category updated successfully");
+    } catch (error) {
+      console.error('Failed to update category:', error);
+      toast.error("Failed to update category");
+    }
   };
 
   const handleDelete = () => {
@@ -100,11 +114,13 @@ export default function ContactProfile() {
         <ContactHeader
           contactId={contact.id}
           name={contact.preferred_name || contact.name}
-          category={contact.category?.name || "Uncategorized"}
+          category={contact.category?.name}
+          categoryId={contact.category?.id}
           status={(contact.status || "active") as "active" | "inactive"}
           tags={contact.tags || []}
           affiliatedUserId={affiliatedUserId}
           onEdit={handleEdit}
+          onCategoryChange={handleCategoryChange}
         />
 
         {/* Personal Identity & Context */}
