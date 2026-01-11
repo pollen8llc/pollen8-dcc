@@ -431,12 +431,16 @@ const TriggerWizard = () => {
                         <div className="space-y-1.5">
                           <Label className="text-xs font-medium text-foreground/70 pl-1">
                             Target Contacts <span className="text-destructive">*</span>
+                            {isActv8Mode && (
+                              <span className="text-emerald-500 ml-2 text-[10px]">(Locked)</span>
+                            )}
                           </Label>
                           <ContactTokenInput
                             selectedContacts={formData.selectedContacts}
                             onContactsChange={(contacts) => updateFormData({ selectedContacts: contacts })}
                             placeholder="Search contacts..."
                             required
+                            locked={isActv8Mode}
                           />
                         </div>
 
@@ -561,6 +565,7 @@ const TriggerWizard = () => {
                         isSubmitting={isSubmitting}
                         onUpdatePriority={(priority) => updateFormData({ priority })}
                         actv8StepData={isActv8Mode && actv8StepData ? { stepName: actv8StepData.stepName, pathName: actv8StepData.pathName } : undefined}
+                        isActv8Mode={isActv8Mode}
                       />
                     )}
                   </div>
