@@ -649,8 +649,8 @@ const TriggerWizard = () => {
                   </Button>
                 </div>
 
-                {/* Calendar - Mobile optimized */}
-                <div className="flex-1 flex items-center justify-center">
+                {/* Calendar - fits card with equal margins */}
+                <div className="flex-1 flex items-center justify-center px-0">
                   <Calendar
                     mode="single"
                     selected={formData.triggerDate || undefined}
@@ -660,7 +660,7 @@ const TriggerWizard = () => {
                       today.setHours(0, 0, 0, 0);
                       return date < today;
                     }}
-                    className="rounded-xl bg-background/50 p-2 sm:p-4 pointer-events-auto scale-[0.85] sm:scale-100 origin-center"
+                    className="w-full pointer-events-auto [&_.rdp]:w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full"
                   />
                 </div>
 
