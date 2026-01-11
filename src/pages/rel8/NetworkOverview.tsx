@@ -78,7 +78,7 @@ export default function NetworkOverview() {
         {/* Network Overview Header */}
         <Card className="glass-morphism border-primary/20 overflow-hidden">
           <div className="p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/5">
-            <div className="flex flex-col items-center text-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
               {/* User Info - Compact */}
               <div className="flex items-center gap-3">
                 <UnifiedAvatar
@@ -89,13 +89,13 @@ export default function NetworkOverview() {
               </div>
               
               {/* Network Value - Digital Display */}
-              <div className="relative">
+              <div className="relative flex-1">
                 <div className="relative rounded-2xl bg-slate-900/80 border border-primary/20 px-6 py-4 md:px-10 md:py-6 shadow-inner">
                   {/* Glow effect */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
                   
                   {/* Digital number display with dimmed zeros */}
-                  <div className="font-mono text-5xl sm:text-6xl md:text-7xl font-bold tabular-nums text-center relative">
+                  <div className="font-mono text-5xl sm:text-6xl md:text-7xl font-bold tabular-nums text-left relative">
                     {(() => {
                       const scoreStr = networkScore.toString();
                       const maxDigits = 7; // e.g., 9,999,999
@@ -112,30 +112,30 @@ export default function NetworkOverview() {
                     })()}
                   </div>
                 </div>
-                <div className="text-sm text-muted-foreground uppercase tracking-widest mt-3 text-center">
+                <div className="text-sm text-muted-foreground uppercase tracking-widest mt-3">
                   Network Value
                 </div>
               </div>
+            </div>
               
-              {/* Tier Badges */}
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Badge className="bg-gradient-to-r from-primary/20 to-primary/10 text-primary border-primary/30 px-4 py-1.5">
-                  <Crown className="h-3.5 w-3.5 mr-1.5" />
-                  Tier {tier.tier}
-                </Badge>
-                <Badge variant="outline" className="border-accent/40 text-accent px-4 py-1.5">
-                  <Star className="h-3.5 w-3.5 mr-1.5" />
-                  {tier.label}
-                </Badge>
-                <Badge variant="secondary" className="px-4 py-1.5">
-                  {tier.planets} Planets
-                </Badge>
-              </div>
+            {/* Tier Badges */}
+            <div className="flex flex-wrap items-center gap-2 mt-4">
+              <Badge className="bg-gradient-to-r from-primary/20 to-primary/10 text-primary border-primary/30 px-4 py-1.5">
+                <Crown className="h-3.5 w-3.5 mr-1.5" />
+                Tier {tier.tier}
+              </Badge>
+              <Badge variant="outline" className="border-accent/40 text-accent px-4 py-1.5">
+                <Star className="h-3.5 w-3.5 mr-1.5" />
+                {tier.label}
+              </Badge>
+              <Badge variant="secondary" className="px-4 py-1.5">
+                {tier.planets} Planets
+              </Badge>
+            </div>
               
-              {/* Solar System Visual */}
-              <div className="mt-2">
-                <SolarSystem systemId={solarSystemId} size={100} static />
-              </div>
+            {/* Solar System Visual */}
+            <div className="mt-4 flex justify-start">
+              <SolarSystem systemId={solarSystemId} size={100} static />
             </div>
           </div>
         </Card>
