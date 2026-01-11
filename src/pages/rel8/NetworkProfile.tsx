@@ -282,19 +282,6 @@ export default function NetworkProfile() {
               </div>
             </div>
 
-            {/* Bottom Section: Connection Strength */}
-            <div className="pt-2">
-              <div className="flex items-center justify-between mb-3 px-1">
-                <div className="flex items-center gap-2">
-                  <Zap className={`h-4 w-4 ${strengthColors[contact.connectionStrength]}`} />
-                  <span className="text-sm font-bold uppercase tracking-wider">Connection Strength</span>
-                </div>
-                <Badge variant="outline" className={`font-bold border-2 ${strengthColors[contact.connectionStrength]}`}>
-                  {strengthLabels[contact.connectionStrength]}
-                </Badge>
-              </div>
-              <ConnectionStrengthBar strength={contact.connectionStrength} size="lg" className="h-3" />
-            </div>
           </div>
         </Card>
 
