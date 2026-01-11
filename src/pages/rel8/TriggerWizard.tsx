@@ -623,17 +623,17 @@ const TriggerWizard = () => {
                 "[backface-visibility:hidden] [transform:rotateX(180deg)]"
               )}
             >
-              <CardContent className="p-6 h-full flex flex-col">
+              <CardContent className="p-3 sm:p-6 h-full flex flex-col">
                 {/* Calendar Header */}
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                      Select Start Date
+                <div className="flex items-center justify-between mb-3 sm:mb-6">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-base sm:text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                      Select Date
                     </h2>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
                       {formData.triggerDate 
-                        ? `Selected: ${format(formData.triggerDate, "PPPP")}`
-                        : "Choose when your reminder starts"
+                        ? format(formData.triggerDate, "PPP")
+                        : "Choose start date"
                       }
                     </p>
                   </div>
@@ -642,15 +642,15 @@ const TriggerWizard = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setFlipState('none')}
-                    className="backdrop-blur-sm bg-background/50 border-primary/30 gap-2"
+                    className="backdrop-blur-sm bg-background/50 border-primary/30 gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                   >
-                    <RotateCcw className="w-4 h-4" />
+                    <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
                     Back
                   </Button>
                 </div>
 
-                {/* Full-Width Calendar */}
-                <div className="flex-1 flex items-center justify-center">
+                {/* Calendar - Mobile optimized */}
+                <div className="flex-1 flex items-center justify-center overflow-hidden">
                   <Calendar
                     mode="single"
                     selected={formData.triggerDate || undefined}
@@ -660,29 +660,31 @@ const TriggerWizard = () => {
                       today.setHours(0, 0, 0, 0);
                       return date < today;
                     }}
-                    className="w-full max-w-none rounded-xl border-2 border-primary/10 bg-background/50 p-4 md:p-8 
+                    className="w-full rounded-xl border border-primary/10 bg-background/50 p-2 sm:p-4 md:p-6
                       [&_.rdp-months]:w-full 
                       [&_.rdp-month]:w-full 
                       [&_.rdp-table]:w-full 
                       [&_.rdp-head_row]:flex [&_.rdp-head_row]:w-full [&_.rdp-head_row]:justify-around
                       [&_.rdp-row]:flex [&_.rdp-row]:w-full [&_.rdp-row]:justify-around
-                      [&_.rdp-cell]:flex-1 [&_.rdp-cell]:text-center
-                      [&_.rdp-day]:w-full [&_.rdp-day]:h-14 [&_.rdp-day]:md:h-16 [&_.rdp-day]:text-base [&_.rdp-day]:md:text-lg
-                      [&_.rdp-caption_label]:text-xl [&_.rdp-caption_label]:md:text-2xl
-                      [&_.rdp-nav_button]:h-10 [&_.rdp-nav_button]:w-10 [&_.rdp-nav_button]:md:h-12 [&_.rdp-nav_button]:md:w-12"
+                      [&_.rdp-cell]:flex-1 [&_.rdp-cell]:text-center [&_.rdp-cell]:p-0.5
+                      [&_.rdp-day]:w-full [&_.rdp-day]:h-9 [&_.rdp-day]:sm:h-11 [&_.rdp-day]:md:h-14 [&_.rdp-day]:text-xs [&_.rdp-day]:sm:text-sm [&_.rdp-day]:md:text-base
+                      [&_.rdp-caption_label]:text-sm [&_.rdp-caption_label]:sm:text-lg [&_.rdp-caption_label]:md:text-xl
+                      [&_.rdp-nav_button]:h-7 [&_.rdp-nav_button]:w-7 [&_.rdp-nav_button]:sm:h-9 [&_.rdp-nav_button]:sm:w-9 [&_.rdp-nav_button]:md:h-10 [&_.rdp-nav_button]:md:w-10
+                      [&_.rdp-head_cell]:text-[10px] [&_.rdp-head_cell]:sm:text-xs [&_.rdp-head_cell]:font-medium"
                   />
                 </div>
 
                 {/* Confirm Button */}
-                <div className="pt-6 border-t border-primary/20 flex justify-end">
+                <div className="pt-3 sm:pt-6 border-t border-primary/20 flex justify-end">
                   <Button
                     type="button"
+                    size="sm"
                     onClick={() => setFlipState('none')}
                     disabled={!formData.triggerDate}
-                    className="backdrop-blur-sm shadow-lg"
+                    className="backdrop-blur-sm shadow-lg h-8 sm:h-9 text-xs sm:text-sm"
                   >
-                    <Check className="w-4 h-4 mr-2" />
-                    Confirm Date
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    Confirm
                   </Button>
                 </div>
               </CardContent>
