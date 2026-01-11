@@ -175,7 +175,7 @@ export function ContactTokenInput({
               {searchQuery ? "No contacts found" : "Type to search contacts"}
             </div>
           ) : (
-            availableContacts.slice(0, 10).map((contact, index) => (
+            availableContacts.slice(0, 3).map((contact, index) => (
               <button
                 key={contact.id}
                 type="button"
