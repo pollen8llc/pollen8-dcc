@@ -357,6 +357,7 @@ const TriggerWizard = () => {
                         onSubmit={handleReviewSubmit}
                         onPrevious={handlePrevious}
                         isSubmitting={isSubmitting}
+                        onUpdatePriority={(priority) => updateFormData({ priority })}
                       />
                     )}
                   </div>
