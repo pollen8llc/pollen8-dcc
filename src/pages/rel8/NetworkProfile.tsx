@@ -9,6 +9,7 @@ import { DevelopmentPathAccordion } from "@/components/rel8t/network/Development
 import { ContactOutreachReminders } from "@/components/rel8t/network/ContactOutreachReminders";
 import { RelationshipLevelAccordion } from "@/components/rel8t/network/RelationshipLevelAccordion";
 import { PathSelectionAccordion } from "@/components/rel8t/network/PathSelectionAccordion";
+import { Accordion } from "@/components/ui/accordion";
 // Outreach linking removed - outreaches are tracked via step instances
 import { useContactAnalysis } from "@/hooks/useContactAnalysis";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
@@ -44,6 +45,9 @@ export default function NetworkProfile() {
     setActv8StepData,
     setPreSelectedContacts
   } = useRelationshipWizard();
+  
+  // Cascading accordion state
+  const [openAccordion, setOpenAccordion] = useState<string | undefined>(undefined);
   const {
     data: actv8Contact,
     isLoading,
@@ -290,33 +294,55 @@ export default function NetworkProfile() {
           </div>
         </Card>
 
-        {/* Relationship Level Accordion */}
-        <RelationshipLevelAccordion contactName={contact.name} actv8ContactId={actv8Contact.id} currentTier={contact.pathTier} skippedPaths={contact.skippedPaths} pathHistory={contact.pathHistory} currentPathId={contact.developmentPathId} currentPathName={actv8Contact.path?.name} hasCurrentPath={!!contact.developmentPathId} isPathComplete={actv8Contact.path?.steps && contact.currentStepIndex >= actv8Contact.path.steps.length} onSelectPath={handleSelectPath} />
+        {/* Cascading Accordions */}
+        <Accordion 
+          type="single" 
+          collapsible 
+          value={openAccordion} 
+          onValueChange={setOpenAccordion}
+          className="w-full space-y-3"
+        >
+          {/* Relationship Level Accordion */}
+          <RelationshipLevelAccordion 
+            contactName={contact.name} 
+            actv8ContactId={actv8Contact.id} 
+            currentTier={contact.pathTier} 
+            skippedPaths={contact.skippedPaths} 
+            pathHistory={contact.pathHistory} 
+            currentPathId={contact.developmentPathId} 
+            currentPathName={actv8Contact.path?.name} 
+            hasCurrentPath={!!contact.developmentPathId} 
+            isPathComplete={actv8Contact.path?.steps && contact.currentStepIndex >= actv8Contact.path.steps.length} 
+            onSelectPath={handleSelectPath}
+            onLevelUpdated={() => setOpenAccordion("path-selection")}
+          />
 
-        {/* Path Selection Accordion */}
-        <PathSelectionAccordion 
-          actv8ContactId={actv8Contact.id}
-          currentTier={contact.pathTier}
-          currentPathId={contact.developmentPathId}
-          currentPathName={actv8Contact.path?.name}
-          hasCurrentPath={!!contact.developmentPathId}
-          isPathComplete={actv8Contact.path?.steps && contact.currentStepIndex >= actv8Contact.path.steps.length}
-          onSelectPath={handleSelectPath}
-        />
+          {/* Path Selection Accordion */}
+          <PathSelectionAccordion 
+            actv8ContactId={actv8Contact.id}
+            currentTier={contact.pathTier}
+            currentPathId={contact.developmentPathId}
+            currentPathName={actv8Contact.path?.name}
+            hasCurrentPath={!!contact.developmentPathId}
+            isPathComplete={actv8Contact.path?.steps && contact.currentStepIndex >= actv8Contact.path.steps.length}
+            onSelectPath={handleSelectPath}
+            onPathSelected={() => setOpenAccordion("development-path")}
+          />
 
-        {/* Development Path Accordion */}
-        <DevelopmentPathAccordion 
-          pathId={contact.developmentPathId} 
-          currentStepIndex={contact.currentStepIndex} 
-          completedSteps={contact.completedSteps} 
-          linkedOutreaches={linkedOutreaches} 
-          actv8ContactId={actv8Contact.id} 
-          pathTier={contact.pathTier} 
-          pathHistory={contact.pathHistory} 
-          skippedPaths={contact.skippedPaths}
-          totalStepsInPath={actv8Contact.path?.steps?.length || 4}
-          onPlanTouchpoint={handlePlanTouchpoint} 
-        />
+          {/* Development Path Accordion */}
+          <DevelopmentPathAccordion 
+            pathId={contact.developmentPathId} 
+            currentStepIndex={contact.currentStepIndex} 
+            completedSteps={contact.completedSteps} 
+            linkedOutreaches={linkedOutreaches} 
+            actv8ContactId={actv8Contact.id} 
+            pathTier={contact.pathTier} 
+            pathHistory={contact.pathHistory} 
+            skippedPaths={contact.skippedPaths}
+            totalStepsInPath={actv8Contact.path?.steps?.length || 4}
+            onPlanTouchpoint={handlePlanTouchpoint} 
+          />
+        </Accordion>
 
         {/* Outreach & Reminders Section */}
         <Card className="p-4 glass-morphism border-primary/10">

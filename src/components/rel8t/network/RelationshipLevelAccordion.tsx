@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ interface RelationshipLevelAccordionProps {
   hasCurrentPath: boolean;
   isPathComplete: boolean;
   onSelectPath: (pathId: string) => void;
+  onLevelUpdated?: () => void;
 }
 
 const tierLabels: Record<number, string> = {
@@ -56,6 +57,7 @@ export function RelationshipLevelAccordion({
   hasCurrentPath,
   isPathComplete,
   onSelectPath,
+  onLevelUpdated,
 }: RelationshipLevelAccordionProps) {
   const queryClient = useQueryClient();
   
@@ -90,6 +92,7 @@ export function RelationshipLevelAccordion({
       queryClient.invalidateQueries({ queryKey: ['actv8-contact'] });
       queryClient.invalidateQueries({ queryKey: ['available-paths', actv8ContactId] });
       toast.success('Relationship level updated');
+      onLevelUpdated?.();
     },
     onError: (error: any) => {
       toast.error('Failed to update: ' + error.message);
@@ -147,152 +150,150 @@ export function RelationshipLevelAccordion({
   const currentLevelLabel = levelLabels[getCurrentLevelId()] || 'Unknown';
 
   return (
-    <Accordion type="single" collapsible className="w-full">
-      <AccordionItem value="relationship-level" className="border rounded-2xl bg-card/50 backdrop-blur-sm border-primary/20 overflow-hidden">
-        <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-primary/5 transition-colors">
-          <div className="flex items-center gap-3 text-left flex-1">
-            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <Heart className="h-4 w-4 text-primary" />
-            </div>
-            <div className="flex-1">
-              <span className="font-medium text-sm">Relationship Level</span>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-xs text-muted-foreground">
-                  {currentLevelLabel} • {tierLabels[effectiveTier] || `Tier ${effectiveTier}`}
-                </span>
-              </div>
-            </div>
-            {/* Mini Tier Bar */}
-            <div className="flex items-center gap-1 mr-2">
-              {[1, 2, 3, 4].map((tier) => (
-                <div
-                  key={tier}
-                  className={cn(
-                    "h-2 w-4 rounded-sm transition-colors",
-                    getSegmentColor(tier)
-                  )}
-                />
-              ))}
+    <AccordionItem value="relationship-level" className="border rounded-2xl bg-card/50 backdrop-blur-sm border-primary/20 overflow-hidden">
+      <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-primary/5 transition-colors">
+        <div className="flex items-center gap-3 text-left flex-1">
+          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <Heart className="h-4 w-4 text-primary" />
+          </div>
+          <div className="flex-1">
+            <span className="font-medium text-sm">Relationship Level</span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-xs text-muted-foreground">
+                {currentLevelLabel} • {tierLabels[effectiveTier] || `Tier ${effectiveTier}`}
+              </span>
             </div>
           </div>
-        </AccordionTrigger>
-        
-        <AccordionContent className="px-4 pb-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-6">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <div className="space-y-6 pt-2">
-              {/* Relationship Level Selection */}
-              <div className="p-4 rounded-xl border border-border/50 bg-muted/20">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                  How well do you know {contactName}?
-                </h4>
-                <RadioGroup
-                  value={selectedLevel}
-                  onValueChange={setSelectedLevel}
-                  className="space-y-2"
-                >
-                  {ASSESSMENT_LEVELS.map((level) => {
-                    const isSelected = selectedLevel === level.id;
-                    const isCurrent = level.id === getCurrentLevelId();
-                    return (
-                      <div
-                        key={level.id}
-                        className={cn(
-                          "flex items-center space-x-3 rounded-lg border p-3 cursor-pointer transition-all",
-                          "hover:border-primary/50 hover:bg-primary/5",
-                          isSelected
-                            ? "border-primary bg-primary/10"
-                            : "border-border/30 bg-card/30"
-                        )}
-                        onClick={() => setSelectedLevel(level.id)}
-                      >
-                        <RadioGroupItem value={level.id} id={level.id} />
-                        <div className="flex-1">
-                          <Label
-                            htmlFor={level.id}
-                            className="cursor-pointer flex items-center gap-2"
-                          >
-                            <div
-                              className={cn(
-                                "h-7 w-7 rounded-full flex items-center justify-center",
-                                isSelected
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-muted text-muted-foreground"
-                              )}
-                            >
-                              {level.icon}
-                            </div>
-                            <div className="flex-1">
-                              <span className="font-medium text-sm block">
-                                {level.label}
-                              </span>
-                              <span className="text-[10px] text-muted-foreground">
-                                {level.description}
-                              </span>
-                            </div>
-                            {isCurrent && (
-                              <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full">
-                                Current
-                              </span>
-                            )}
-                          </Label>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </RadioGroup>
-                
-                {selectedLevel !== getCurrentLevelId() && (
-                  <Button
-                    onClick={handleUpdateLevel}
-                    disabled={updateLevelMutation.isPending}
-                    className="w-full mt-3"
-                    size="sm"
-                  >
-                    {updateLevelMutation.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Updating...
-                      </>
-                    ) : (
-                      "Update Relationship Level"
-                    )}
-                  </Button>
+          {/* Mini Tier Bar */}
+          <div className="flex items-center gap-1 mr-2">
+            {[1, 2, 3, 4].map((tier) => (
+              <div
+                key={tier}
+                className={cn(
+                  "h-2 w-4 rounded-sm transition-colors",
+                  getSegmentColor(tier)
                 )}
-              </div>
-
-              {/* Tier Progress Indicator */}
-              <div>
-                <div className="flex items-center gap-2">
-                  {[1, 2, 3, 4].map((tier) => (
-                    <div key={tier} className="flex-1 space-y-1">
-                      <div
-                        className={cn(
-                          "h-2 rounded-full transition-colors",
-                          getSegmentColor(tier)
-                        )}
-                      />
-                      <span className={cn(
-                        "text-[9px] block text-center",
-                        tier <= completedTiersCount && !skippedTiers.includes(tier) && "text-[hsl(224,76%,48%)] font-medium",
-                        skippedTiers.includes(tier) && "text-amber-500",
-                        tier === effectiveTier && "text-foreground font-medium",
-                        tier > effectiveTier && !skippedTiers.includes(tier) && tier > completedTiersCount && "text-muted-foreground"
-                      )}>
-                        {tierLabels[tier]}
-                      </span>
+              />
+            ))}
+          </div>
+        </div>
+      </AccordionTrigger>
+      
+      <AccordionContent className="px-4 pb-4">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-6">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="space-y-6 pt-2">
+            {/* Relationship Level Selection */}
+            <div className="p-4 rounded-xl border border-border/50 bg-muted/20">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                How well do you know {contactName}?
+              </h4>
+              <RadioGroup
+                value={selectedLevel}
+                onValueChange={setSelectedLevel}
+                className="space-y-2"
+              >
+                {ASSESSMENT_LEVELS.map((level) => {
+                  const isSelected = selectedLevel === level.id;
+                  const isCurrent = level.id === getCurrentLevelId();
+                  return (
+                    <div
+                      key={level.id}
+                      className={cn(
+                        "flex items-center space-x-3 rounded-lg border p-3 cursor-pointer transition-all",
+                        "hover:border-primary/50 hover:bg-primary/5",
+                        isSelected
+                          ? "border-primary bg-primary/10"
+                          : "border-border/30 bg-card/30"
+                      )}
+                      onClick={() => setSelectedLevel(level.id)}
+                    >
+                      <RadioGroupItem value={level.id} id={level.id} />
+                      <div className="flex-1">
+                        <Label
+                          htmlFor={level.id}
+                          className="cursor-pointer flex items-center gap-2"
+                        >
+                          <div
+                            className={cn(
+                              "h-7 w-7 rounded-full flex items-center justify-center",
+                              isSelected
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {level.icon}
+                          </div>
+                          <div className="flex-1">
+                            <span className="font-medium text-sm block">
+                              {level.label}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {level.description}
+                            </span>
+                          </div>
+                          {isCurrent && (
+                            <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                              Current
+                            </span>
+                          )}
+                        </Label>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
+                  );
+                })}
+              </RadioGroup>
+              
+              {selectedLevel !== getCurrentLevelId() && (
+                <Button
+                  onClick={handleUpdateLevel}
+                  disabled={updateLevelMutation.isPending}
+                  className="w-full mt-3"
+                  size="sm"
+                >
+                  {updateLevelMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Relationship Level"
+                  )}
+                </Button>
+              )}
             </div>
-          )}
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+
+            {/* Tier Progress Indicator */}
+            <div>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4].map((tier) => (
+                  <div key={tier} className="flex-1 space-y-1">
+                    <div
+                      className={cn(
+                        "h-2 rounded-full transition-colors",
+                        getSegmentColor(tier)
+                      )}
+                    />
+                    <span className={cn(
+                      "text-[9px] block text-center",
+                      tier <= completedTiersCount && !skippedTiers.includes(tier) && "text-[hsl(224,76%,48%)] font-medium",
+                      skippedTiers.includes(tier) && "text-amber-500",
+                      tier === effectiveTier && "text-foreground font-medium",
+                      tier > effectiveTier && !skippedTiers.includes(tier) && tier > completedTiersCount && "text-muted-foreground"
+                    )}>
+                      {tierLabels[tier]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        )}
+      </AccordionContent>
+    </AccordionItem>
   );
 }
