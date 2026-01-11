@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SimpleTriggerFormData } from "@/hooks/rel8t/useTriggerWizard";
+import { ContactActivationDialog } from "./ContactActivationDialog";
 
 interface TriggerReviewStepProps {
   formData: SimpleTriggerFormData;
@@ -71,6 +72,7 @@ export function TriggerReviewStep({
   isSubmitting 
 }: TriggerReviewStepProps) {
   const [createOutreach, setCreateOutreach] = useState(false);
+  const [showActivationDialog, setShowActivationDialog] = useState(false);
 
   const getChannelDetails = () => {
     if (!formData.outreachChannel || !formData.channelDetails) return null;
@@ -213,7 +215,14 @@ export function TriggerReviewStep({
               <Checkbox
                 id="createOutreach"
                 checked={createOutreach}
-                onCheckedChange={(checked) => setCreateOutreach(checked === true)}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    // Open dialog to show contact activation statuses
+                    setShowActivationDialog(true);
+                  } else {
+                    setCreateOutreach(false);
+                  }
+                }}
                 className="mt-0.5"
               />
               <div className="flex-1">
@@ -231,6 +240,22 @@ export function TriggerReviewStep({
             </div>
           </CardContent>
         </Card>
+
+        {/* Contact Activation Dialog */}
+        <ContactActivationDialog
+          open={showActivationDialog}
+          onOpenChange={(open) => {
+            if (!open && !createOutreach) {
+              setCreateOutreach(false);
+            }
+            setShowActivationDialog(open);
+          }}
+          contacts={formData.selectedContacts}
+          onConfirm={() => {
+            setCreateOutreach(true);
+            setShowActivationDialog(false);
+          }}
+        />
       </div>
 
       {/* Action Buttons */}
