@@ -8,6 +8,7 @@ import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStre
 import { DevelopmentPathAccordion } from "@/components/rel8t/network/DevelopmentPathAccordion";
 import { ContactOutreachReminders } from "@/components/rel8t/network/ContactOutreachReminders";
 import { RelationshipLevelAccordion } from "@/components/rel8t/network/RelationshipLevelAccordion";
+import { PathSelectionAccordion } from "@/components/rel8t/network/PathSelectionAccordion";
 // Outreach linking removed - outreaches are tracked via step instances
 import { useContactAnalysis } from "@/hooks/useContactAnalysis";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
@@ -291,6 +292,17 @@ export default function NetworkProfile() {
 
         {/* Relationship Level Accordion */}
         <RelationshipLevelAccordion contactName={contact.name} actv8ContactId={actv8Contact.id} currentTier={contact.pathTier} skippedPaths={contact.skippedPaths} pathHistory={contact.pathHistory} currentPathId={contact.developmentPathId} currentPathName={actv8Contact.path?.name} hasCurrentPath={!!contact.developmentPathId} isPathComplete={actv8Contact.path?.steps && contact.currentStepIndex >= actv8Contact.path.steps.length} onSelectPath={handleSelectPath} />
+
+        {/* Path Selection Accordion */}
+        <PathSelectionAccordion 
+          actv8ContactId={actv8Contact.id}
+          currentTier={contact.pathTier}
+          currentPathId={contact.developmentPathId}
+          currentPathName={actv8Contact.path?.name}
+          hasCurrentPath={!!contact.developmentPathId}
+          isPathComplete={actv8Contact.path?.steps && contact.currentStepIndex >= actv8Contact.path.steps.length}
+          onSelectPath={handleSelectPath}
+        />
 
         {/* Development Path Accordion */}
         <DevelopmentPathAccordion 
