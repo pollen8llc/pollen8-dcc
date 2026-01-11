@@ -14,6 +14,7 @@ interface ContactTokenInputProps {
   maxContacts?: number;
   className?: string;
   required?: boolean;
+  locked?: boolean; // Lock contact selection (Actv8 mode)
 }
 
 export function ContactTokenInput({
@@ -23,6 +24,7 @@ export function ContactTokenInput({
   maxContacts,
   className,
   required = false,
+  locked = false,
 }: ContactTokenInputProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -103,16 +105,21 @@ export function ContactTokenInput({
         className={cn(
           "flex flex-wrap items-center gap-2 p-3 min-h-[48px]",
           "bg-background/90 backdrop-blur-lg border-2 border-primary/30 rounded-xl shadow-lg",
-          "focus-within:border-primary/60 transition-all cursor-text"
+          "focus-within:border-primary/60 transition-all",
+          locked ? "cursor-default" : "cursor-text",
+          locked && "border-emerald-500/50 bg-emerald-500/5"
         )}
-        onClick={() => inputRef.current?.focus()}
+        onClick={() => !locked && inputRef.current?.focus()}
       >
         {/* Selected Contact Tokens */}
         {selectedContacts.map((contact) => (
           <Badge
             key={contact.id}
             variant="secondary"
-            className="flex items-center gap-1.5 py-1 px-2 bg-primary/10 hover:bg-primary/20 border border-primary/20"
+            className={cn(
+              "flex items-center gap-1.5 py-1 px-2 bg-primary/10 border border-primary/20",
+              locked ? "bg-emerald-500/10 border-emerald-500/30" : "hover:bg-primary/20"
+            )}
           >
             <UnifiedAvatar 
               userId={contact.id} 
@@ -122,21 +129,24 @@ export function ContactTokenInput({
             <span className="text-sm max-w-[120px] truncate">
               {getDisplayName(contact)}
             </span>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemoveContact(contact.id);
-              }}
-              className="ml-1 rounded-full hover:bg-destructive/20 p-0.5 transition-colors"
-            >
-              <X className="h-3 w-3" />
-            </button>
+            {/* Only show remove button if not locked */}
+            {!locked && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveContact(contact.id);
+                }}
+                className="ml-1 rounded-full hover:bg-destructive/20 p-0.5 transition-colors"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
           </Badge>
         ))}
 
-        {/* Search Input */}
-        {(!maxContacts || selectedContacts.length < maxContacts) && (
+        {/* Search Input - Hidden when locked */}
+        {!locked && (!maxContacts || selectedContacts.length < maxContacts) && (
           <div className="flex-1 min-w-[150px] flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground shrink-0" />
             <Input

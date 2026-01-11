@@ -35,6 +35,7 @@ interface TriggerReviewStepProps {
     stepName: string;
     pathName: string;
   } | null;
+  isActv8Mode?: boolean;
 }
 
 const channelIcons: Record<string, React.ReactNode> = {
@@ -76,9 +77,11 @@ export function TriggerReviewStep({
   onPrevious,
   isSubmitting,
   onUpdatePriority,
-  actv8StepData
+  actv8StepData,
+  isActv8Mode = false
 }: TriggerReviewStepProps) {
-  const [createOutreach, setCreateOutreach] = useState(false);
+  // Auto-enable outreach for Actv8 mode
+  const [createOutreach, setCreateOutreach] = useState(isActv8Mode);
   const [showActivationDialog, setShowActivationDialog] = useState(false);
 
   const priorityOptions = [
@@ -224,30 +227,46 @@ export function TriggerReviewStep({
         )}
 
         {/* Outreach Option */}
-        <div className="rounded-lg border border-dashed border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-3">
+        <div className={cn(
+          "rounded-lg border p-3",
+          isActv8Mode 
+            ? "border-emerald-500/50 bg-emerald-500/10 border-solid"
+            : "border-dashed border-primary/30 bg-gradient-to-br from-primary/5 to-transparent"
+        )}>
           <div className="flex items-start gap-2.5">
             <Checkbox
               id="createOutreach"
               checked={createOutreach}
+              disabled={isActv8Mode}
               onCheckedChange={(checked) => {
+                if (isActv8Mode) return; // Extra guard
                 if (checked) {
                   setShowActivationDialog(true);
                 } else {
                   setCreateOutreach(false);
                 }
               }}
-              className="mt-0.5"
+              className={cn("mt-0.5", isActv8Mode && "opacity-50")}
             />
             <div className="flex-1">
               <Label 
                 htmlFor="createOutreach" 
-                className="text-xs font-medium cursor-pointer flex items-center gap-1.5"
+                className={cn(
+                  "text-xs font-medium flex items-center gap-1.5",
+                  isActv8Mode ? "cursor-default" : "cursor-pointer"
+                )}
               >
-                <ListTodo className="w-3.5 h-3.5 text-primary" />
+                <ListTodo className={cn("w-3.5 h-3.5", isActv8Mode ? "text-emerald-500" : "text-primary")} />
                 Also create as Outreach Task
+                {isActv8Mode && (
+                  <span className="text-emerald-500 ml-1 text-[10px]">(Required)</span>
+                )}
               </Label>
               <p className="text-[10px] text-muted-foreground mt-0.5">
-                Add to your outreach list for tracking
+                {isActv8Mode 
+                  ? "Outreach task will be linked to your development path"
+                  : "Add to your outreach list for tracking"
+                }
               </p>
             </div>
           </div>
