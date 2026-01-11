@@ -9,8 +9,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
 import { cn } from "@/lib/utils";
 import { getActv8ContactStatus, activateContact } from "@/services/actv8Service";
@@ -44,48 +42,52 @@ const ContactStatusCard = ({
   status: ContactStatus;
   onActivate: () => void;
 }) => (
-  <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md hover:bg-card/40 transition-all duration-200">
-    <CardContent className="p-3 flex items-center gap-3">
-      {/* Status dot */}
-      <div
-        className={cn(
-          "w-2 h-2 rounded-full shrink-0",
-          status.isActive
-            ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"
-            : "bg-muted-foreground/50 animate-pulse"
-        )}
-      />
-
-      {/* Avatar */}
-      <UnifiedAvatar userId={contact.id} size={32} isContactId={true} />
-
-      {/* Name */}
-      <span className="flex-1 font-medium truncate">{contact.name}</span>
-
-      {/* Status/Action */}
-      {status.isActive ? (
-        <Badge variant="outline" className="text-green-500 border-green-500/30">
-          <Check className="h-3 w-3 mr-1" /> Active
-        </Badge>
-      ) : (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={onActivate}
-          disabled={status.isLoading}
-          className="gap-1.5 border-primary/30 hover:bg-primary/10"
-        >
-          {status.isLoading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <>
-              <Zap className="h-3.5 w-3.5" /> Activate
-            </>
-          )}
-        </Button>
+  <div className={cn(
+    "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+    status.isActive 
+      ? "bg-primary/5 border border-primary/20" 
+      : "bg-card/40 border border-border/50"
+  )}>
+    {/* Status dot */}
+    <div
+      className={cn(
+        "w-2 h-2 rounded-full shrink-0",
+        status.isActive
+          ? "bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]"
+          : "bg-muted-foreground/40 animate-pulse"
       )}
-    </CardContent>
-  </Card>
+    />
+
+    {/* Avatar */}
+    <UnifiedAvatar userId={contact.id} size={24} isContactId={true} />
+
+    {/* Name */}
+    <span className="flex-1 text-sm font-medium truncate">{contact.name}</span>
+
+    {/* Status/Action */}
+    {status.isActive ? (
+      <div className="flex items-center gap-1 text-xs text-primary">
+        <Check className="h-3 w-3" />
+        <span>Active</span>
+      </div>
+    ) : (
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={onActivate}
+        disabled={status.isLoading}
+        className="h-7 px-2 gap-1 text-xs hover:bg-primary/10"
+      >
+        {status.isLoading ? (
+          <Loader2 className="h-3 w-3 animate-spin" />
+        ) : (
+          <>
+            <Zap className="h-3 w-3" /> Activate
+          </>
+        )}
+      </Button>
+    )}
+  </div>
 );
 
 export function ContactActivationDialog({
