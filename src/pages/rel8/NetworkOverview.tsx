@@ -2,23 +2,22 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
-import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import NetworkMapGlobe from "@/components/rel8t/NetworkMapGlobe";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { MultiProgress } from "@/components/ui/multi-progress";
-import { NetworkScoreBadge } from "@/components/ui/network-score-badge";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { SolarSystem } from "@/components/ui/SolarSystem";
+import { UnifiedAvatar } from "@/components/ui/unified-avatar";
 import { mockContacts, getStrengthDistribution, getAverageScores } from "@/data/mockConnectionStrengthData";
 import { connectionStrengthConfig, getAllStrengthConfigs } from "@/config/connectionStrengthConfig";
 import { getUserNetworkScore, getNetworkScoreTier } from "@/services/connectionStrengthService";
 import { useUser } from "@/contexts/UserContext";
 import { 
   Users, TrendingUp, Zap, Target, Activity, BarChart3, 
-  Network, Globe, Sparkles, ArrowRight
+  Globe, Sparkles, ArrowRight, Crown, Star
 } from "lucide-react";
 
 export default function NetworkOverview() {
@@ -69,50 +68,58 @@ export default function NetworkOverview() {
     };
   }, []);
 
+  const userName = currentUser?.name || 'User';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
-      <DotConnectorHeader />
       
       <div className="container mx-auto max-w-6xl px-4 py-6 pb-32 space-y-6 animate-fade-in">
-        {/* Page Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-teal-500/20 flex items-center justify-center">
-              <Network className="h-7 w-7 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">Network Overview</h1>
-              <p className="text-sm text-muted-foreground">
-                Analyze your relationship portfolio
-              </p>
-            </div>
-          </div>
-          <SolarSystem systemId={solarSystemId} size={80} static />
-        </div>
-
-        {/* Network Score Card */}
+        {/* Network Overview Header */}
         <Card className="glass-morphism border-primary/20 overflow-hidden">
-          <div className="p-6 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-primary mb-1">{networkScore.toLocaleString()}</div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Network Score</div>
+          <div className="p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/5">
+            <div className="flex flex-col items-center text-center gap-4">
+              {/* User Info - Compact */}
+              <div className="flex items-center gap-3">
+                <UnifiedAvatar
+                  userId={currentUser?.id}
+                  size={32}
+                />
+                <span className="text-sm font-medium text-muted-foreground">{userName}</span>
+              </div>
+              
+              {/* Network Value - Large Focus */}
+              <div className="relative">
+                <div className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+                  {networkScore.toLocaleString()}
                 </div>
-                <div className="h-16 w-px bg-border/50 hidden md:block" />
-                <div className="text-center">
-                  <Badge className="bg-primary/20 text-primary border-primary/30 mb-2">
-                    Tier {tier.tier} • {tier.label}
-                  </Badge>
-                  <div className="text-xs text-muted-foreground">{tier.planets} planets unlocked</div>
+                <div className="text-sm text-muted-foreground uppercase tracking-widest mt-1">
+                  Network Value
                 </div>
               </div>
-              <NetworkScoreBadge score={networkScore} />
+              
+              {/* Tier Badges */}
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Badge className="bg-gradient-to-r from-primary/20 to-primary/10 text-primary border-primary/30 px-4 py-1.5">
+                  <Crown className="h-3.5 w-3.5 mr-1.5" />
+                  Tier {tier.tier}
+                </Badge>
+                <Badge variant="outline" className="border-accent/40 text-accent px-4 py-1.5">
+                  <Star className="h-3.5 w-3.5 mr-1.5" />
+                  {tier.label}
+                </Badge>
+                <Badge variant="secondary" className="px-4 py-1.5">
+                  {tier.planets} Planets
+                </Badge>
+              </div>
+              
+              {/* Solar System Visual */}
+              <div className="mt-2">
+                <SolarSystem systemId={solarSystemId} size={100} static />
+              </div>
             </div>
           </div>
         </Card>
-
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="glass-morphism border-0 bg-card/40">
