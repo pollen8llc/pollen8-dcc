@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { SolarSystem } from './SolarSystem';
 import { SolarSystemAvatarService } from '@/services/solarSystemAvatarService';
@@ -10,20 +10,36 @@ interface UnifiedAvatarProps {
   className?: string;
   isAdmin?: boolean;
   isContactId?: boolean;
+  /** Force static mode (no animations) for performance */
+  static?: boolean;
 }
+
+// Simple mobile detection for performance optimization
+const isMobileDevice = () => {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth < 768 || 
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+};
 
 const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({ 
   userId, 
   size = 40, 
   className = "",
   isAdmin = false,
-  isContactId = false
+  isContactId = false,
+  static: forceStatic
 }) => {
   const { currentUser } = useUser();
   const [solarSystemId, setSolarSystemId] = useState<string>("UXI8000");
   const [loading, setLoading] = useState(true);
   
   const targetUserId = userId || currentUser?.id;
+  
+  // Use static mode on mobile for better performance
+  const isStatic = useMemo(() => {
+    if (forceStatic !== undefined) return forceStatic;
+    return isMobileDevice();
+  }, [forceStatic]);
 
   useEffect(() => {
     const loadSolarSystem = async () => {
@@ -61,10 +77,10 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
   );
 
   if (loading) {
-    // Show loading placeholder
+    // Show loading placeholder - removed animate-pulse for performance
     return (
       <div 
-        className={cn(containerClasses, "bg-muted animate-pulse")}
+        className={cn(containerClasses, "bg-muted")}
         style={{ width: size, height: size }}
       />
     );
@@ -78,6 +94,7 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
       <SolarSystem 
         systemId={solarSystemId}
         size={size}
+        static={isStatic}
       />
     </div>
   );
