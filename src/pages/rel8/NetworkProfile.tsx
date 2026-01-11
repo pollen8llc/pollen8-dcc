@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath, advanceToPath } from "@/services/actv8Service";
 import { getOutreachesByActv8Contact, getOutreachesForContact } from "@/services/rel8t/outreachService";
@@ -46,8 +46,10 @@ export default function NetworkProfile() {
     setPreSelectedContacts
   } = useRelationshipWizard();
   
-  // Cascading accordion state
+  // Cascading accordion state with smart defaults
   const [openAccordion, setOpenAccordion] = useState<string | undefined>(undefined);
+  const hasInitializedAccordion = useRef(false);
+
   const {
     data: actv8Contact,
     isLoading,
@@ -61,6 +63,21 @@ export default function NetworkProfile() {
     data: analysis,
     isLoading: analysisLoading
   } = useContactAnalysis(actv8Contact?.contact_id);
+  
+  // Set smart default accordion based on onboarding state
+  useEffect(() => {
+    if (actv8Contact && !hasInitializedAccordion.current) {
+      hasInitializedAccordion.current = true;
+      
+      // If no development path selected, start onboarding at relationship level
+      // Otherwise, show the active development path
+      if (!actv8Contact.development_path_id) {
+        setOpenAccordion("relationship-level");
+      } else {
+        setOpenAccordion("development-path");
+      }
+    }
+  }, [actv8Contact]);
 
   // Fetch outreaches - filter by current path INSTANCE for proper isolation
   const {
