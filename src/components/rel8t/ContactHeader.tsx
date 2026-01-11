@@ -183,13 +183,13 @@ export function ContactHeader({
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/60 to-transparent blur-sm" />
         </div>
 
-        {/* Action Buttons - Responsive Grid */}
-        <div className="flex flex-col xs:flex-row gap-3">
+        {/* Action Buttons - Full width horizontal on desktop, stacked on mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Button 
             onClick={handleActivate} 
             variant="default" 
-            size={isMobile ? "default" : "lg"}
-            className="flex-1 gap-2 shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-[1.02]"
+            size="lg"
+            className="w-full gap-2 shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-[1.02]"
             disabled={isActivating}
           >
             {renderActivateButtonContent()}
@@ -197,8 +197,8 @@ export function ContactHeader({
           <Button 
             onClick={onEdit} 
             variant="outline" 
-            size={isMobile ? "default" : "lg"}
-            className="flex-1 gap-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02]"
+            size="lg"
+            className="w-full gap-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02]"
           >
             <Edit className="h-4 w-4" />
             Edit
