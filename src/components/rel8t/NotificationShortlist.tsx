@@ -274,23 +274,25 @@ const NotificationShortlist = () => {
                               {getSyncTitle(entry.sync_type)}
                             </h4>
                           </div>
-                          {entry.outreach?.title && (
-                            <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                              {entry.outreach.title}
-                            </p>
-                          )}
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {responder && (
+                              <span className="text-xs text-muted-foreground truncate max-w-[180px]">
+                                {responder}
+                              </span>
+                            )}
+                            <span className="text-xs text-muted-foreground/60">
+                              {format(new Date(entry.created_at), "MMM d")}
+                            </span>
+                          </div>
                         </div>
 
-                        {/* Metadata */}
+                        {/* Outreach title on right */}
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {responder && (
-                            <span className="hidden sm:block text-xs text-muted-foreground max-w-[120px] truncate">
-                              {responder}
+                          {entry.outreach?.title && (
+                            <span className="hidden sm:block text-xs text-muted-foreground max-w-[150px] truncate">
+                              {entry.outreach.title}
                             </span>
                           )}
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(entry.created_at), "MMM d")}
-                          </span>
                           
                           {/* Delete button */}
                           <Button
