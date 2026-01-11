@@ -236,7 +236,7 @@ export function RelationshipLevelAccordion({
                             </span>
                           </div>
                           {isCurrent && (
-                            <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                            <span className="hidden sm:inline-block text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full flex-shrink-0">
                               Current
                             </span>
                           )}
