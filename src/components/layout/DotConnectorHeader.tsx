@@ -2,7 +2,8 @@ import React from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Globe } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapPin, Globe, LogOut } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { NetworkScoreNumber } from "@/components/ui/network-score-badge";
@@ -14,8 +15,13 @@ interface DotConnectorHeaderProps {
 export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({ 
   className = "" 
 }) => {
-  const { currentUser } = useUser();
+  const { currentUser, logout } = useUser();
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/auth');
+  };
 
   const getFullName = () => {
     return currentUser?.name || "Organizer";
@@ -45,6 +51,16 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
         <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
           <CardContent className="p-0">
             <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
+              {/* Logout Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                className="absolute top-4 right-4 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+              
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-8">
                {/* Avatar */}
                <div 
