@@ -191,9 +191,7 @@ const NotificationShortlist = () => {
     );
   }
 
-  if (!syncLogs || syncLogs.length === 0) {
-    return null;
-  }
+  const hasResponses = syncLogs && syncLogs.length > 0;
 
   return (
     <motion.div
@@ -234,6 +232,13 @@ const NotificationShortlist = () => {
         </CardHeader>
 
         <CardContent className="pt-0">
+          {!hasResponses ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Calendar className="w-10 h-10 mx-auto mb-3 opacity-40" />
+              <p className="text-sm">No calendar responses yet</p>
+              <p className="text-xs mt-1 opacity-70">Responses to your meeting invites will appear here</p>
+            </div>
+          ) : (
           <div className="space-y-2">
             <AnimatePresence mode="popLayout">
               {syncLogs.map((entry, index) => {
@@ -312,6 +317,7 @@ const NotificationShortlist = () => {
               })}
             </AnimatePresence>
           </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>
