@@ -14,6 +14,7 @@ import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FollowUpChannelStep } from "@/components/rel8t/triggers/FollowUpChannelStep";
 import { ContactTokenInput } from "@/components/rel8t/ContactTokenInput";
+import { TriggerReviewStep } from "@/components/rel8t/triggers/TriggerReviewStep";
 
 type FlipState = 'none' | 'date' | 'time';
 
@@ -21,8 +22,9 @@ const TriggerWizard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get('returnTo');
-  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [flipState, setFlipState] = useState<FlipState>('none');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { 
     formData, 
@@ -40,18 +42,23 @@ const TriggerWizard = () => {
     e.stopPropagation();
     if (currentStep === 1) {
       setCurrentStep(2);
+    } else if (currentStep === 2) {
+      setCurrentStep(3);
     }
   };
 
   const handlePrevious = () => {
-    if (currentStep === 2) {
+    if (currentStep === 3) {
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
       setCurrentStep(1);
     }
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = await handleSubmit(returnTo || undefined);
+  const handleReviewSubmit = async (createOutreach: boolean) => {
+    setIsSubmitting(true);
+    const result = await handleSubmit(returnTo || undefined, createOutreach);
+    setIsSubmitting(false);
     
     if (result) {
       if (returnTo === 'relationship') {
@@ -60,6 +67,11 @@ const TriggerWizard = () => {
         navigate("/rel8/triggers");
       }
     }
+  };
+
+  // Keep for form submission fallback (shouldn't be used with new flow)
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
   };
 
   const handleCancel = () => {
@@ -160,7 +172,7 @@ const TriggerWizard = () => {
           </div>
           <div>
             <h1 className="text-xl font-semibold">Create Reminder</h1>
-            <p className="text-sm text-muted-foreground">Step {currentStep} of 2</p>
+            <p className="text-sm text-muted-foreground">Step {currentStep} of 3</p>
           </div>
         </div>
 
@@ -173,6 +185,10 @@ const TriggerWizard = () => {
           <div className={cn(
             "h-1 flex-1 rounded-full transition-colors",
             currentStep >= 2 ? "bg-primary" : "bg-primary/20"
+          )} />
+          <div className={cn(
+            "h-1 flex-1 rounded-full transition-colors",
+            currentStep >= 3 ? "bg-primary" : "bg-primary/20"
           )} />
         </div>
 
@@ -340,9 +356,19 @@ const TriggerWizard = () => {
                         />
                       </div>
                     )}
+
+                    {currentStep === 3 && (
+                      <TriggerReviewStep
+                        formData={formData}
+                        onSubmit={handleReviewSubmit}
+                        onPrevious={handlePrevious}
+                        isSubmitting={isSubmitting}
+                      />
+                    )}
                   </div>
 
-                  {/* Action Buttons */}
+                  {/* Action Buttons - Hide on Step 3 since TriggerReviewStep has its own */}
+                  {currentStep < 3 && (
                   <div className="flex items-center justify-between pt-6 border-t border-primary/20">
                     <div className="flex gap-3">
                       <Button
@@ -367,28 +393,18 @@ const TriggerWizard = () => {
                     </div>
 
                     <div>
-                      {currentStep < 2 ? (
-                        <Button
-                          type="button"
-                          onClick={handleNext}
-                          disabled={!canProceed()}
-                          className="backdrop-blur-sm shadow-lg"
-                        >
-                          Next
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </Button>
-                      ) : (
-                        <Button
-                          type="submit"
-                          disabled={formData.selectedContacts.length === 0 || (formData.outreachChannel && !isChannelDetailsValid())}
-                          className="backdrop-blur-sm shadow-lg"
-                        >
-                          <Check className="w-4 h-4 mr-2" />
-                          {returnTo === 'relationship' ? 'Add Reminder' : 'Create Reminder'}
-                        </Button>
-                      )}
+                      <Button
+                        type="button"
+                        onClick={handleNext}
+                        disabled={currentStep === 1 ? !canProceed() : (formData.outreachChannel && !isChannelDetailsValid())}
+                        className="backdrop-blur-sm shadow-lg"
+                      >
+                        Next
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
                     </div>
                   </div>
+                  )}
                 </form>
               </CardContent>
             </Card>
