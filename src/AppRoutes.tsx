@@ -76,7 +76,6 @@ const OutreachDetails = lazy(() => import("@/pages/rel8/OutreachDetails"));
 const ConnectHub = lazy(() => import("@/pages/rel8/ConnectHub"));
 const ConnectCreate = lazy(() => import("@/pages/rel8/ConnectCreate"));
 const ConnectImport = lazy(() => import("@/pages/rel8/ConnectImport"));
-const ConnectFind = lazy(() => import("@/pages/rel8/ConnectFind"));
 const InvitesPage = lazy(() => import("@/pages/rel8/InvitesPage"));
 
 // Nomin8 pages
@@ -516,13 +515,6 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <ConnectImport />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/rel8/connect/find" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <ConnectFind />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
