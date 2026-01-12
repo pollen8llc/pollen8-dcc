@@ -250,7 +250,7 @@ export default function NetworkProfile() {
           suggestedTone: step.suggested_tone,
           pathName: actv8Contact.path.name,
           pathId: actv8Contact.development_path_id,
-          pathInstanceId: actv8Contact.current_path_instance_id || '' // Unique instance for path isolation
+          pathInstanceId: actv8Contact.current_path_instance_id || null // Unique instance for path isolation
         });
         setPreSelectedContacts([{
           id: actv8Contact.contact.id,
