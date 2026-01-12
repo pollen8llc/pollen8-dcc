@@ -77,7 +77,7 @@ export default function NetworkOverview() {
   const [selectedChart, setSelectedChart] = useState<ChartCategory>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [timelineOffset, setTimelineOffset] = useState(0);
-  const [dateRange, setDateRange] = useState<'1W' | '1M' | '3M'>('3M');
+  const [dateRange, setDateRange] = useState<'1W' | '1M' | '3M' | '6M'>('6M');
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // Handle category click - smooth crossfade
@@ -113,26 +113,48 @@ export default function NetworkOverview() {
 
   // Navigate timeline
   const navigateTimeline = (direction: 'left' | 'right') => {
-    const step = 1;
-    if (direction === 'left' && timelineOffset > 0) {
+    if (!selectedChart) return;
+    
+    const windowSizeMap: Record<string, number> = {
+      '1W': 2,
+      '1M': 4,
+      '3M': 6,
+      '6M': 6,
+    };
+    const windowSize = windowSizeMap[dateRange] || 6;
+    const totalDataPoints = 52; // Full year = 52 weeks
+    const maxOffset = Math.max(0, totalDataPoints - windowSize);
+    const step = Math.max(1, Math.floor(windowSize / 4)); // Move by 1/4 of window size
+    
+    if (direction === 'left') {
       setTimelineOffset(prev => Math.max(0, prev - step));
-    } else if (direction === 'right' && timelineOffset < 12) {
-      setTimelineOffset(prev => Math.min(12, prev + step));
+    } else if (direction === 'right') {
+      setTimelineOffset(prev => Math.min(maxOffset, prev + step));
     }
   };
 
-  // Generate data points based on date range
-  const generateDataPoints = (baseValue: number, targetValue: number, count: number): number[] => {
-    const points: number[] = [];
-    const step = (targetValue - baseValue) / (count - 1);
-    for (let i = 0; i < count; i++) {
-      const value = baseValue + (step * i) + (Math.random() * 2 - 1); // Add slight variation
-      points.push(Math.max(0, Math.round(value)));
+  // Generate full year of data (52 weeks)
+  const generateFullYearData = (finalValue: number): { values: number[], labels: string[] } => {
+    const totalWeeks = 52;
+    const startValue = Math.max(1, finalValue * 0.7);
+    const values: number[] = [];
+    const labels: string[] = [];
+    const now = new Date();
+    
+    for (let i = totalWeeks - 1; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - (i * 7)); // Go back by weeks
+      labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      
+      const progress = (totalWeeks - i) / totalWeeks;
+      const value = startValue + (finalValue - startValue) * progress + (Math.random() * 2 - 1);
+      values.push(Math.max(0, Math.round(value)));
     }
-    return points;
+    
+    return { values, labels };
   };
 
-  // Extended chart data for scrolling timeline (18 months of data)
+  // Extended chart data for scrolling timeline
   const getChartData = (category: ChartCategory) => {
     const baseData: Record<string, { finalValue: number, color: string, label: string }> = {
       distribution: { finalValue: distributionStats.locations, color: '#cbd5e1', label: 'Locations' },
@@ -145,42 +167,30 @@ export default function NetworkOverview() {
     
     const categoryData = baseData[category || 'distribution'] || baseData.distribution;
     
-    // Determine number of data points based on date range
-    const pointCountMap: Record<string, number> = {
+    // Generate full year of data
+    const fullYearData = generateFullYearData(categoryData.finalValue);
+    const totalDataPoints = fullYearData.values.length;
+    
+    // Determine window size (number of points to show) based on date range
+    const windowSizeMap: Record<string, number> = {
       '1W': 2,   // 2 points for 1 week
       '1M': 4,   // 4 points for 1 month
-      '3M': 12,  // 4 points per month * 3 months
+      '3M': 6,   // 6 points for 3 months
+      '6M': 6,   // 6 points for 6 months
     };
     
-    const pointCount = pointCountMap[dateRange] || 12;
-    const startValue = Math.max(1, categoryData.finalValue * 0.7); // Start at 70% of final value
-    const values = generateDataPoints(startValue, categoryData.finalValue, pointCount);
-    
-    // Generate labels based on date range
-    const labels: string[] = [];
-    const now = new Date();
-    for (let i = pointCount - 1; i >= 0; i--) {
-      const date = new Date(now);
-      if (dateRange === '1W') {
-        date.setDate(date.getDate() - (i * 3.5)); // Every ~3.5 days
-        labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-      } else if (dateRange === '1M') {
-        date.setDate(date.getDate() - (i * 7)); // Every week
-        labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-      } else if (dateRange === '3M') {
-        date.setDate(date.getDate() - (i * 7)); // Every week
-        labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-      }
-    }
-    labels.reverse(); // Reverse to show oldest to newest
+    const windowSize = windowSizeMap[dateRange] || 12;
+    const maxOffset = Math.max(0, totalDataPoints - windowSize);
+    const currentOffset = Math.min(timelineOffset, maxOffset);
+    const endIdx = currentOffset + windowSize;
     
     return { 
-      months: labels,
-      values: values,
+      months: fullYearData.labels.slice(currentOffset, endIdx),
+      values: fullYearData.values.slice(currentOffset, endIdx),
       color: categoryData.color, 
       label: categoryData.label,
-      canGoLeft: false,
-      canGoRight: false
+      canGoLeft: currentOffset > 0,
+      canGoRight: currentOffset < maxOffset
     };
   };
 
@@ -262,7 +272,7 @@ export default function NetworkOverview() {
                   
                   {/* Date Range Filter */}
                   <div className="flex items-center justify-center gap-2 mb-4">
-                    {(['1W', '1M', '3M'] as const).map((range) => (
+                    {(['1W', '1M', '3M', '6M'] as const).map((range) => (
                       <button
                         key={range}
                         onClick={() => {
@@ -282,10 +292,28 @@ export default function NetworkOverview() {
                   
                   {/* Canvas Timeline Area */}
                   <div className="relative h-[280px] flex items-center">
+                    {/* Left Navigation */}
+                    <button 
+                      onClick={() => navigateTimeline('left')}
+                      disabled={!getChartData(selectedChart).canGoLeft}
+                      className={`absolute left-0 z-10 p-3 bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 transition-all flex items-center justify-center ${getChartData(selectedChart).canGoLeft ? 'hover:bg-slate-700 hover:border-slate-600 cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
+                    >
+                      <ChevronLeft className="h-5 w-5 text-teal-400" />
+                    </button>
+                    
+                    {/* Right Navigation */}
+                    <button 
+                      onClick={() => navigateTimeline('right')}
+                      disabled={!getChartData(selectedChart).canGoRight}
+                      className={`absolute right-0 z-10 p-3 bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 transition-all flex items-center justify-center ${getChartData(selectedChart).canGoRight ? 'hover:bg-slate-700 hover:border-slate-600 cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
+                    >
+                      <ChevronRight className="h-5 w-5 text-teal-400" />
+                    </button>
+                      
                       {/* Canvas */}
                       <div 
                         ref={canvasRef}
-                        className="w-full h-full overflow-hidden relative"
+                        className="w-full h-full mx-10 overflow-hidden relative"
                       >
                         {/* Grid Background */}
                         <div className="absolute inset-0">
@@ -297,18 +325,14 @@ export default function NetworkOverview() {
                               style={{ top: `${i * 25}%` }}
                             />
                           ))}
-                          {/* Vertical grid lines - dynamic based on data points */}
-                          {selectedChart && (() => {
-                            const chartData = getChartData(selectedChart);
-                            const pointCount = chartData.values.length;
-                            return Array.from({ length: pointCount }).map((_, i) => (
-                              <div 
-                                key={`v-${i}`} 
-                                className="absolute h-full border-l border-slate-700/40" 
-                                style={{ left: `${(i / (pointCount - 1 || 1)) * 100}%` }}
-                              />
-                            ));
-                          })()}
+                          {/* Vertical grid lines - dynamic based on visible data points */}
+                          {selectedChart && getChartData(selectedChart).values.map((_, i, arr) => (
+                            <div 
+                              key={`v-${i}`} 
+                              className="absolute h-full border-l border-slate-700/40" 
+                              style={{ left: `${(i / (arr.length - 1 || 1)) * 100}%` }}
+                            />
+                          ))}
               </div>
               
                         {/* Timeline Content with transition */}
@@ -420,12 +444,41 @@ export default function NetworkOverview() {
                                 {month}
                               </span>
                             ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
+                          </div>
+                        </div>
+                      </div>
                     </div>
+
+                  {/* Timeline indicator */}
+                  <div className="flex items-center justify-center gap-1 mt-4 pb-2">
+                    {(() => {
+                      if (!selectedChart) return null;
+                      const windowSizeMap: Record<string, number> = {
+                        '1W': 2,
+                        '1M': 4,
+                        '3M': 12,
+                        '6M': 6,
+                      };
+                      const windowSize = windowSizeMap[dateRange] || 6;
+                      const totalDataPoints = 52;
+                      const maxOffset = Math.max(0, totalDataPoints - windowSize);
+                      const step = Math.max(1, Math.floor(windowSize / 4));
+                      const indicatorCount = Math.ceil(maxOffset / step) + 1;
+                      
+                      return Array.from({ length: indicatorCount }).map((_, i) => {
+                        const offsetForDot = i * step;
+                        const isActive = Math.abs(offsetForDot - timelineOffset) < step / 2;
+                        
+                        return (
+                          <div 
+                            key={i}
+                            className={`h-1 rounded-full transition-all ${isActive ? 'w-4 bg-teal-400' : 'w-1 bg-slate-700'}`}
+                          />
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
               )}
                   </div>
             </div>
