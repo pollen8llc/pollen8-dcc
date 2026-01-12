@@ -9,15 +9,15 @@ import {
 } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
-import { useModuleCompletion } from "@/hooks/useModuleCompletion";
+import { useSetupProgress } from "@/hooks/useSetupProgress";
 
 export function Rel8OnlyNavigation() {
   const location = useLocation();
   const { currentUser } = useUser();
-  const { rel8_complete } = useModuleCompletion();
+  const { completedCount, totalTasks, isComplete } = useSetupProgress();
   
-  // Check if onboarding is complete
-  const isOnboardingComplete = rel8_complete === true;
+  // Calculate progress percentage
+  const progressPercentage = totalTasks > 0 ? (completedCount / totalTasks) * 100 : 0;
   
   const navItems = [
     {
@@ -52,25 +52,49 @@ export function Rel8OnlyNavigation() {
 
   return (
     <nav className="flex items-center gap-2 p-2 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg">
-      {/* Avatar Link with onboarding ring */}
+      {/* Avatar Link with progress ring */}
       <Link
         to="/rel8"
         className="relative flex items-center justify-center flex-shrink-0"
       >
-        {/* Pulsing onboarding ring when incomplete */}
-        {!isOnboardingComplete && (
-          <div className="absolute inset-0 rounded-full">
-            <div className="absolute inset-[-3px] rounded-full bg-gradient-to-r from-primary via-accent to-primary animate-[pulse_2s_ease-in-out_infinite] opacity-60" />
-            <div className="absolute inset-[-2px] rounded-full border-2 border-primary/80 animate-[pulse_2s_ease-in-out_infinite]" />
+        {/* Progress ring when onboarding incomplete */}
+        {!isComplete && (
+          <div className="absolute inset-[-4px]">
+            {/* Background ring */}
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
+              <circle
+                cx="24"
+                cy="24"
+                r="22"
+                fill="none"
+                className="stroke-muted/30"
+                strokeWidth="3"
+              />
+              {/* Progress arc */}
+              <circle
+                cx="24"
+                cy="24"
+                r="22"
+                fill="none"
+                className="stroke-primary"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeDasharray={`${progressPercentage * 1.38} 138`}
+              />
+            </svg>
+            {/* Animated glow pulse */}
+            <div 
+              className="absolute inset-0 rounded-full animate-[ping_1.5s_ease-in-out_infinite] opacity-40"
+              style={{
+                background: `conic-gradient(from 0deg, hsl(var(--primary)) ${progressPercentage}%, transparent ${progressPercentage}%)`,
+              }}
+            />
           </div>
         )}
         <UnifiedAvatar
           userId={currentUser?.id}
           size={40}
-          className={cn(
-            "sm:w-10 sm:h-10 md:w-10 md:h-10 relative z-10",
-            !isOnboardingComplete && "ring-2 ring-primary/50"
-          )}
+          className="sm:w-10 sm:h-10 md:w-10 md:h-10 relative z-10"
         />
       </Link>
       
