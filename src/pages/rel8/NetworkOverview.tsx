@@ -203,7 +203,7 @@ export default function NetworkOverview() {
         <div className="grid grid-cols-12 gap-3 md:gap-4">
           {/* Main Panel - Network Value / Chart View (full width) */}
           <div className="col-span-12">
-            <div className="rounded-2xl bg-slate-900 border border-teal-500/30">
+            <div className="rounded-2xl glass-morphism border-0 bg-card/50 backdrop-blur-md hover:bg-card/70 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
               
               {/* Network Value Display */}
               {!selectedChart && (
@@ -211,8 +211,8 @@ export default function NetworkOverview() {
                   {/* Label */}
                   <div className="text-xs text-teal-400/70 uppercase tracking-[0.2em] mb-3">
                     Network Value
-                  </div>
-                  
+              </div>
+              
                   {/* Main Score Display */}
                   <div className="font-mono text-5xl sm:text-6xl md:text-7xl font-bold tabular-nums">
                     {(() => {
@@ -244,9 +244,9 @@ export default function NetworkOverview() {
                         <span>{userName}</span>
                       </div>
                       <span>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                  </div>
                 </div>
                 </div>
+              </div>
               )}
               
               {/* Chart View */}
@@ -444,10 +444,10 @@ export default function NetworkOverview() {
                                 {month}
                               </span>
                             ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
                   {/* Timeline indicator */}
                   <div className="flex items-center justify-center gap-1 mt-4 pb-2">
@@ -468,8 +468,8 @@ export default function NetworkOverview() {
                       return Array.from({ length: indicatorCount }).map((_, i) => {
                         const offsetForDot = i * step;
                         const isActive = Math.abs(offsetForDot - timelineOffset) < step / 2;
-                        
-                        return (
+                
+                return (
                           <div 
                             key={i}
                             className={`h-1 rounded-full transition-all ${isActive ? 'w-4 bg-teal-400' : 'w-1 bg-slate-700'}`}
@@ -478,7 +478,7 @@ export default function NetworkOverview() {
                       });
                     })()}
                   </div>
-                </div>
+                    </div>
               )}
                   </div>
             </div>
@@ -488,7 +488,7 @@ export default function NetworkOverview() {
           <div className="col-span-6 md:col-span-4">
             <div 
               onClick={() => handleCategoryClick('distribution')}
-              className={`relative h-full min-h-[96px] rounded-xl bg-slate-900/70 border overflow-hidden p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${selectedChart === 'distribution' ? 'border-slate-300 ring-2 ring-slate-300/30' : 'border-slate-400/30 hover:border-slate-300/50'}`}
+              className={`relative h-full min-h-[96px] rounded-xl glass-morphism border-0 bg-card/50 backdrop-blur-md hover:bg-card/70 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 overflow-hidden p-4 cursor-pointer hover:scale-[1.02] ${selectedChart === 'distribution' ? 'ring-2 ring-slate-300/30' : ''}`}
             >
               <div className="flex flex-col justify-center h-full">
                 <div className="text-[10px] text-slate-400/60 uppercase tracking-widest mb-1">Distribution</div>
@@ -498,13 +498,13 @@ export default function NetworkOverview() {
               </div>
                 <div className="text-xs text-slate-400/80 mt-1">Locations</div>
               </div>
+              </div>
             </div>
-          </div>
           
           <div className="col-span-6 md:col-span-4">
             <div 
               onClick={() => handleCategoryClick('relationships')}
-              className={`relative h-full min-h-[96px] rounded-xl bg-slate-900/70 border overflow-hidden p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${selectedChart === 'relationships' ? 'border-teal-400 ring-2 ring-teal-400/30' : 'border-teal-500/30 hover:border-teal-400/50'}`}
+              className={`relative h-full min-h-[96px] rounded-xl glass-morphism border-0 bg-card/50 backdrop-blur-md hover:bg-card/70 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 overflow-hidden p-4 cursor-pointer hover:scale-[1.02] ${selectedChart === 'relationships' ? 'ring-2 ring-teal-400/30' : ''}`}
             >
               <div className="flex flex-col justify-center h-full">
                 <div className="text-[10px] text-teal-400/60 uppercase tracking-widest mb-1">Relationships</div>
@@ -515,45 +515,45 @@ export default function NetworkOverview() {
                 <div className="text-xs text-teal-400/80 mt-1">Connections</div>
               </div>
             </div>
-          </div>
+                </div>
           
           <div className="col-span-6 md:col-span-4">
             <div 
               onClick={() => handleCategoryClick('contacts')}
-              className={`relative h-full min-h-[96px] rounded-xl bg-slate-900/70 border overflow-hidden p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${selectedChart === 'contacts' ? 'border-yellow-400 ring-2 ring-yellow-400/30' : 'border-yellow-500/30 hover:border-yellow-400/50'}`}
+              className={`relative h-full min-h-[96px] rounded-xl glass-morphism bg-card/50 backdrop-blur-md hover:bg-card/70 border overflow-hidden p-4 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/10 ${selectedChart === 'contacts' ? 'border-yellow-400 ring-2 ring-yellow-400/30' : 'border-yellow-500/30 hover:border-yellow-400/50'}`}
             >
               <div className="flex flex-col justify-center h-full">
                 <div className="text-[10px] text-yellow-400/60 uppercase tracking-widest mb-1">Contacts</div>
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-yellow-400" />
                   <span className="text-2xl font-bold text-yellow-300">{totalContacts}</span>
-                </div>
-                <div className="text-xs text-yellow-400/80 mt-1">Total</div>
               </div>
-            </div>
-          </div>
+                <div className="text-xs text-yellow-400/80 mt-1">Total</div>
+                </div>
+              </div>
+                </div>
           
           {/* Row 2 */}
           <div className="col-span-6 md:col-span-4">
             <div 
               onClick={() => handleCategoryClick('strength')}
-              className={`relative h-full min-h-[96px] rounded-xl bg-slate-900/70 border overflow-hidden p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${selectedChart === 'strength' ? 'border-green-400 ring-2 ring-green-400/30' : 'border-green-500/30 hover:border-green-400/50'}`}
+              className={`relative h-full min-h-[96px] rounded-xl glass-morphism bg-card/50 backdrop-blur-md hover:bg-card/70 border overflow-hidden p-4 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/10 ${selectedChart === 'strength' ? 'border-green-400 ring-2 ring-green-400/30' : 'border-green-500/30 hover:border-green-400/50'}`}
             >
               <div className="flex flex-col justify-center h-full">
                 <div className="text-[10px] text-green-400/60 uppercase tracking-widest mb-1">Avg Strength</div>
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-green-400" />
                   <span className="text-2xl font-bold text-green-300">{avgScore}%</span>
-                </div>
+              </div>
                 <div className="text-xs text-green-400/80 mt-1">Network</div>
+                </div>
               </div>
             </div>
-          </div>
           
           <div className="col-span-6 md:col-span-4">
             <div 
               onClick={() => handleCategoryClick('orbits')}
-              className={`relative h-full min-h-[96px] rounded-xl bg-slate-900/70 border overflow-hidden p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${selectedChart === 'orbits' ? 'border-purple-400 ring-2 ring-purple-400/30' : 'border-purple-500/30 hover:border-purple-400/50'}`}
+              className={`relative h-full min-h-[96px] rounded-xl glass-morphism bg-card/50 backdrop-blur-md hover:bg-card/70 border overflow-hidden p-4 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/10 ${selectedChart === 'orbits' ? 'border-purple-400 ring-2 ring-purple-400/30' : 'border-purple-500/30 hover:border-purple-400/50'}`}
             >
               <div className="flex flex-col justify-center h-full">
                 <div className="text-[10px] text-purple-400/60 uppercase tracking-widest mb-1">Orbits</div>
@@ -563,13 +563,13 @@ export default function NetworkOverview() {
                 </div>
                 <div className="text-xs text-purple-400/80 mt-1">Active</div>
               </div>
-            </div>
-          </div>
+                </div>
+              </div>
           
           <div className="col-span-6 md:col-span-4">
             <div 
               onClick={() => handleCategoryClick('communities')}
-              className={`relative h-full min-h-[96px] rounded-xl bg-slate-900/70 border overflow-hidden p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${selectedChart === 'communities' ? 'border-blue-400 ring-2 ring-blue-400/30' : 'border-blue-500/30 hover:border-blue-400/50'}`}
+              className={`relative h-full min-h-[96px] rounded-xl glass-morphism bg-card/50 backdrop-blur-md hover:bg-card/70 border overflow-hidden p-4 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/10 ${selectedChart === 'communities' ? 'border-blue-400 ring-2 ring-blue-400/30' : 'border-blue-500/30 hover:border-blue-400/50'}`}
             >
               <div className="flex flex-col justify-center h-full">
                 <div className="text-[10px] text-blue-400/60 uppercase tracking-widest mb-1">Communities</div>
@@ -581,26 +581,26 @@ export default function NetworkOverview() {
               </div>
             </div>
           </div>
-        </div>
+            </div>
 
         {/* Quick Links */}
         <div className="grid grid-cols-3 gap-3">
           <Link to="/rel8/actv8" className="group">
-            <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900/60 border border-teal-500/20 hover:border-teal-500/40 transition-all">
+            <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-morphism bg-card/50 backdrop-blur-md hover:bg-card/70 border border-teal-500/20 hover:border-teal-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
               <Zap className="h-4 w-4 text-teal-400" />
               <span className="text-sm font-medium text-teal-300 hidden sm:inline">Actv8</span>
               <ArrowRight className="h-3 w-3 text-teal-400/50 group-hover:text-teal-400 transition-colors" />
                 </div>
           </Link>
           <Link to="/rel8/insights" className="group">
-            <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900/60 border border-purple-500/20 hover:border-purple-500/40 transition-all">
+            <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-morphism bg-card/60 backdrop-blur-md hover:bg-card/80 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
               <BarChart3 className="h-4 w-4 text-purple-400" />
               <span className="text-sm font-medium text-purple-300 hidden sm:inline">Insights</span>
               <ArrowRight className="h-3 w-3 text-purple-400/50 group-hover:text-purple-400 transition-colors" />
                 </div>
           </Link>
           <Link to="/admin?tab=connection-strength" className="group">
-            <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900/60 border border-blue-500/20 hover:border-blue-500/40 transition-all">
+            <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-morphism bg-card/60 backdrop-blur-md hover:bg-card/80 border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
               <Target className="h-4 w-4 text-blue-400" />
               <span className="text-sm font-medium text-blue-300 hidden sm:inline">Settings</span>
               <ArrowRight className="h-3 w-3 text-blue-400/50 group-hover:text-blue-400 transition-colors" />
@@ -609,7 +609,7 @@ export default function NetworkOverview() {
         </div>
 
         {/* Connection Strength Distribution */}
-        <div className="rounded-2xl bg-slate-900/80 border border-teal-500/20 p-5">
+        <div className="rounded-2xl glass-morphism bg-card/70 backdrop-blur-md border border-teal-500/20 p-5">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="h-5 w-5 text-teal-400" />
             <h3 className="text-lg font-semibold text-teal-300">Connection Strength Distribution</h3>
@@ -628,7 +628,7 @@ export default function NetworkOverview() {
               ][index];
               
               return (
-                <div key={config.id} className={`p-4 rounded-xl bg-slate-900/60 border ${colorStyles.border}`}>
+                <div key={config.id} className={`p-4 rounded-xl bg-card/75 border ${colorStyles.border}`}>
                   <div className="flex items-center justify-between mb-2">
                     <span className={`text-sm font-semibold ${colorStyles.text}`}>{config.label}</span>
                     <span className={`text-lg font-bold ${colorStyles.textBold}`}>{count}</span>

@@ -191,7 +191,10 @@
 
 /* New utilities for glassmorphism */
 .glass-morphism {
-  @apply backdrop-blur-md bg-white/5 border border-white/10 shadow-lg;
+  border-width: 1px;
+  border-color: rgb(255 255 255 / 0.1);
+  background-color: rgb(255 255 255 / 0.02);
+  @apply backdrop-blur-md shadow-lg;
 }
 
 .glass-morphism-hover {
