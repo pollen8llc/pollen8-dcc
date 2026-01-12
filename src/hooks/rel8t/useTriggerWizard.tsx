@@ -169,6 +169,13 @@ export function useTriggerWizard() {
           if (actv8Context?.actv8StepIndex !== undefined && actv8Context?.actv8StepIndex !== null) {
             outreachData.actv8_step_index = actv8Context.actv8StepIndex;
           }
+          // CRITICAL: Add path instance ID for proper isolation between path runs
+          if (actv8Context?.actv8StepData?.pathId) {
+            outreachData.path_id = actv8Context.actv8StepData.pathId;
+          }
+          if (actv8Context?.actv8StepData?.pathInstanceId) {
+            outreachData.path_instance_id = actv8Context.actv8StepData.pathInstanceId;
+          }
           
           await createOutreach(outreachData, contactIds);
         }
