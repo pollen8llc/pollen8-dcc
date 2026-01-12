@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import ContactList from "@/components/rel8t/ContactList";
-import { Plus, Trash2, CheckSquare, Square, Search, Filter, Users, Zap, Loader2, Heart } from "lucide-react";
+import { Plus, Trash2, CheckSquare, Square, Search, Filter, Users, Zap, Loader2, Heart, FolderPlus } from "lucide-react";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -222,7 +222,7 @@ const Contacts = () => {
           {isSelectionMode ? (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               {/* Left side buttons */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:flex-1">
+              <div className="flex flex-wrap items-stretch sm:items-center gap-2 sm:flex-1">
                 <Button
                   variant="outline"
                   onClick={handleSelectAll}
@@ -239,72 +239,69 @@ const Contacts = () => {
                   </span>
                 </Button>
                 
-                {selectedContacts.length > 0 && (
-                  <>
-                    <Button
-                      variant="default"
-                      onClick={handleBuildRapportWithSelected}
-                      className="flex items-center justify-center gap-2 w-full sm:w-auto"
-                      size="sm"
-                    >
-                      <Heart className="h-4 w-4" />
-                      <span>Build Rapport</span>
-                    </Button>
-                    
-                    <Button
-                      variant="default"
-                      onClick={handleActivateSelected}
-                      disabled={isActivating}
-                      className="flex items-center justify-center gap-2 w-full sm:w-auto"
-                      size="sm"
-                    >
-                      {isActivating ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Adding...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Zap className="h-4 w-4" />
-                          <span>Activate</span>
-                        </>
-                      )}
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsCategorizeDialogOpen(true)}
-                      className="flex items-center justify-center gap-2 w-full sm:w-auto"
-                      size="sm"
-                    >
-                      <Filter className="h-4 w-4" />
-                      <span>Categorize</span>
-                    </Button>
-                  </>
-                )}
+                {/* Always show action buttons in selection mode */}
+                <Button
+                  variant="default"
+                  onClick={handleBuildRapportWithSelected}
+                  disabled={selectedContacts.length === 0}
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                  size="sm"
+                >
+                  <Heart className="h-4 w-4" />
+                  <span>Build Rapport{selectedContacts.length > 0 && ` (${selectedContacts.length})`}</span>
+                </Button>
                 
-              <Button
-                variant="outline"
-                onClick={toggleSelectionMode}
-                className="w-full sm:w-auto"
-                size="sm"
-              >
-                Close
-              </Button>
-              </div>
-              
-              {/* Delete button - right side on desktop, bottom on mobile */}
-              {selectedContacts.length > 0 && (
+                <Button
+                  variant="default"
+                  onClick={handleActivateSelected}
+                  disabled={isActivating || selectedContacts.length === 0}
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                  size="sm"
+                >
+                  {isActivating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Adding...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4" />
+                      <span>Activate{selectedContacts.length > 0 && ` (${selectedContacts.length})`}</span>
+                    </>
+                  )}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCategorizeDialogOpen(true)}
+                  disabled={selectedContacts.length === 0}
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                  size="sm"
+                >
+                  <Filter className="h-4 w-4" />
+                  <span>Categorize{selectedContacts.length > 0 && ` (${selectedContacts.length})`}</span>
+                </Button>
+                
                 <Button
                   variant="destructive"
                   onClick={handleBulkDelete}
-                  className="flex items-center justify-center gap-2 w-full sm:w-auto order-last sm:order-none"
+                  disabled={selectedContacts.length === 0}
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto"
                   size="sm"
                 >
                   <Trash2 className="h-4 w-4" />
-                  <span>Delete ({selectedContacts.length})</span>
+                  <span>Delete{selectedContacts.length > 0 && ` (${selectedContacts.length})`}</span>
                 </Button>
-              )}
+                
+                <Button
+                  variant="outline"
+                  onClick={toggleSelectionMode}
+                  className="w-full sm:w-auto"
+                  size="sm"
+                >
+                  Close
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
@@ -325,6 +322,16 @@ const Contacts = () => {
               >
                 <Plus className="h-4 w-4" />
                 <span>Add Contact</span>
+              </Button>
+              
+              <Button 
+                variant="outline"
+                onClick={() => navigate("/rel8/categories")}
+                className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                size="sm"
+              >
+                <FolderPlus className="h-4 w-4" />
+                <span>Categories</span>
               </Button>
             </div>
           )}
