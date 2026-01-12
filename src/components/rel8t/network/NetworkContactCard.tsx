@@ -85,9 +85,9 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
   return (
     <>
       <Link to={`/rel8/actv8/${contact.id}/profile`}>
-        <Card className="cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm border-2 bg-gradient-to-br from-card/80 to-card/40 hover:border-primary/30 hover:shadow-primary/10 hover:shadow-2xl group relative overflow-hidden">
-          {/* Gradient border effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+        <Card className="cursor-pointer hover:shadow-md transition-all bg-card/60 backdrop-blur-xl border border-primary/20 hover:border-primary/30 hover:shadow-primary/10 hover:shadow-lg group relative overflow-hidden">
+          {/* Subtle hover glow effect */}
+          <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
           
           {/* Paused overlay */}
           {isPaused && (
