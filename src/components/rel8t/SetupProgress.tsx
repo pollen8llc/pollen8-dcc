@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
@@ -9,7 +10,8 @@ import {
   Coffee,
   Check,
   ArrowRight,
-  LucideIcon
+  LucideIcon,
+  Info
 } from "lucide-react";
 import { useSetupProgress, SetupTask } from "@/hooks/useSetupProgress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +22,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -29,6 +38,14 @@ const iconMap: Record<string, LucideIcon> = {
   Bell,
   Zap,
   Coffee,
+};
+
+// Info content for tasks that need explanation
+const taskInfoContent: Record<string, { title: string; description: string }> = {
+  "build-rapport": {
+    title: "What is Building Rapport?",
+    description: "Building rapport is the foundation of meaningful relationships. When you complete a path step, you're making intentional progress in developing a connection—whether that's scheduling a coffee chat, sending a thoughtful message, or following up after a meeting. This structured approach helps you nurture relationships systematically rather than leaving them to chance. Each step you complete strengthens your network and deepens your connections."
+  }
 };
 
 const SetupProgress = () => {
@@ -129,9 +146,11 @@ interface SetupTaskAccordionProps {
 
 const SetupTaskAccordion = ({ task, index, isFirstIncomplete }: SetupTaskAccordionProps) => {
   const navigate = useNavigate();
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
   const Icon = iconMap[task.icon] || Folder;
   const isComplete = task.current >= task.target;
   const progress = (task.current / task.target) * 100;
+  const hasInfo = taskInfoContent[task.id];
 
   return (
     <motion.div
@@ -169,10 +188,21 @@ const SetupTaskAccordion = ({ task, index, isFirstIncomplete }: SetupTaskAccordi
             {/* Title and description */}
             <div className="flex-1 text-left">
               <h4 className={cn(
-                "font-semibold text-sm",
+                "font-semibold text-sm inline-flex items-center gap-1.5",
                 isComplete && "text-muted-foreground line-through"
               )}>
                 {task.title}
+                {hasInfo && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsInfoOpen(true);
+                    }}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </h4>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {task.description}
@@ -240,6 +270,20 @@ const SetupTaskAccordion = ({ task, index, isFirstIncomplete }: SetupTaskAccordi
           </div>
         </AccordionContent>
       </AccordionItem>
+
+      {/* Info Dialog */}
+      {hasInfo && (
+        <Dialog open={isInfoOpen} onOpenChange={setIsInfoOpen}>
+          <DialogContent className="bg-card/95 backdrop-blur-xl border-primary/20">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold">{hasInfo.title}</DialogTitle>
+              <DialogDescription className="text-muted-foreground pt-2 leading-relaxed">
+                {hasInfo.description}
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      )}
     </motion.div>
   );
 };
