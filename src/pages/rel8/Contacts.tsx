@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import ContactList from "@/components/rel8t/ContactList";
-import { Plus, Trash2, CheckSquare, Square, Search, Filter, Users, Zap, Loader2, Heart, FolderPlus } from "lucide-react";
+import { Plus, Trash2, CheckSquare, Square, Search, Filter, Users, Zap, Loader2, FolderPlus } from "lucide-react";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -239,17 +239,7 @@ const Contacts = () => {
                   </span>
                 </Button>
                 
-                {/* Always show action buttons in selection mode */}
-                <Button
-                  variant="default"
-                  onClick={handleBuildRapportWithSelected}
-                  disabled={selectedContacts.length === 0}
-                  className="flex items-center justify-center gap-2 w-full sm:w-auto"
-                  size="sm"
-                >
-                  <Heart className="h-4 w-4" />
-                  <span>Build Rapport{selectedContacts.length > 0 && ` (${selectedContacts.length})`}</span>
-                </Button>
+                {/* Activate button */}
                 
                 <Button
                   variant="default"
