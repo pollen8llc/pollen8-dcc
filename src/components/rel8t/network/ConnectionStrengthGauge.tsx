@@ -35,7 +35,8 @@ export function ConnectionStrengthGauge({
           className={cn(
             "h-full rounded-full transition-all duration-500 bg-gradient-to-r",
             strengthData.gradientClass,
-            strength === 'star' && "shadow-[0_0_10px_rgba(20,184,166,0.4)]"
+            strength === 'star' && "shadow-[0_0_10px_rgba(139,92,246,0.4)]",
+            strength === 'flame' && "shadow-[0_0_8px_rgba(99,102,241,0.3)]"
           )}
           style={{ width: `${strengthData.percentage}%` }}
         />

@@ -22,40 +22,40 @@ export const connectionStrengthConfig: Record<ConnectionStrengthLevel, StrengthC
     label: 'Spark',
     description: 'New or weak connection',
     percentage: 25,
-    color: 'hsl(24, 95%, 53%)', // orange-500
-    bgClass: 'bg-orange-500',
-    gradientClass: 'from-orange-500 to-orange-400',
-    textClass: 'text-orange-500',
+    color: 'hsl(199, 89%, 86%)', // sky-300
+    bgClass: 'bg-sky-300',
+    gradientClass: 'from-white to-sky-300',
+    textClass: 'text-sky-300',
   },
   ember: {
     id: 'ember',
     label: 'Ember',
     description: 'Developing relationship',
     percentage: 50,
-    color: 'hsl(45, 93%, 47%)', // yellow-500
-    bgClass: 'bg-yellow-500',
-    gradientClass: 'from-orange-400 to-yellow-400',
-    textClass: 'text-yellow-500',
+    color: 'hsl(217, 91%, 60%)', // blue-500
+    bgClass: 'bg-blue-500',
+    gradientClass: 'from-sky-300 to-blue-500',
+    textClass: 'text-blue-400',
   },
   flame: {
     id: 'flame',
     label: 'Flame',
     description: 'Established connection',
     percentage: 75,
-    color: 'hsl(160, 84%, 39%)', // emerald-500
-    bgClass: 'bg-emerald-500',
-    gradientClass: 'from-yellow-400 to-emerald-500',
-    textClass: 'text-emerald-500',
+    color: 'hsl(239, 84%, 67%)', // indigo-500
+    bgClass: 'bg-indigo-500',
+    gradientClass: 'from-blue-500 to-indigo-500',
+    textClass: 'text-indigo-400',
   },
   star: {
     id: 'star',
     label: 'Star',
     description: 'Strong, trusted relationship',
     percentage: 100,
-    color: 'hsl(160, 84%, 39%)', // emerald-500
-    bgClass: 'bg-teal-500',
-    gradientClass: 'from-emerald-500 to-teal-400',
-    textClass: 'text-teal-500',
+    color: 'hsl(258, 90%, 66%)', // violet-500
+    bgClass: 'bg-violet-500',
+    gradientClass: 'from-indigo-500 to-violet-500',
+    textClass: 'text-violet-400',
   },
 };
 
