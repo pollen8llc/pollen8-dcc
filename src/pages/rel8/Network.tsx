@@ -221,7 +221,7 @@ export default function Network() {
               className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl border-2 transition-all duration-200 ${
                 activeTab === 'contacts'
                   ? 'bg-primary/20 border-primary text-primary shadow-lg shadow-primary/20 ring-2 ring-primary/20'
-                  : 'bg-blue-500/10 border-blue-500/50 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500'
+                  : 'bg-card/60 border-border/50 text-muted-foreground hover:bg-card/80 hover:border-primary/30'
               }`}
             >
               <Users className="h-5 w-5" />
@@ -231,16 +231,16 @@ export default function Network() {
               onClick={() => setActiveTab('outreach')}
               className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl border-2 transition-all duration-200 ${
                 activeTab === 'outreach'
-                  ? 'bg-teal-500/20 border-teal-500 text-teal-400 shadow-lg shadow-teal-500/20 ring-2 ring-teal-500/20'
-                  : 'bg-blue-500/10 border-blue-500/50 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500'
+                  ? 'bg-primary/20 border-primary text-primary shadow-lg shadow-primary/20 ring-2 ring-primary/20'
+                  : 'bg-card/60 border-border/50 text-muted-foreground hover:bg-card/80 hover:border-primary/30'
               }`}
             >
               <CalendarCheck className="h-5 w-5" />
               <span>Outreach</span>
               {pendingOutreachCount > 0 && (
                 <span className="relative ml-1 inline-flex">
-                  <span className="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-teal-400 opacity-60"></span>
-                  <span className="relative inline-flex rounded-full h-6 w-6 bg-gradient-to-br from-teal-400 to-teal-600 text-white text-xs font-bold items-center justify-center shadow-lg shadow-teal-500/50 border-2 border-teal-300">
+                  <span className="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-primary opacity-60"></span>
+                  <span className="relative inline-flex rounded-full h-6 w-6 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-xs font-bold items-center justify-center shadow-lg shadow-primary/50 border-2 border-primary/50">
                     {pendingOutreachCount > 9 ? '9+' : pendingOutreachCount}
                   </span>
                 </span>
@@ -254,7 +254,7 @@ export default function Network() {
             ) : (
               <>
                 {/* Filters Card */}
-                <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mb-6">
+                <Card className="bg-card/60 backdrop-blur-xl border-primary/20 mb-6">
                   <CardContent className="p-4">
                     <NetworkFilters
                       searchQuery={searchQuery}
@@ -287,7 +287,7 @@ export default function Network() {
                   ))}
 
                   {filteredContacts.length === 0 && (
-                    <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md">
+                    <Card className="bg-card/60 backdrop-blur-xl border-primary/20">
                       <CardContent className="flex flex-col items-center justify-center py-12">
                         <p className="text-muted-foreground mb-3">No contacts match your filters</p>
                         <Button 
@@ -318,7 +318,7 @@ export default function Network() {
 
           <TabsContent value="outreach" className="mt-0">
             {/* Outreach Tasks Card - matching /rel8 Dashboard style */}
-            <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md">
+            <Card className="bg-card/60 backdrop-blur-xl border-primary/20">
               <div className="p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent backdrop-blur-xl border-b border-primary/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
