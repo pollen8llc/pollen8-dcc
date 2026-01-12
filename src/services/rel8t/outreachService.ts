@@ -789,14 +789,14 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     // If no actv8_contact_id but we have contactIds, try to find matching actv8 contact
     if (!actv8ContactId && contactIds.length > 0) {
       try {
-        const { data: matchingActv8 } = await supabase
-          .from("rms_actv8_contacts")
-          .select("id, current_step_index")
-          .eq("user_id", user.id)
-          .in("contact_id", contactIds)
-          .eq("status", "active")
-          .limit(1)
-          .maybeSingle();
+      const { data: matchingActv8 } = await supabase
+        .from("rms_actv8_contacts")
+        .select("id, current_step_index, current_path_instance_id")
+        .eq("user_id", user.id)
+        .in("contact_id", contactIds)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
         
         if (matchingActv8) {
           actv8ContactId = matchingActv8.id;
@@ -810,7 +810,8 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
             .from("rms_outreach")
             .update({
               actv8_contact_id: actv8ContactId,
-              actv8_step_index: actv8StepIndex
+              actv8_step_index: actv8StepIndex,
+              path_instance_id: matchingActv8.current_path_instance_id,
             })
             .eq("id", outreachId);
           
