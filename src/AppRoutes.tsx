@@ -145,9 +145,6 @@ const P8Dashboard = lazy(() => import("@/pages/p8/P8Dashboard"));
 // Integrations Page (standalone)
 const Intgr8 = lazy(() => import("@/pages/Intgr8"));
 
-// Orbits page
-const Orbits = lazy(() => import("@/pages/Orbits"));
-
 // Loading component
 const AppLoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -862,15 +859,6 @@ const AppRoutes = () => {
             <ProtectedRoute>
               <Intgr8 />
             </ProtectedRoute>
-          } />
-
-          {/* Orbits page - Recurring social commitment system */}
-          <Route path="/orbits" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <Orbits />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
           } />
 
           {/* Documentation and Features pages */}

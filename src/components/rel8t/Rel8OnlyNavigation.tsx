@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { 
   Users, 
   Building2, 
-  Globe,
+  Upload,
   Calendar,
 } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
@@ -30,11 +30,11 @@ export function Rel8OnlyNavigation() {
       isActive: location.pathname.startsWith("/rel8/contacts")
     },
     {
-      href: "/rel8/network",
-      label: "Network",
-      icon: Globe,
+      href: "/rel8/connect",
+      label: "Connect",
+      icon: Upload,
       iconColor: "text-green-500",
-      isActive: location.pathname === "/rel8/network"
+      isActive: location.pathname === "/rel8/connect"
     },
     {
       href: "/rel8/categories",
