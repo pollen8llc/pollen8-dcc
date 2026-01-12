@@ -69,7 +69,7 @@ const getBuildRapportProgressCount = async (): Promise<number> => {
 };
 
 export const useSetupProgress = (): SetupProgressData => {
-  const TARGET = 3;
+  const TARGET = 1;
 
   // Fetch all data in parallel
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
@@ -108,7 +108,7 @@ export const useSetupProgress = (): SetupProgressData => {
   const tasks: SetupTask[] = [
     {
       id: "categories",
-      title: "Create Categories",
+      title: "Create a Category",
       description: "Organize your network into meaningful groups",
       target: TARGET,
       current: Math.min(categories.length, TARGET),
@@ -118,69 +118,67 @@ export const useSetupProgress = (): SetupProgressData => {
         "Click \"Let's Go\" to open Categories",
         "Click the \"Add Category\" button",
         "Enter a category name (e.g., Family, Work, Friends)",
-        "Choose a color and icon",
-        "Click Save — Repeat for 3 categories",
+        "Choose a color and click Save",
       ],
     },
     {
       id: "contacts",
-      title: "Add Contacts",
-      description: "Add people to your network",
+      title: "Add a Contact",
+      description: "Add someone to your network",
       target: TARGET,
       current: Math.min(contactCount, TARGET),
       route: "/rel8/connect",
       icon: "UserPlus",
       steps: [
         "Click \"Let's Go\" to open Connect",
-        "Click the \"Add Contact\" button",
-        "Enter the contact's name and details",
-        "Click Save — Repeat for 3 contacts",
+        "Click the \"+\" button to add a contact",
+        "Enter their name and any details you have",
+        "Click Save to add them to your network",
       ],
     },
     {
       id: "categorize",
-      title: "Categorize Contacts",
-      description: "Assign contacts to categories",
+      title: "Categorize a Contact",
+      description: "Assign a contact to a category",
       target: TARGET,
       current: Math.min(categorizedCount, TARGET),
       route: "/rel8/contacts",
       icon: "Tags",
       steps: [
         "Click \"Let's Go\" to open Contacts",
-        "Click on a contact to view their profile",
-        "Click the Category dropdown",
-        "Select a category — Repeat for 3 contacts",
+        "Click on any contact to view their profile",
+        "Find the Category field and select a category",
+        "Your contact is now organized!",
       ],
     },
     {
       id: "activate",
-      title: "Activate Contacts",
-      description: "Start building rapport with key contacts",
+      title: "Activate a Contact",
+      description: "Start building a stronger relationship",
       target: TARGET,
       current: Math.min(actv8Count, TARGET),
       route: "/rel8/actv8",
       icon: "Zap",
       steps: [
         "Click \"Let's Go\" to open Actv8",
-        "Browse your contacts list",
-        "Click the Activate button on a contact",
-        "Repeat for 3 contacts",
+        "Find a contact you want to develop",
+        "Click the \"Activate\" button on their card",
+        "They're now in your active development list!",
       ],
     },
     {
       id: "build-rapport",
       title: "Build Rapport",
-      description: "Complete your first meeting with an activated contact",
-      target: 1,
-      current: Math.min(buildRapportCount, 1),
+      description: "Make progress on a relationship path",
+      target: TARGET,
+      current: Math.min(buildRapportCount, TARGET),
       route: "/rel8/actv8",
       icon: "Coffee",
       steps: [
         "Click \"Let's Go\" to open Actv8",
         "Click on an activated contact",
-        "Go to the Development Timeline tab",
-        "Click on a Build Rapport step",
-        "Schedule and complete a meeting",
+        "Select a relationship level in the accordion",
+        "Complete your first path step",
       ],
     },
   ];
