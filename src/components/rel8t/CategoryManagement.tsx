@@ -11,14 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
   Dialog,
   DialogContent,
   DialogHeader,
@@ -242,93 +234,89 @@ export const CategoryManagement = () => {
 
   return (
     <>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="bg-card/60 backdrop-blur-xl border-primary/20">
+        <CardHeader className="flex flex-row items-center justify-between pb-4">
           <div>
-            <CardTitle>Contact Categories</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg font-semibold">Contact Categories</CardTitle>
+            <CardDescription className="text-muted-foreground/80">
               Organize your contacts with custom categories
             </CardDescription>
           </div>
-          <Button onClick={openCreateDialog}>
+          <Button 
+            onClick={openCreateDialog}
+            size="sm"
+            className="bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add Category
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {isLoading ? (
-            <div className="flex justify-center py-8">Loading categories...</div>
+            <div className="flex justify-center py-8 text-muted-foreground">Loading categories...</div>
           ) : categories.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Color</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categories.map((category) => (
-                  <TableRow 
-                    key={category.id} 
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => navigate(`/rel8/categories/${category.id}`)}
-                  >
-                    <TableCell>
-                      <div 
-                        className="w-6 h-6 rounded-full" 
-                        style={{ backgroundColor: category.color || '#6366f1' }} 
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell>{new Date(category.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleAddContact(category.id)}
-                        >
-                          <UserPlus className="h-4 w-4 mr-1" />
-                          Add Contact
+            <div className="space-y-2">
+              {categories.map((category) => (
+                <div 
+                  key={category.id} 
+                  className="flex items-center justify-between p-3 rounded-xl bg-card/40 hover:bg-card/60 border border-border/50 hover:border-primary/30 transition-all cursor-pointer group"
+                  onClick={() => navigate(`/rel8/categories/${category.id}`)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-4 h-4 rounded-full ring-2 ring-white/20" 
+                      style={{ backgroundColor: category.color || '#6366f1' }} 
+                    />
+                    <span className="font-medium text-foreground">{category.name}</span>
+                    <span className="text-xs text-muted-foreground hidden sm:inline">
+                      {new Date(category.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleAddContact(category.id)}
+                      className="h-8 px-2 text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                    </Button>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
                         </Button>
-                        
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-popover">
-                            <DropdownMenuItem onClick={() => openEditDialog(category)}>
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleArchiveCategory(category)}>
-                              <Archive className="h-4 w-4 mr-2" />
-                              Archive
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => setCategoryToDelete(category)}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-popover/95 backdrop-blur-md border-border/50">
+                        <DropdownMenuItem onClick={() => openEditDialog(category)}>
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleArchiveCategory(category)}>
+                          <Archive className="h-4 w-4 mr-2" />
+                          Archive
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => setCategoryToDelete(category)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <Tag className="h-12 w-12 text-muted-foreground mb-2" />
-              <h3 className="font-medium text-lg">No categories created yet</h3>
-              <p className="text-muted-foreground mb-4">
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="p-4 rounded-full bg-primary/10 mb-4">
+                <Tag className="h-8 w-8 text-primary/60" />
+              </div>
+              <h3 className="font-medium text-lg text-foreground">No categories created yet</h3>
+              <p className="text-muted-foreground/80 text-sm mt-1">
                 Categories help you organize and filter your contacts
               </p>
             </div>
