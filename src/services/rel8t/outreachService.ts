@@ -583,7 +583,32 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
       ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() 
       : 'User';
     
-    // Create outreach
+    // LAYER B: Derive path_instance_id from actv8_contact if not provided
+    // This ensures every outreach linked to an actv8 contact has the correct instance ID
+    let effectivePathInstanceId = outreach.path_instance_id || null;
+    let effectivePathId = outreach.path_id || null;
+    
+    if (!effectivePathInstanceId && outreach.actv8_contact_id) {
+      try {
+        const { data: actv8Data } = await supabase
+          .from("rms_actv8_contacts")
+          .select("current_path_instance_id, development_path_id")
+          .eq("id", outreach.actv8_contact_id)
+          .single();
+        
+        if (actv8Data?.current_path_instance_id) {
+          effectivePathInstanceId = actv8Data.current_path_instance_id;
+          console.log("📍 Derived path_instance_id from actv8 contact:", effectivePathInstanceId);
+        }
+        if (!effectivePathId && actv8Data?.development_path_id) {
+          effectivePathId = actv8Data.development_path_id;
+        }
+      } catch (lookupError) {
+        console.error("Error deriving path_instance_id:", lookupError);
+      }
+    }
+    
+    // Create outreach with enforced path_instance_id
     const { data, error } = await supabase
       .from("rms_outreach")
       .insert([{ 
@@ -601,9 +626,9 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
         // Actv8 Build Rapport linkage
         actv8_contact_id: outreach.actv8_contact_id || null,
         actv8_step_index: outreach.actv8_step_index ?? null,
-        // Path association for filtering (use instance ID for proper isolation)
-        path_id: outreach.path_id || null,
-        path_instance_id: outreach.path_instance_id || null
+        // Path association for filtering (use enforced instance ID for proper isolation)
+        path_id: effectivePathId,
+        path_instance_id: effectivePathInstanceId
       }])
       .select()
       .single();
@@ -823,13 +848,19 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     }
     
     // Sync with Actv8 step instance if we have an actv8 contact
+    // Use the effectivePathInstanceId we derived earlier for proper instance-aware syncing
+    const syncPathInstanceId = effectivePathInstanceId || data.path_instance_id;
     if (actv8ContactId && actv8StepIndex !== null && actv8StepIndex !== undefined) {
       try {
         const { updateStepInstance, getStepInstances, createStepInstance, getActv8Contact } = await import("@/services/actv8Service");
         
-        // Get step instances to find the one matching this step index
+        // Get step instances to find the one matching this step index AND path instance
         const stepInstances = await getStepInstances(actv8ContactId);
-        const matchingInstance = stepInstances.find(si => si.step_index === actv8StepIndex);
+        // Filter by path_instance_id for proper isolation
+        const matchingInstance = stepInstances.find(si => 
+          si.step_index === actv8StepIndex && 
+          (!syncPathInstanceId || (si as any).path_instance_id === syncPathInstanceId)
+        );
         
         if (matchingInstance) {
           // Update the step instance with the outreach ID and set status to active
@@ -840,7 +871,7 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
           });
           console.log("✅ Linked outreach to step instance:", matchingInstance.id);
         } else {
-          // If no step instance exists, create one
+          // If no step instance exists, create one with the path_instance_id
           const actv8Contact = await getActv8Contact(actv8ContactId);
           if (actv8Contact?.path?.steps?.[actv8StepIndex]) {
             const step = actv8Contact.path.steps[actv8StepIndex];
@@ -849,7 +880,8 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
               step.id,
               actv8StepIndex,
               actv8Contact.development_path_id,
-              'active'
+              'active',
+              syncPathInstanceId // Pass the instance ID explicitly
             );
             // Update the new instance with the outreach ID
             if (newInstance) {
@@ -857,7 +889,7 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
                 outreach_id: outreachId,
                 started_at: new Date().toISOString()
               });
-              console.log("✅ Created and linked new step instance:", newInstance.id);
+              console.log("✅ Created and linked new step instance:", newInstance.id, "with path_instance_id:", syncPathInstanceId);
             }
           }
         }
@@ -902,6 +934,35 @@ export const getOutreachesByActv8Contact = async (actv8ContactId: string, pathIn
     // Use provided pathInstanceId or fall back to current_path_instance_id
     // This ensures we only show outreaches for the CURRENT path "run"
     const filterInstanceId = pathInstanceId !== undefined ? pathInstanceId : actv8Record?.current_path_instance_id;
+    
+    // LAYER C: Self-heal orphaned outreaches for THIS contact/instance only
+    // This fixes outreaches created before the fix was deployed
+    if (filterInstanceId && actv8Record?.development_path_id) {
+      try {
+        // Find outreaches that:
+        // 1. Are linked to this actv8_contact_id
+        // 2. Have NULL path_instance_id (orphaned)
+        // 3. Were created after the path started (so we don't grab old history)
+        const { data: orphanedOutreaches, error: orphanError } = await supabase
+          .from("rms_outreach")
+          .select("id, created_at")
+          .eq("actv8_contact_id", actv8ContactId)
+          .is("path_instance_id", null);
+        
+        if (!orphanError && orphanedOutreaches && orphanedOutreaches.length > 0) {
+          // Repair them by setting the path_instance_id
+          const orphanIds = orphanedOutreaches.map(o => o.id);
+          await supabase
+            .from("rms_outreach")
+            .update({ path_instance_id: filterInstanceId })
+            .in("id", orphanIds);
+          console.log(`🔧 Self-healed ${orphanIds.length} orphaned outreaches for actv8 contact ${actv8ContactId}`);
+        }
+      } catch (healError) {
+        console.error("Error self-healing orphaned outreaches:", healError);
+        // Don't fail the query if heal fails
+      }
+    }
     
     // Fetch outreaches that are directly linked via actv8_contact_id
     // CRITICAL: Filter by path_instance_id for proper isolation between path runs

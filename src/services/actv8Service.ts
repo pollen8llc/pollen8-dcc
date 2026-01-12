@@ -1151,15 +1151,22 @@ export async function completeStepInstance(
   actv8ContactId: string,
   stepIndex: number,
   outreachId: string,
-  outcome?: { interaction_outcome?: string; rapport_progress?: string }
+  outcome?: { interaction_outcome?: string; rapport_progress?: string },
+  pathInstanceId?: string | null
 ): Promise<StepInstance | null> {
-  // Find the step instance for this step
-  const { data: instances, error: findError } = await supabase
+  // Find the step instance for this step - filter by path_instance_id if provided for accuracy
+  let query = supabase
     .from("rms_actv8_step_instances")
     .select("*")
     .eq("actv8_contact_id", actv8ContactId)
-    .eq("step_index", stepIndex)
-    .limit(1);
+    .eq("step_index", stepIndex);
+  
+  // If pathInstanceId provided, filter by it for proper isolation between runs
+  if (pathInstanceId) {
+    query = query.eq("path_instance_id", pathInstanceId);
+  }
+  
+  const { data: instances, error: findError } = await query.limit(1);
 
   if (findError) throw findError;
   
