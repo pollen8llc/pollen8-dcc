@@ -151,17 +151,20 @@ export function ContactHeader({
             {onCategoryChange ? (
               <button
                 onClick={() => setIsCategoryDialogOpen(true)}
-                className="group inline-flex items-center gap-1.5 mt-1 hover:text-primary transition-colors cursor-pointer"
+                className={cn(
+                  "group inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer border",
+                  category 
+                    ? "bg-primary/15 border-primary/30 text-primary hover:bg-primary/25 hover:border-primary/50" 
+                    : "bg-muted/50 border-muted-foreground/30 text-muted-foreground hover:bg-muted hover:border-muted-foreground/50 animate-[pulse_2s_ease-in-out_infinite]"
+                )}
               >
-                <span className="text-sm sm:text-base text-muted-foreground font-medium group-hover:text-primary group-hover:underline underline-offset-2 transition-colors">
-                  {category || "Uncategorized"}
-                </span>
-                <Pencil className="h-3 w-3 text-muted-foreground/50 opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                <span>{category || "Uncategorized"}</span>
+                <Pencil className="h-3 w-3 opacity-50 group-hover:opacity-100 transition-opacity" />
               </button>
             ) : category ? (
-              <p className="mt-1 text-sm sm:text-base text-muted-foreground font-medium">
+              <span className="inline-flex items-center mt-2 px-3 py-1 rounded-full text-xs font-semibold bg-primary/15 border border-primary/30 text-primary">
                 {category}
-              </p>
+              </span>
             ) : null}
           </div>
         </div>
