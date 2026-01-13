@@ -386,6 +386,48 @@ export async function advanceToPath(
   return transformActv8Contact(data);
 }
 
+// =====================================================
+// Completed Path Instances (for TierProgressBar)
+// =====================================================
+
+export interface CompletedPathInstance {
+  id: string;
+  path_id: string;
+  path_name: string;
+  tier: number;
+  status: 'ended' | 'skipped';
+  started_at: string;
+  ended_at?: string;
+}
+
+export async function getCompletedPathInstances(actv8ContactId: string): Promise<CompletedPathInstance[]> {
+  const { data, error } = await supabase
+    .from('rms_actv8_path_instances')
+    .select(`
+      id,
+      path_id,
+      status,
+      started_at,
+      ended_at,
+      rms_actv8_paths!inner(name, tier)
+    `)
+    .eq('actv8_contact_id', actv8ContactId)
+    .in('status', ['ended', 'skipped'])
+    .order('started_at', { ascending: true });
+
+  if (error) throw error;
+
+  return (data || []).map((d: any) => ({
+    id: d.id,
+    path_id: d.path_id,
+    path_name: d.rms_actv8_paths.name,
+    tier: d.rms_actv8_paths.tier,
+    status: d.status as 'ended' | 'skipped',
+    started_at: d.started_at,
+    ended_at: d.ended_at || undefined,
+  }));
+}
+
 export async function getDevelopmentPath(pathId: string): Promise<DevelopmentPath | null> {
   if (!pathId) return null;
   

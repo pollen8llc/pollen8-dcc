@@ -218,8 +218,6 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
                   currentTier={contact.pathTier}
                   currentStepIndex={currentStep}
                   totalStepsInCurrentPath={totalSteps}
-                  pathHistory={contact.pathHistory}
-                  skippedPaths={contact.skippedPaths}
                   size="sm"
                   animated
                 />

@@ -2,7 +2,7 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/
 import { TrendingUp } from "lucide-react";
 import { DevelopmentPathCard } from "./DevelopmentPathCard";
 import { Outreach } from "@/services/rel8t/outreachService";
-import { PathHistoryEntry, SkippedPathEntry } from "@/hooks/useActv8Contacts";
+import { CompletedPathInstance } from "./TierProgressBar";
 import { cn } from "@/lib/utils";
 
 interface LinkedOutreach {
@@ -17,8 +17,7 @@ interface DevelopmentPathAccordionProps {
   linkedOutreaches?: LinkedOutreach[];
   actv8ContactId?: string;
   pathTier?: number;
-  pathHistory?: PathHistoryEntry[];
-  skippedPaths?: SkippedPathEntry[];
+  completedPathInstances?: CompletedPathInstance[];
   totalStepsInPath?: number;
   onPlanTouchpoint?: (stepIndex: number) => void;
 }
@@ -30,23 +29,33 @@ export function DevelopmentPathAccordion({
   linkedOutreaches = [],
   actv8ContactId,
   pathTier = 1,
-  pathHistory = [],
-  skippedPaths = [],
+  completedPathInstances = [],
   totalStepsInPath = 4,
   onPlanTouchpoint,
 }: DevelopmentPathAccordionProps) {
+  // Derive completed/skipped tiers from path instances
+  const completedTiers = new Set(
+    completedPathInstances
+      .filter(p => p.status === 'ended')
+      .map(p => p.tier)
+  );
+  
+  const skippedTiers = new Set(
+    completedPathInstances
+      .filter(p => p.status === 'skipped')
+      .map(p => p.tier)
+  );
+
   // Generate 16 progress dots (4 tiers × 4 steps)
   const getSegmentStatus = (segmentIndex: number) => {
     const tier = Math.floor(segmentIndex / 4) + 1;
     const stepInTier = segmentIndex % 4;
     
     // Check if this tier was skipped
-    const isSkipped = skippedPaths.some(s => s.tier_at_skip === tier);
-    if (isSkipped) return 'skipped';
+    if (skippedTiers.has(tier)) return 'skipped';
     
-    // Check if this tier was completed (in path history)
-    const completedTierCount = pathHistory.length;
-    if (tier <= completedTierCount) return 'completed';
+    // Check if this tier was completed
+    if (completedTiers.has(tier)) return 'completed';
     
     // Current tier logic
     if (tier === pathTier) {
@@ -58,6 +67,9 @@ export function DevelopmentPathAccordion({
       if (stepInTier === normalizedStepIndex) return 'current';
       return 'future';
     }
+    
+    // Tiers before current (fallback)
+    if (tier < pathTier) return 'completed';
     
     // Future tiers
     return 'future';
@@ -101,8 +113,7 @@ export function DevelopmentPathAccordion({
           linkedOutreaches={linkedOutreaches}
           actv8ContactId={actv8ContactId}
           pathTier={pathTier}
-          pathHistory={pathHistory}
-          skippedPaths={skippedPaths}
+          completedPathInstances={completedPathInstances}
           onPlanTouchpoint={onPlanTouchpoint}
         />
       </AccordionContent>

@@ -7,8 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { Calendar, ExternalLink, Check, ChevronRight, Play, SkipForward, History, Clock } from "lucide-react";
 import { Outreach } from "@/services/rel8t/outreachService";
-import { PathHistoryEntry, SkippedPathEntry } from "@/hooks/useActv8Contacts";
-import { TierProgressBar } from "./TierProgressBar";
+import { TierProgressBar, CompletedPathInstance } from "./TierProgressBar";
 
 interface LinkedOutreach {
   stepIndex: number;
@@ -22,18 +21,10 @@ interface DevelopmentPathCardProps {
   linkedOutreaches?: LinkedOutreach[];
   actv8ContactId?: string;
   pathTier?: number;
-  pathHistory?: PathHistoryEntry[];
-  skippedPaths?: SkippedPathEntry[];
+  completedPathInstances?: CompletedPathInstance[];
   onPlanTouchpoint?: (stepIndex: number) => void;
   onAdvanceStep?: () => void;
 }
-
-const tierLabels: Record<number, string> = {
-  1: "Foundation",
-  2: "Growth",
-  3: "Professional",
-  4: "Advanced",
-};
 
 export function DevelopmentPathCard({
   pathId,
@@ -42,8 +33,7 @@ export function DevelopmentPathCard({
   linkedOutreaches = [],
   actv8ContactId,
   pathTier = 1,
-  pathHistory = [],
-  skippedPaths = [],
+  completedPathInstances = [],
   onPlanTouchpoint,
 }: DevelopmentPathCardProps) {
   const navigate = useNavigate();
@@ -80,6 +70,12 @@ export function DevelopmentPathCard({
   const progress = (Math.min(stepIndex + 1, totalSteps) / totalSteps) * 100;
   const isComplete = path.steps && stepIndex >= path.steps.length;
 
+  // Derive counts from completedPathInstances
+  const completedPathsCount = completedPathInstances.filter(p => p.status === 'ended').length;
+  const skippedPathsCount = completedPathInstances.filter(p => p.status === 'skipped').length;
+  const skippedPathsList = completedPathInstances.filter(p => p.status === 'skipped');
+  const completedPathsList = completedPathInstances.filter(p => p.status === 'ended');
+
   const getLinkedOutreach = (index: number) => {
     // First check if we have a linked outreach from step instances
     const instance = stepInstances.find(si => si.step_index === index);
@@ -96,13 +92,13 @@ export function DevelopmentPathCard({
     return linkedOutreaches.find(lo => lo.stepIndex === index);
   };
 
-  const getStepInstance = (stepId: string, stepIndex?: number): StepInstance | undefined => {
+  const getStepInstance = (stepId: string, stepIdx?: number): StepInstance | undefined => {
     // First try to find by step_id
     const byStepId = stepInstances.find(si => si.step_id === stepId);
     if (byStepId) return byStepId;
     // Fallback to step_index if provided
-    if (stepIndex !== undefined) {
-      return stepInstances.find(si => si.step_index === stepIndex);
+    if (stepIdx !== undefined) {
+      return stepInstances.find(si => si.step_index === stepIdx);
     }
     return undefined;
   };
@@ -130,32 +126,28 @@ export function DevelopmentPathCard({
         currentTier={pathTier}
         currentStepIndex={stepIndex}
         totalStepsInCurrentPath={path?.steps?.length || 4}
-        pathHistory={pathHistory}
-        skippedPaths={skippedPaths}
+        completedPathInstances={completedPathInstances}
         size="md"
         showLabels
         animated
       />
       <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-2">
-        {pathHistory.length} paths completed
-        {skippedPaths.length > 0 && (
+        {completedPathsCount} paths completed
+        {skippedPathsCount > 0 && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="ml-2 text-amber-500 cursor-help">
-                  • {skippedPaths.length} skipped
+                  • {skippedPathsCount} skipped
                 </span>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-xs">
                 <p className="text-xs font-medium mb-1">Skipped Paths:</p>
                 <ul className="text-xs space-y-1">
-                  {skippedPaths.map((skip, i) => (
+                  {skippedPathsList.map((skip, i) => (
                     <li key={i} className="flex items-start gap-1">
                       <SkipForward className="h-3 w-3 mt-0.5 shrink-0" />
-                      <span>
-                        {skip.path_name}
-                        {skip.reason && <span className="text-muted-foreground"> - {skip.reason}</span>}
-                      </span>
+                      <span>{skip.path_name}</span>
                     </li>
                   ))}
                 </ul>
@@ -186,14 +178,14 @@ export function DevelopmentPathCard({
       </div>
 
       {/* Path History (if any) */}
-      {pathHistory.length > 0 && (
+      {completedPathsCount > 0 && (
         <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
             <History className="h-3 w-3" />
             <span>Completed Paths</span>
           </div>
           <div className="flex flex-wrap gap-1">
-            {pathHistory.map((history, i) => (
+            {completedPathsList.map((history, i) => (
               <Badge key={i} variant="secondary" className="text-[10px]">
                 {history.path_name}
               </Badge>
@@ -207,7 +199,6 @@ export function DevelopmentPathCard({
         {path.steps?.map((step, index) => {
           const isCompleted = index < stepIndex || completed.includes(step.id);
           const isCurrent = index === stepIndex;
-          const isUnlocked = index <= stepIndex; // Step is unlocked if current or previous completed
           const linkedOutreach = getLinkedOutreach(index);
           const stepInstance = getStepInstance(step.id, index);
 
