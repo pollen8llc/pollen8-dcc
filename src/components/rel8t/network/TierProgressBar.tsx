@@ -1,13 +1,21 @@
 import { cn } from "@/lib/utils";
-import { PathHistoryEntry, SkippedPathEntry } from "@/hooks/useActv8Contacts";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+export interface CompletedPathInstance {
+  id: string;
+  path_id: string;
+  path_name: string;
+  tier: number;
+  status: 'ended' | 'skipped';
+  started_at: string;
+  ended_at?: string;
+}
+
 interface TierProgressBarProps {
-  currentTier: number; // 1-4
-  currentStepIndex: number; // 0-3 within current path
-  totalStepsInCurrentPath?: number;
-  pathHistory?: PathHistoryEntry[];
-  skippedPaths?: SkippedPathEntry[];
+  currentTier: number; // 1-4 (tier of currently active path)
+  currentStepIndex: number; // 0-based index within current path
+  totalStepsInCurrentPath?: number; // Total steps in the active path
+  completedPathInstances?: CompletedPathInstance[]; // Source of truth for completed/skipped tiers
   size?: 'sm' | 'md' | 'lg';
   showLabels?: boolean;
   animated?: boolean;
@@ -32,38 +40,66 @@ export function TierProgressBar({
   currentTier,
   currentStepIndex,
   totalStepsInCurrentPath = 4,
-  pathHistory = [],
-  skippedPaths = [],
+  completedPathInstances = [],
   size = 'sm',
   showLabels = false,
   animated = true,
 }: TierProgressBarProps) {
   const config = sizeConfig[size];
 
-  // Get the number of completed tiers (from path history)
-  const completedTiers = pathHistory.length;
+  // Derive completed and skipped tiers from path instances (source of truth)
+  const completedTiers = new Set(
+    completedPathInstances
+      .filter(p => p.status === 'ended')
+      .map(p => p.tier)
+  );
+  
+  const skippedTiers = new Set(
+    completedPathInstances
+      .filter(p => p.status === 'skipped')
+      .map(p => p.tier)
+  );
 
-  // Get skipped tier numbers
-  const skippedTierNumbers = skippedPaths.map(s => s.tier_at_skip);
+  // Check if current path is complete (currentStepIndex >= totalSteps)
+  const isCurrentPathComplete = currentStepIndex >= totalStepsInCurrentPath;
+
+  // Normalize step index to 4 segments (0-3)
+  // Maps any step count to a 0-3 range
+  const normalizedStepIndex = Math.min(
+    3,
+    Math.floor((currentStepIndex / totalStepsInCurrentPath) * 4)
+  );
 
   const getSegmentState = (tier: number, step: number): SegmentState => {
     // Tier is 1-indexed, step is 0-indexed (0-3)
     
+    // Check if this tier was completed via path instances
+    if (completedTiers.has(tier)) {
+      return 'completed-tier';
+    }
+    
     // Check if this tier was skipped
-    if (skippedTierNumbers.includes(tier)) {
+    if (skippedTiers.has(tier)) {
       return 'skipped';
     }
 
-    // Check if this tier is fully completed (tier < currentTier means completed)
-    if (tier < currentTier) {
-      return 'completed-tier';
+    // Current tier logic
+    if (tier === currentTier) {
+      // If current path is complete, show entire tier as completed
+      if (isCurrentPathComplete) {
+        return 'completed-tier';
+      }
+      
+      // Show progress within the current tier
+      if (step < normalizedStepIndex) return 'in-progress';
+      if (step === normalizedStepIndex) return 'current';
+      return 'future';
     }
 
-    // Current tier
-    if (tier === currentTier) {
-      if (step < currentStepIndex) return 'in-progress';
-      if (step === currentStepIndex) return 'current';
-      return 'future';
+    // Tiers before current (but not in instances) - should be marked as completed or skipped
+    // This handles edge cases where tier completion wasn't tracked properly
+    if (tier < currentTier) {
+      return 'completed-tier';
     }
 
     // Future tiers
@@ -113,20 +149,34 @@ export function TierProgressBar({
   };
 
   const getTierTooltip = (tier: number) => {
+    // Find the path instance for this tier
+    const completedInstance = completedPathInstances.find(
+      p => p.tier === tier && p.status === 'ended'
+    );
+    const skippedInstance = completedPathInstances.find(
+      p => p.tier === tier && p.status === 'skipped'
+    );
+    
+    if (completedInstance) {
+      return `${tierLabels[tier]} - Completed: ${completedInstance.path_name}`;
+    }
+    
+    if (skippedInstance) {
+      return `${tierLabels[tier]} - Skipped`;
+    }
+    
+    if (tier === currentTier) {
+      if (isCurrentPathComplete) {
+        return `${tierLabels[tier]} - Completed (pending save)`;
+      }
+      const displayStep = Math.min(currentStepIndex + 1, totalStepsInCurrentPath);
+      return `${tierLabels[tier]} - In Progress (Step ${displayStep}/${totalStepsInCurrentPath})`;
+    }
+    
     if (tier < currentTier) {
-      const skippedPath = skippedPaths.find(s => s.tier_at_skip === tier);
-      if (skippedPath) {
-        return `${tierLabels[tier]} - Skipped${skippedPath.reason ? `: ${skippedPath.reason}` : ''}`;
-      }
-      const completedPath = pathHistory.find((_, i) => i + 1 === tier);
-      if (completedPath) {
-        return `${tierLabels[tier]} - Completed: ${completedPath.path_name}`;
-      }
       return `${tierLabels[tier]} - Completed`;
     }
-    if (tier === currentTier) {
-      return `${tierLabels[tier]} - In Progress (Step ${currentStepIndex + 1}/4)`;
-    }
+    
     return `${tierLabels[tier]} - Locked`;
   };
 
@@ -176,7 +226,8 @@ export function TierProgressBar({
               key={tier} 
               className={cn(
                 "text-[10px] font-medium transition-colors",
-                tier < currentTier ? "text-[hsl(224,76%,48%)]" :
+                completedTiers.has(tier) || tier < currentTier ? "text-[hsl(224,76%,48%)]" :
+                skippedTiers.has(tier) ? "text-amber-500" :
                 tier === currentTier ? "text-white" : 
                 "text-muted-foreground/50"
               )}

@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath, advanceToPath } from "@/services/actv8Service";
+import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath, advanceToPath, getCompletedPathInstances } from "@/services/actv8Service";
 import { getOutreachesByActv8Contact, getOutreachesForContact } from "@/services/rel8t/outreachService";
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
@@ -22,6 +22,7 @@ import { UnifiedAvatar } from "@/components/ui/unified-avatar";
 import { Loader2, Mail, Phone, Calendar, TrendingUp, Settings, MessageCircle, MessageSquare, Target, Zap, BarChart3, Star, ThumbsUp, ThumbsDown, Minus, TrendingDown } from "lucide-react";
 import { format, parseISO, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { CompletedPathInstance } from "@/components/rel8t/network/TierProgressBar";
 const strengthLabels: Record<string, string> = {
   spark: 'New Connection',
   ember: 'Growing',
