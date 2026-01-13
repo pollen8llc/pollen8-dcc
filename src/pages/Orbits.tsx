@@ -9,27 +9,22 @@
  * No social-media patterns. No chat feeds. No emojis.
  */
 
-import { useState } from "react";
-import { format, formatDistanceToNow, differenceInDays } from "date-fns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDistanceToNow, differenceInDays, format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
+import { useNavigate } from "react-router-dom";
 import { 
   Users, 
   Clock, 
-  ArrowLeft, 
-  Check, 
-  X, 
   AlertTriangle,
-  Circle,
-  CalendarClock,
-  TrendingDown,
-  Radio
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import React, { useRef, useEffect, useState } from "react";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -224,6 +219,12 @@ const MOCK_ORBITS: Orbit[] = [
 // HELPER FUNCTIONS
 // ============================================================================
 
+function getOrbitColor(level: number) {
+  if (level === 1) return "#22c55e"; // Inner circle - Green
+  if (level === 2) return "#3b82f6"; // Middle circle - Blue
+  return "#6b7280"; // Outer circle - Gray
+}
+
 function getHealthColor(score: number): string {
   if (score >= 70) return "text-teal-400";
   if (score >= 40) return "text-amber-400";
@@ -234,12 +235,6 @@ function getHealthBorderColor(score: number): string {
   if (score >= 70) return "border-teal-500/30";
   if (score >= 40) return "border-amber-500/30";
   return "border-rose-500/30";
-}
-
-function getHealthBgColor(score: number): string {
-  if (score >= 70) return "bg-teal-500";
-  if (score >= 40) return "bg-amber-500";
-  return "bg-rose-500";
 }
 
 function getStatusColor(status: 'core' | 'peripheral' | 'drifting' | 'active' | 'inactive'): string {
@@ -255,473 +250,613 @@ function getStatusColor(status: 'core' | 'peripheral' | 'drifting' | 'active' | 
   }
 }
 
-function getCadenceLabel(cadence: 'weekly' | 'biweekly' | 'monthly'): string {
-  switch (cadence) {
-    case 'weekly': return 'Meets Weekly';
-    case 'biweekly': return 'Meets Biweekly';
-    case 'monthly': return 'Meets Monthly';
-  }
-}
-
 // ============================================================================
 // COMPONENTS
 // ============================================================================
 
 /**
- * OrbitCard - Dashboard view of a single orbit
- * Shows key metrics at a glance: health, status, last interaction
+ * MinimalOrbitCanvas - Interactive canvas visualization for orbit card
  */
-function OrbitCard({ 
+const MinimalOrbitCanvas = ({ 
   orbit, 
-  onClick 
+  onMemberClick,
+  onHoverChange,
+  isPaused
 }: { 
   orbit: Orbit; 
-  onClick: () => void;
-}) {
-  const daysSinceInteraction = differenceInDays(new Date(), orbit.lastInteraction);
-  const isWarning = daysSinceInteraction > 14;
+  onMemberClick?: (member: OrbitMember) => void;
+  onHoverChange?: (member: OrbitMember | null) => void;
+  isPaused?: boolean;
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationFrameId = useRef<number>();
+  const angleOffsetRef = useRef<number>(0);
+  const pulseRef = useRef<number>(0);
+  const nodesRef = useRef<Array<{ member: OrbitMember; x: number; y: number; radius: number }>>([]);
+  const [hoveredNode, setHoveredNode] = useState<OrbitMember | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let width = canvas.offsetWidth;
+    let height = canvas.offsetHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    const handleResize = () => {
+      width = canvas.offsetWidth;
+      height = canvas.offsetHeight;
+      canvas.width = width;
+      canvas.height = height;
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const maxRadius = Math.min(width, height) * 0.4;
+
+      // Draw orbit circles
+      const orbitRadii = [
+        maxRadius * 0.4,
+        maxRadius * 0.65,
+        maxRadius * 0.9,
+      ];
+
+      orbitRadii.forEach((radius, i) => {
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `${getOrbitColor(i + 1)}40`;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 8]);
+    ctx.stroke();
+        ctx.setLineDash([]);
+      });
+
+      // Draw center node with pulse
+    const baseRadius = 8;
+      const pulseAmount = Math.sin(pulseRef.current) * 2;
+    const radius = baseRadius + pulseAmount;
+
+    const gradient = ctx.createRadialGradient(
+        centerX, centerY, 0,
+        centerX, centerY, radius * 3
+    );
+    gradient.addColorStop(0, "rgba(255, 255, 255, 0.5)");
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius * 3, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+
+      // Store and draw member nodes
+      nodesRef.current = [];
+      orbit.members.forEach((member, index) => {
+        let orbitLevel;
+        switch (member.status) {
+          case "active":
+            orbitLevel = 0;
+            break;
+          case "drifting":
+            orbitLevel = 1;
+            break;
+          default:
+            orbitLevel = 2;
+        }
+
+        const nodeRadius = orbitRadii[orbitLevel];
+        const angle = (index / orbit.members.length) * 2 * Math.PI + angleOffsetRef.current * (3 - orbitLevel);
+
+        const x = centerX + nodeRadius * Math.cos(angle);
+        const y = centerY + nodeRadius * Math.sin(angle);
+        const nodeSize = hoveredNode?.id === member.id ? 14 : 12;
+
+        // Store node position for interaction
+        nodesRef.current.push({ member, x, y, radius: nodeSize });
+
+        // Hover glow
+        if (hoveredNode?.id === member.id) {
+          const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, nodeSize * 2);
+          glowGradient.addColorStop(0, `${getOrbitColor(orbitLevel + 1)}60`);
+          glowGradient.addColorStop(1, "transparent");
+      ctx.beginPath();
+          ctx.arc(x, y, nodeSize * 2, 0, Math.PI * 2);
+      ctx.fillStyle = glowGradient;
+      ctx.fill();
+    }
+
+        // Draw node
+    ctx.beginPath();
+        ctx.arc(x, y, nodeSize, 0, Math.PI * 2);
+        ctx.fillStyle = getOrbitColor(orbitLevel + 1);
+    ctx.fill();
+
+        // Draw initials
+    ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 9px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+        ctx.fillText(member.initials, x, y);
+      });
+    };
+
+    const animate = (currentTime: number) => {
+      if (!isPaused) {
+        angleOffsetRef.current += 0.0005; // Quarter of original speed
+      }
+      pulseRef.current += 0.005;
+      draw();
+      animationFrameId.current = requestAnimationFrame(animate);
+    };
+
+    animate(0);
+
+    // Mouse move handler for hover
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const hovered = nodesRef.current.find(node => {
+        const distance = Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y, 2));
+        return distance <= node.radius + 5;
+      });
+
+      const member = hovered?.member || null;
+      setHoveredNode(member);
+      
+      if (hovered) {
+        setTooltipPos({ x: e.clientX, y: e.clientY });
+      } else {
+        setTooltipPos(null);
+      }
+      
+      if (onHoverChange) {
+        onHoverChange(member);
+      }
+      
+      canvas.style.cursor = hovered ? 'pointer' : 'default';
+    };
+    
+    // Mouse leave handler
+    const handleMouseLeave = () => {
+      setHoveredNode(null);
+      setTooltipPos(null);
+      if (onHoverChange) {
+        onHoverChange(null);
+      }
+    };
+
+    // Click handler
+    const handleClick = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const clicked = nodesRef.current.find(node => {
+        const distance = Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y, 2));
+        return distance <= node.radius + 5;
+      });
+
+      if (clicked && onMemberClick) {
+        onMemberClick(clicked.member);
+      }
+    };
+
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+    canvas.addEventListener('click', handleClick);
+
+    return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
+      window.removeEventListener("resize", handleResize);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
+      canvas.removeEventListener('click', handleClick);
+    };
+  }, [orbit, hoveredNode, onMemberClick, onHoverChange, isPaused]);
 
   return (
-    <Card 
-      className={cn(
-        "cursor-pointer transition-all duration-200 hover:scale-[1.02]",
-        "glass-morphism",
-        getHealthBorderColor(orbit.healthScore)
-      )}
-      onClick={onClick}
-    >
-      <CardContent className="p-5">
-        {/* Orbit Name & Purpose */}
-        <div className="mb-4">
-          <h3 className="font-semibold text-lg text-foreground">{orbit.name}</h3>
-          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{orbit.purpose}</p>
-        </div>
-
-        {/* Metrics Row */}
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <Badge variant="outline" className="bg-muted/30">
-            <Users className="h-3 w-3 mr-1" />
-            {orbit.members.length} members
-          </Badge>
-          <Badge variant="outline" className={getStatusColor(orbit.userStatus)}>
-            {orbit.userStatus.charAt(0).toUpperCase() + orbit.userStatus.slice(1)}
-          </Badge>
-        </div>
-
-        {/* Health Score */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-muted-foreground uppercase tracking-wide">Orbit Health</span>
-            <span className={cn("text-sm font-mono font-medium", getHealthColor(orbit.healthScore))}>
-              {orbit.healthScore}
-            </span>
-          </div>
-          <Progress 
-            value={orbit.healthScore} 
-            className="h-1.5" 
-          />
-        </div>
-
-        {/* Last Interaction */}
+    <>
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full absolute inset-0 cursor-pointer"
+        style={{ background: 'transparent' }}
+      />
+      {/* Tooltip - Wider and Rectangular */}
+      {hoveredNode && tooltipPos && (
+        <div
+          className="fixed z-50 bg-background/95 backdrop-blur-md border border-border rounded-lg p-4 shadow-xl pointer-events-none min-w-[320px]"
+          style={{
+            left: `${Math.min(tooltipPos.x + 15, window.innerWidth - 340)}px`,
+            top: `${Math.max(tooltipPos.y - 10, 10)}px`,
+            transform: tooltipPos.y < 150 ? 'translateY(0)' : 'translateY(-100%)'
+          }}
+        >
+          <div className="flex items-center gap-4">
         <div className={cn(
-          "flex items-center gap-2 text-sm",
-          isWarning ? "text-rose-400" : "text-muted-foreground"
-        )}>
-          <Clock className="h-4 w-4" />
-          <span>
-            Last met {formatDistanceToNow(orbit.lastInteraction, { addSuffix: true })}
-          </span>
-          {isWarning && <AlertTriangle className="h-4 w-4" />}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-/**
- * MemberRow - Individual member in the detail view
- * Shows status, last attendance, and attendance rate
- */
-function MemberRow({ member }: { member: OrbitMember }) {
-  return (
-    <div className="flex items-center justify-between py-3 border-b border-border/30 last:border-0">
-      <div className="flex items-center gap-3">
-        {/* Initials Avatar */}
-        <div className={cn(
-          "w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium",
-          member.status === 'active' ? "bg-teal-500/20 text-teal-400" :
-          member.status === 'drifting' ? "bg-rose-500/20 text-rose-400" :
+              "w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0",
+              hoveredNode.status === 'active' ? "bg-teal-500/20 text-teal-400" :
+              hoveredNode.status === 'drifting' ? "bg-rose-500/20 text-rose-400" :
           "bg-muted text-muted-foreground"
         )}>
-          {member.initials}
+              {hoveredNode.initials}
         </div>
-        <div>
-          <p className="font-medium text-foreground">{member.name}</p>
-          <p className="text-xs text-muted-foreground">
-            Last attended: {format(member.lastAttended, "MMM d, yyyy")}
-          </p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="font-semibold text-foreground truncate">{hoveredNode.name}</p>
+                <Badge variant="outline" className={cn("text-xs flex-shrink-0", getStatusColor(hoveredNode.status))}>
+                  {hoveredNode.status}
+                </Badge>
         </div>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground whitespace-nowrap">
+                <span>Last: {format(hoveredNode.lastAttended, "MMM d, yyyy")}</span>
+                <span>•</span>
+                <span>Attendance: {hoveredNode.attendanceRate}%</span>
       </div>
-      <div className="flex items-center gap-3">
-        {/* Attendance Rate Mini Bar */}
-        <div className="w-16">
-          <Progress value={member.attendanceRate} className="h-1" />
-          <p className="text-xs text-muted-foreground text-right mt-0.5">{member.attendanceRate}%</p>
         </div>
-        <Badge variant="outline" className={getStatusColor(member.status)}>
-          {member.status.charAt(0).toUpperCase() + member.status.slice(1)}
-        </Badge>
       </div>
     </div>
+      )}
+    </>
+  );
+};
+
+/**
+ * RotatingStatus - Rotates between last met and upcoming meeting status
+ */
+function RotatingStatus({ 
+  orbit, 
+  isPaused 
+}: { 
+  orbit: Orbit; 
+  isPaused: boolean;
+}) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const daysSinceInteraction = differenceInDays(new Date(), orbit.lastInteraction);
+  const isWarning = daysSinceInteraction > 14;
+  const upcomingMeetings = orbit.meetings.filter(m => m.status === 'upcoming');
+  const nextMeeting = upcomingMeetings[0];
+
+  const statuses = [
+    {
+      label: "Last met",
+      value: formatDistanceToNow(orbit.lastInteraction, { addSuffix: true }),
+      icon: Clock,
+      warning: isWarning
+    },
+    ...(nextMeeting ? [{
+      label: "Next meeting",
+      value: formatDistanceToNow(nextMeeting.date),
+      icon: Clock,
+      warning: false
+    }] : [])
+  ];
+
+  useEffect(() => {
+    if (isPaused || statuses.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % statuses.length);
+    }, 3000); // Switch every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [isPaused, statuses.length]);
+
+  if (statuses.length === 0) return null;
+
+  const currentStatus = statuses[currentIndex];
+  const Icon = currentStatus.icon;
+
+            return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={currentIndex}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3 }}
+        className="bg-background/90 backdrop-blur-md border border-border/50 rounded-lg px-4 py-2"
+      >
+        <div className={cn(
+          "flex items-center gap-2 text-sm",
+          currentStatus.warning ? "text-rose-400" : "text-muted-foreground"
+        )}>
+          <Icon className="h-4 w-4" />
+          <span className="font-medium">{currentStatus.label}:</span>
+          <span>{currentStatus.value}</span>
+              </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
 /**
- * MeetingCard - Display a single meeting (upcoming or past)
- * Shows date, attendance grid, and notes
+ * FullScreenOrbitCard - Full screen card for each orbit
  */
-function MeetingCard({ 
-  meeting, 
-  members,
-  isUpcoming,
-  onRsvp,
-  userRsvp
+function FullScreenOrbitCard({ 
+  orbit, 
+  onViewDetails 
 }: { 
-  meeting: OrbitMeeting; 
-  members: OrbitMember[];
-  isUpcoming: boolean;
-  onRsvp?: (status: 'attending' | 'cant-attend' | 'late') => void;
-  userRsvp?: 'attending' | 'cant-attend' | 'late' | null;
+  orbit: Orbit; 
+  onViewDetails: () => void;
 }) {
-  const getMemberById = (id: string) => members.find(m => m.id === id);
+  const [hoveredMember, setHoveredMember] = useState<OrbitMember | null>(null);
+  const daysSinceInteraction = differenceInDays(new Date(), orbit.lastInteraction);
+  const isWarning = daysSinceInteraction > 14;
+  const upcomingMeetings = orbit.meetings.filter(m => m.status === 'upcoming').length;
+
+  const handleMemberClick = (member: OrbitMember) => {
+    // Could navigate to member profile or show tooltip
+    console.log('Clicked member:', member.name);
+  };
 
   return (
     <div className={cn(
-      "p-4 rounded-lg border",
-      isUpcoming ? "border-primary/30 bg-primary/5" : "border-border/30 bg-muted/10"
+      "relative w-full h-full flex flex-col",
+      "bg-gradient-to-br from-[#0a0a0f] via-[#0a0a0f] to-[#1a1a2e]"
     )}>
-      {/* Date & Status */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <CalendarClock className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{format(meeting.date, "EEEE, MMM d, yyyy")}</span>
-        </div>
-        {isUpcoming && (
-          <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30">
-            In {formatDistanceToNow(meeting.date)}
-          </Badge>
-        )}
-      </div>
-
-      {/* RSVP Buttons for Upcoming Meetings */}
-      {isUpcoming && onRsvp && (
-        <div className="flex gap-2 mb-4">
-          <Button 
-            size="sm" 
-            variant={userRsvp === 'attending' ? 'default' : 'outline'}
-            onClick={() => onRsvp('attending')}
-            className="flex-1"
-          >
-            <Check className="h-4 w-4 mr-1" />
-            Attending
-          </Button>
-          <Button 
-            size="sm" 
-            variant={userRsvp === 'cant-attend' ? 'destructive' : 'outline'}
-            onClick={() => onRsvp('cant-attend')}
-            className="flex-1"
-          >
-            <X className="h-4 w-4 mr-1" />
-            Can't Attend
-          </Button>
-          <Button 
-            size="sm" 
-            variant={userRsvp === 'late' ? 'secondary' : 'outline'}
-            onClick={() => onRsvp('late')}
-            className="flex-1"
-          >
-            <Clock className="h-4 w-4 mr-1" />
-            Late
-          </Button>
-        </div>
-      )}
-
-      {/* Attendance Grid for Completed Meetings */}
-      {!isUpcoming && meeting.attendees.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {meeting.attendees.map((attendee) => {
-            const member = getMemberById(attendee.memberId);
-            if (!member) return null;
-            return (
-              <div 
-                key={attendee.memberId}
-                className={cn(
-                  "flex items-center gap-1.5 px-2 py-1 rounded text-xs",
-                  attendee.status === 'present' ? "bg-teal-500/20 text-teal-400" :
-                  attendee.status === 'late' ? "bg-amber-500/20 text-amber-400" :
-                  "bg-rose-500/20 text-rose-400"
-                )}
-              >
-                <span>{member.initials}</span>
-                {attendee.status === 'present' && <Check className="h-3 w-3" />}
-                {attendee.status === 'missed' && <X className="h-3 w-3" />}
-                {attendee.status === 'late' && <Clock className="h-3 w-3" />}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Meeting Notes */}
-      {meeting.notes.length > 0 && (
-        <div className="space-y-2 mt-3 pt-3 border-t border-border/30">
-          {meeting.notes.map((note, idx) => {
-            const member = getMemberById(note.memberId);
-            return (
-              <div key={idx} className="text-sm">
-                <span className="text-muted-foreground">{member?.initials}: </span>
-                <span className="text-foreground/80">{note.content}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/**
- * OrbitDetailView - Expanded view of a single orbit
- * Shows full member list, meetings, and status updates
- */
-function OrbitDetailView({ 
-  orbit, 
-  onBack 
-}: { 
-  orbit: Orbit; 
-  onBack: () => void;
-}) {
-  const [userRsvp, setUserRsvp] = useState<'attending' | 'cant-attend' | 'late' | null>(null);
-  const [meetingNote, setMeetingNote] = useState("");
-
-  const upcomingMeeting = orbit.meetings.find(m => m.status === 'upcoming');
-  const pastMeetings = orbit.meetings.filter(m => m.status === 'completed').slice(0, 5);
-
-  // Determine warning messages
-  const warnings: string[] = [];
-  if (orbit.userStatus === 'drifting') {
-    warnings.push("You are drifting from this Orbit");
-  }
-  if (orbit.healthScore < 50) {
-    warnings.push("Orbit health has declined");
-  }
-  const driftingMembers = orbit.members.filter(m => m.status === 'drifting' || m.status === 'inactive');
-  if (driftingMembers.length >= 2) {
-    warnings.push("Absence increases distance");
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Back Button */}
-      <Button variant="ghost" onClick={onBack} className="mb-2">
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Orbits
-      </Button>
-
-      {/* Orbit Profile Header */}
-      <Card className={cn("glass-morphism", getHealthBorderColor(orbit.healthScore))}>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-            {/* Left: Name, Purpose, Cadence */}
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-foreground mb-2">{orbit.name}</h2>
-              <p className="text-muted-foreground mb-4">{orbit.purpose}</p>
-              <div className="flex items-center gap-3 flex-wrap">
-                <Badge variant="outline" className="bg-muted/30">
-                  <CalendarClock className="h-3 w-3 mr-1" />
-                  {getCadenceLabel(orbit.cadence)}
-                </Badge>
-                <Badge variant="outline" className={getStatusColor(orbit.userStatus)}>
-                  Your Status: {orbit.userStatus.charAt(0).toUpperCase() + orbit.userStatus.slice(1)}
-                </Badge>
-                {orbit.trackingActive && (
-                  <Badge variant="outline" className="bg-teal-500/20 text-teal-400 border-teal-500/30">
-                    <Radio className="h-3 w-3 mr-1" />
-                    Tracking Active
-                  </Badge>
-                )}
-              </div>
+      {/* Interactive Canvas - Full Screen */}
+      <div className="absolute inset-0 z-0">
+        <MinimalOrbitCanvas 
+          orbit={orbit} 
+          onMemberClick={handleMemberClick}
+          onHoverChange={setHoveredMember}
+          isPaused={!!hoveredMember}
+        />
             </div>
 
-            {/* Right: Health Indicator */}
-            <div className="flex flex-col items-center">
+      {/* Top Edge - Minimal Header */}
+      <div className="absolute top-0 left-0 right-0 z-10 px-6 py-4">
+        <div className="flex items-start gap-4">
+          {/* Left: Health Score - Large to match header height */}
               <div className={cn(
-                "w-24 h-24 rounded-full border-4 flex items-center justify-center",
+            "w-16 h-16 rounded-full border-4 flex items-center justify-center flex-shrink-0",
                 orbit.healthScore >= 70 ? "border-teal-500" :
                 orbit.healthScore >= 40 ? "border-amber-500" :
                 "border-rose-500"
               )}>
-                <div className="text-center">
-                  <span className={cn("text-3xl font-bold font-mono", getHealthColor(orbit.healthScore))}>
+            <span className={cn("text-2xl font-bold font-mono", getHealthColor(orbit.healthScore))}>
                     {orbit.healthScore}
                   </span>
-                </div>
-              </div>
-              <span className="text-xs text-muted-foreground uppercase tracking-wide mt-2">Health</span>
-            </div>
           </div>
 
-          {/* Warning Messages */}
-          {warnings.length > 0 && (
-            <div className="mt-6 space-y-2">
-              {warnings.map((warning, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-rose-400 text-sm">
-                  <TrendingDown className="h-4 w-4" />
-                  <span>{warning}</span>
+          {/* Right: Title, Subtitle, and Badges */}
+          <div className="flex-1 min-w-0">
+            {/* Title & Subtitle - Minimal */}
+            <div className="mb-2">
+              <h2 className="text-lg font-semibold text-foreground truncate">
+                {orbit.name}
+              </h2>
+              <p className="text-xs text-muted-foreground truncate">
+                {orbit.purpose}
+              </p>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Inner Circle Members */}
-      <Card className="glass-morphism border-border/30">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Circle className="h-4 w-4 text-primary" />
-            Inner Circle
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div>
-            {orbit.members.map((member) => (
-              <MemberRow key={member.id} member={member} />
-            ))}
+            {/* Badges Row - Below Subtitle */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="outline" className={cn("text-xs px-2 py-1", getStatusColor(orbit.userStatus))}>
+                {orbit.userStatus}
+              </Badge>
+              <Badge variant="outline" className="text-xs px-2 py-1 bg-muted/30">
+            <Users className="h-3 w-3 mr-1" />
+                {orbit.members.length}
+          </Badge>
+              {isWarning && (
+                <Badge variant="outline" className="text-xs px-2 py-1 bg-rose-500/20 text-rose-400 border-rose-500/30">
+                  <AlertTriangle className="h-3 w-3 mr-1" />
+                  Attention
+          </Badge>
+              )}
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Meeting Cycle Section */}
-      <Card className="glass-morphism border-border/30">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-primary" />
-            Meeting Cycle
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Next Scheduled Meeting */}
-          {upcomingMeeting && (
-            <div>
-              <h4 className="text-sm text-muted-foreground uppercase tracking-wide mb-3">Next Meeting</h4>
-              <MeetingCard 
-                meeting={upcomingMeeting} 
-                members={orbit.members}
-                isUpcoming={true}
-                onRsvp={setUserRsvp}
-                userRsvp={userRsvp}
-              />
-
-              {/* Status Update / Note Input */}
-              <div className="mt-4">
-                <label className="text-sm text-muted-foreground block mb-2">
-                  Meeting Note (optional, max 140 characters)
-                </label>
-                <Textarea 
-                  value={meetingNote}
-                  onChange={(e) => setMeetingNote(e.target.value.slice(0, 140))}
-                  placeholder="A brief note tied to this meeting..."
-                  className="resize-none"
-                  rows={2}
-                />
-                <div className="text-xs text-muted-foreground text-right mt-1">
-                  {meetingNote.length}/140
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Past Meetings */}
-          {pastMeetings.length > 0 && (
-            <div>
-              <h4 className="text-sm text-muted-foreground uppercase tracking-wide mb-3 mt-6">Past Meetings</h4>
-              <div className="space-y-3">
-                {pastMeetings.map((meeting) => (
-                  <MeetingCard 
-                    key={meeting.id}
-                    meeting={meeting} 
-                    members={orbit.members}
-                    isUpcoming={false}
-                  />
-                ))}
+      {/* Bottom Edge - Info Bar */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Left: Rotating Status */}
+          <RotatingStatus orbit={orbit} isPaused={!!hoveredMember} />
+
+          {/* Right: View Details Button - High Contrast */}
+          <Button 
+            size="default" 
+            onClick={onViewDetails}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg border-2 border-primary/20"
+          >
+            View Details
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
+
+
 
 // ============================================================================
 // MAIN PAGE COMPONENT
 // ============================================================================
 
 export default function Orbits() {
-  const [selectedOrbit, setSelectedOrbit] = useState<Orbit | null>(null);
+  const navigate = useNavigate();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+
+  const currentOrbit = MOCK_ORBITS[currentIndex];
+
+  const goToNext = () => {
+    if (currentIndex < MOCK_ORBITS.length - 1) {
+      setDirection(1);
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const goToPrevious = () => {
+    if (currentIndex > 0) {
+      setDirection(-1);
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        setDirection(-1);
+        setCurrentIndex(prev => prev - 1);
+      } else if (e.key === 'ArrowRight' && currentIndex < MOCK_ORBITS.length - 1) {
+        setDirection(1);
+        setCurrentIndex(prev => prev + 1);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentIndex]);
+
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const threshold = 50;
+    if (info.offset.x > threshold) {
+      goToPrevious();
+    } else if (info.offset.x < -threshold) {
+      goToNext();
+    }
+  };
+
+  const variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 1000 : -1000,
+      opacity: 0
+    }),
+    center: {
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: number) => ({
+      x: direction < 0 ? 1000 : -1000,
+      opacity: 0
+    })
+  };
+
+  if (MOCK_ORBITS.length === 0) {
+  return (
+      <div className="h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <Navbar />
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <h3 className="text-2xl font-medium text-foreground mb-2">No Orbits Yet</h3>
+            <p className="text-muted-foreground">
+              Create your first orbit to begin tracking relational momentum.
+            </p>
+            </div>
+            </div>
+    </div>
+  );
+}
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+    <div className="h-screen bg-[#0a0a0f] overflow-hidden flex flex-col">
       <Navbar />
       
-      <div className="container mx-auto max-w-5xl px-4 py-8 pb-24">
-        {selectedOrbit ? (
-          // Detail View
-          <OrbitDetailView 
-            orbit={selectedOrbit} 
-            onBack={() => setSelectedOrbit(null)} 
-          />
-        ) : (
-          // Dashboard View
-          <>
-            {/* Page Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-foreground">Your Orbits</h1>
-              <p className="text-muted-foreground mt-2 max-w-2xl">
-                Orbits track recurring commitments with your inner circles. 
-                Each orbit monitors consistency, attendance, and relational momentum over time.
-              </p>
-              <Badge variant="outline" className="mt-4 bg-muted/30">
-                {MOCK_ORBITS.length} Active Orbits
-              </Badge>
-            </div>
+      {/* Main Slider Container */}
+      <div className="flex-1 relative">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentIndex}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: "spring", stiffness: 300, damping: 30 },
+              opacity: { duration: 0.2 }
+            }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+            className="absolute inset-0 w-full h-full"
+          >
+            <FullScreenOrbitCard 
+              orbit={currentOrbit}
+              onViewDetails={() => navigate(`/orbits/${currentOrbit.id}`)}
+            />
+          </motion.div>
+        </AnimatePresence>
 
-            {/* Orbits Grid */}
-            <div className="grid gap-4 md:grid-cols-2">
-              {MOCK_ORBITS.map((orbit) => (
-                <OrbitCard 
-                  key={orbit.id}
-                  orbit={orbit}
-                  onClick={() => setSelectedOrbit(orbit)}
-                />
-              ))}
-            </div>
-
-            {/* Empty State (if needed) */}
-            {MOCK_ORBITS.length === 0 && (
-              <Card className="glass-morphism border-dashed">
-                <CardContent className="p-12 text-center">
-                  <Circle className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">No Orbits Yet</h3>
-                  <p className="text-muted-foreground">
-                    Create your first orbit to begin tracking relational momentum.
-                  </p>
-                </CardContent>
-              </Card>
+        {/* Navigation Arrows - More Visible */}
+        <div className="absolute inset-0 flex items-center justify-between pointer-events-none z-20 px-4 md:px-8">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-14 w-14 rounded-full bg-background/95 backdrop-blur-md border-2 border-primary/30",
+              "pointer-events-auto hover:bg-primary/10 hover:border-primary/50",
+              "shadow-lg hover:shadow-xl transition-all",
+              currentIndex === 0 && "opacity-30 cursor-not-allowed"
             )}
-          </>
-        )}
+            onClick={goToPrevious}
+            disabled={currentIndex === 0}
+          >
+            <ChevronLeft className="h-7 w-7 text-primary" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-14 w-14 rounded-full bg-background/95 backdrop-blur-md border-2 border-primary/30",
+              "pointer-events-auto hover:bg-primary/10 hover:border-primary/50",
+              "shadow-lg hover:shadow-xl transition-all",
+              currentIndex === MOCK_ORBITS.length - 1 && "opacity-30 cursor-not-allowed"
+            )}
+            onClick={goToNext}
+            disabled={currentIndex === MOCK_ORBITS.length - 1}
+          >
+            <ChevronRight className="h-7 w-7 text-primary" />
+          </Button>
+        </div>
+
+        {/* Indicator Dots - Hidden on Mobile */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2 hidden md:flex">
+          {MOCK_ORBITS.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setDirection(index > currentIndex ? 1 : -1);
+                setCurrentIndex(index);
+              }}
+              className={cn(
+                "h-2 rounded-full transition-all duration-300",
+                index === currentIndex 
+                  ? "w-8 bg-primary" 
+                  : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+              )}
+              aria-label={`Go to orbit ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
