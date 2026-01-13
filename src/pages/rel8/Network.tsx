@@ -221,7 +221,7 @@ export default function Network() {
               className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl border-2 transition-all duration-200 ${
                 activeTab === 'contacts'
                   ? 'bg-primary/20 border-primary text-primary shadow-lg shadow-primary/20 ring-2 ring-primary/20'
-                  : 'bg-card/60 border-border/50 text-muted-foreground hover:bg-card/80 hover:border-primary/30'
+                  : 'bg-primary/10 border-primary/30 text-primary/70 hover:bg-primary/15 hover:border-primary/50 hover:text-primary'
               }`}
             >
               <Users className="h-5 w-5" />
@@ -232,15 +232,15 @@ export default function Network() {
               className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl border-2 transition-all duration-200 ${
                 activeTab === 'outreach'
                   ? 'bg-primary/20 border-primary text-primary shadow-lg shadow-primary/20 ring-2 ring-primary/20'
-                  : 'bg-card/60 border-border/50 text-muted-foreground hover:bg-card/80 hover:border-primary/30'
+                  : 'bg-primary/10 border-primary/30 text-primary/70 hover:bg-primary/15 hover:border-primary/50 hover:text-primary'
               }`}
             >
               <CalendarCheck className="h-5 w-5" />
               <span>Outreach</span>
               {pendingOutreachCount > 0 && (
                 <span className="relative ml-1 inline-flex">
-                  <span className="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-primary opacity-60"></span>
-                  <span className="relative inline-flex rounded-full h-6 w-6 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-xs font-bold items-center justify-center shadow-lg shadow-primary/50 border-2 border-primary/50">
+                  <span className="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-6 w-6 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-xs font-bold items-center justify-center shadow-lg shadow-primary/50 border-2 border-primary-foreground/20">
                     {pendingOutreachCount > 9 ? '9+' : pendingOutreachCount}
                   </span>
                 </span>
