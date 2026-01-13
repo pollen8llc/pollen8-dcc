@@ -573,16 +573,16 @@ function RotatingStatus({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.3 }}
-        className="bg-background/90 backdrop-blur-md border border-border/50 rounded-lg px-4 py-2"
+        className="bg-background/90 backdrop-blur-md border border-border/50 rounded-lg px-2 md:px-4 py-1.5 md:py-2"
       >
         <div className={cn(
-          "flex items-center gap-2 text-sm",
+          "flex items-center gap-1.5 md:gap-2 text-xs md:text-sm",
           currentStatus.warning ? "text-rose-400" : "text-muted-foreground"
         )}>
-          <Icon className="h-4 w-4" />
+          <Icon className="h-3 w-3 md:h-4 md:w-4" />
           <span className="font-medium">{currentStatus.label}:</span>
           <span>{currentStatus.value}</span>
-              </div>
+        </div>
       </motion.div>
     </AnimatePresence>
   );
@@ -593,12 +593,21 @@ function RotatingStatus({
  */
 function FullScreenOrbitCard({ 
   orbit, 
-  onViewDetails 
+  onViewDetails,
+  onHoverChange
 }: { 
   orbit: Orbit; 
   onViewDetails: () => void;
+  onHoverChange?: (member: OrbitMember | null) => void;
 }) {
   const [hoveredMember, setHoveredMember] = useState<OrbitMember | null>(null);
+  
+  const handleHoverChange = (member: OrbitMember | null) => {
+    setHoveredMember(member);
+    if (onHoverChange) {
+      onHoverChange(member);
+    }
+  };
   const daysSinceInteraction = differenceInDays(new Date(), orbit.lastInteraction);
   const isWarning = daysSinceInteraction > 14;
   const upcomingMeetings = orbit.meetings.filter(m => m.status === 'upcoming').length;
@@ -618,7 +627,7 @@ function FullScreenOrbitCard({
         <MinimalOrbitCanvas 
           orbit={orbit} 
           onMemberClick={handleMemberClick}
-          onHoverChange={setHoveredMember}
+          onHoverChange={handleHoverChange}
           isPaused={!!hoveredMember}
         />
             </div>
@@ -673,17 +682,20 @@ function FullScreenOrbitCard({
       {/* Bottom Edge - Info Bar */}
       <div className="absolute bottom-0 left-0 right-0 z-10 px-6 py-4">
         <div className="flex items-center justify-between">
-          {/* Left: Rotating Status */}
-          <RotatingStatus orbit={orbit} isPaused={!!hoveredMember} />
+          {/* Left: Rotating Status - Smaller on Mobile */}
+          <div className="text-xs md:text-sm">
+            <RotatingStatus orbit={orbit} isPaused={!!hoveredMember} />
+          </div>
 
-          {/* Right: View Details Button - High Contrast */}
+          {/* Right: View Details Button - Smaller on Mobile */}
           <Button 
-            size="default" 
+            size="sm"
             onClick={onViewDetails}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg border-2 border-primary/20"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg border-2 border-primary/20 text-xs md:text-sm px-3 md:px-6 py-2 md:py-2 h-8 md:h-10"
           >
-            View Details
-            <ArrowRight className="h-4 w-4 ml-2" />
+            <span className="hidden sm:inline">View Details</span>
+            <span className="sm:hidden">Details</span>
+            <ArrowRight className="h-3 w-3 md:h-4 md:w-4 ml-1 md:ml-2" />
           </Button>
               </div>
             </div>
@@ -701,6 +713,7 @@ export default function Orbits() {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [hoveredMember, setHoveredMember] = useState<OrbitMember | null>(null);
 
   const currentOrbit = MOCK_ORBITS[currentIndex];
 
@@ -801,42 +814,45 @@ export default function Orbits() {
             <FullScreenOrbitCard 
               orbit={currentOrbit}
               onViewDetails={() => navigate(`/orbits/${currentOrbit.id}`)}
+              onHoverChange={setHoveredMember}
             />
           </motion.div>
         </AnimatePresence>
 
-        {/* Navigation Arrows - More Visible */}
-        <div className="absolute inset-0 flex items-center justify-between pointer-events-none z-20 px-4 md:px-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-14 w-14 rounded-full bg-background/95 backdrop-blur-md border-2 border-primary/30",
-              "pointer-events-auto hover:bg-primary/10 hover:border-primary/50",
-              "shadow-lg hover:shadow-xl transition-all",
-              currentIndex === 0 && "opacity-30 cursor-not-allowed"
-            )}
-            onClick={goToPrevious}
-            disabled={currentIndex === 0}
-          >
-            <ChevronLeft className="h-7 w-7 text-primary" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-14 w-14 rounded-full bg-background/95 backdrop-blur-md border-2 border-primary/30",
-              "pointer-events-auto hover:bg-primary/10 hover:border-primary/50",
-              "shadow-lg hover:shadow-xl transition-all",
-              currentIndex === MOCK_ORBITS.length - 1 && "opacity-30 cursor-not-allowed"
-            )}
-            onClick={goToNext}
-            disabled={currentIndex === MOCK_ORBITS.length - 1}
-          >
-            <ChevronRight className="h-7 w-7 text-primary" />
-          </Button>
-        </div>
+        {/* Navigation Arrows - Hide when tooltip is visible */}
+        {!hoveredMember && (
+          <div className="absolute inset-0 flex items-center justify-between pointer-events-none z-20 px-4 md:px-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-14 w-14 rounded-full bg-background/95 backdrop-blur-md border-2 border-primary/30",
+                "pointer-events-auto hover:bg-primary/10 hover:border-primary/50",
+                "shadow-lg hover:shadow-xl transition-all",
+                currentIndex === 0 && "opacity-30 cursor-not-allowed"
+              )}
+              onClick={goToPrevious}
+              disabled={currentIndex === 0}
+            >
+              <ChevronLeft className="h-7 w-7 text-primary" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-14 w-14 rounded-full bg-background/95 backdrop-blur-md border-2 border-primary/30",
+                "pointer-events-auto hover:bg-primary/10 hover:border-primary/50",
+                "shadow-lg hover:shadow-xl transition-all",
+                currentIndex === MOCK_ORBITS.length - 1 && "opacity-30 cursor-not-allowed"
+              )}
+              onClick={goToNext}
+              disabled={currentIndex === MOCK_ORBITS.length - 1}
+            >
+              <ChevronRight className="h-7 w-7 text-primary" />
+            </Button>
+          </div>
+        )}
 
         {/* Indicator Dots - Hidden on Mobile */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2 hidden md:flex">
