@@ -390,17 +390,16 @@ export default function NetworkProfile() {
           />
 
           {/* Development Path Accordion */}
-          <DevelopmentPathAccordion 
-            pathId={contact.developmentPathId} 
-            currentStepIndex={contact.currentStepIndex} 
-            completedSteps={contact.completedSteps} 
-            linkedOutreaches={linkedOutreaches} 
-            actv8ContactId={actv8Contact.id} 
-            pathTier={contact.pathTier} 
-            pathHistory={contact.pathHistory} 
-            skippedPaths={contact.skippedPaths}
+          <DevelopmentPathAccordion
+            pathId={contact.developmentPathId}
+            currentStepIndex={contact.currentStepIndex}
+            completedSteps={contact.completedSteps}
+            linkedOutreaches={linkedOutreaches}
+            actv8ContactId={actv8Contact.id}
+            pathTier={contact.pathTier}
+            completedPathInstances={contact.pathHistory || []}
             totalStepsInPath={actv8Contact.path?.steps?.length || 4}
-            onPlanTouchpoint={handlePlanTouchpoint} 
+            onPlanTouchpoint={handlePlanTouchpoint}
           />
         </Accordion>
 
