@@ -221,7 +221,7 @@ export default function Network() {
               className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl border-2 transition-all duration-200 ${
                 activeTab === 'contacts'
                   ? 'bg-primary/20 border-primary text-primary shadow-lg shadow-primary/20 ring-2 ring-primary/20'
-                  : 'bg-primary/10 border-primary/30 text-primary/70 hover:bg-primary/15 hover:border-primary/50 hover:text-primary'
+                  : 'bg-primary/5 border-primary/40 text-primary hover:bg-primary/10 hover:border-primary/60'
               }`}
             >
               <Users className="h-5 w-5" />
@@ -232,7 +232,7 @@ export default function Network() {
               className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl border-2 transition-all duration-200 ${
                 activeTab === 'outreach'
                   ? 'bg-primary/20 border-primary text-primary shadow-lg shadow-primary/20 ring-2 ring-primary/20'
-                  : 'bg-primary/10 border-primary/30 text-primary/70 hover:bg-primary/15 hover:border-primary/50 hover:text-primary'
+                  : 'bg-primary/5 border-primary/40 text-primary hover:bg-primary/10 hover:border-primary/60'
               }`}
             >
               <CalendarCheck className="h-5 w-5" />
