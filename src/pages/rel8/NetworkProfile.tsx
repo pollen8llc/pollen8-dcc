@@ -61,6 +61,13 @@ export default function NetworkProfile() {
     queryFn: () => getActv8Contact(id!),
     enabled: !!id
   });
+
+  // Fetch completed path instances for progress bar and history tab
+  const { data: completedPathInstances = [] } = useQuery({
+    queryKey: ['completed-path-instances', id],
+    queryFn: () => getCompletedPathInstances(id!),
+    enabled: !!id
+  });
   const {
     data: analysis,
     isLoading: analysisLoading
@@ -397,7 +404,7 @@ export default function NetworkProfile() {
             linkedOutreaches={linkedOutreaches}
             actv8ContactId={actv8Contact.id}
             pathTier={contact.pathTier}
-            completedPathInstances={contact.pathHistory || []}
+            completedPathInstances={completedPathInstances}
             totalStepsInPath={actv8Contact.path?.steps?.length || 4}
             onPlanTouchpoint={handlePlanTouchpoint}
           />
@@ -414,6 +421,7 @@ export default function NetworkProfile() {
             actv8ContactId={actv8Contact.id} 
             pathInstanceId={actv8Contact.current_path_instance_id}
             linkedOutreaches={linkedOutreaches}
+            completedPathInstances={completedPathInstances}
           />
         </Card>
       </div>
