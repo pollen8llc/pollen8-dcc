@@ -366,7 +366,7 @@ export async function advanceToPath(
   // Create the first step instance for the new path with path_instance_id
   if (newPath.steps?.[0] && data) {
     try {
-      await supabase
+      await (supabase as any)
         .from("rms_actv8_step_instances")
         .insert({
           actv8_contact_id: actv8ContactId,
@@ -583,7 +583,7 @@ export async function activateContact(
         // Create the first step instance with path_instance_id
         const path = await getDevelopmentPath(startingPathId);
         if (path?.steps?.[0]) {
-          await supabase
+          await (supabase as any)
             .from("rms_actv8_step_instances")
             .insert({
               actv8_contact_id: data.id,
@@ -1120,7 +1120,7 @@ export interface StepInstance {
 }
 
 export async function getStepInstances(actv8ContactId: string): Promise<StepInstance[]> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("rms_actv8_step_instances")
     .select("*")
     .eq("actv8_contact_id", actv8ContactId)
@@ -1152,7 +1152,7 @@ export async function createStepInstance(
     instanceId = actv8Contact?.current_path_instance_id;
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("rms_actv8_step_instances")
     .insert({
       actv8_contact_id: actv8ContactId,
@@ -1175,7 +1175,7 @@ export async function updateStepInstance(
   instanceId: string,
   updates: Partial<StepInstance>
 ): Promise<StepInstance> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("rms_actv8_step_instances")
     .update({
       ...updates,
@@ -1197,7 +1197,7 @@ export async function completeStepInstance(
   pathInstanceId?: string | null
 ): Promise<StepInstance | null> {
   // Find the step instance for this step - filter by path_instance_id if provided for accuracy
-  let query = supabase
+  let query = (supabase as any)
     .from("rms_actv8_step_instances")
     .select("*")
     .eq("actv8_contact_id", actv8ContactId)
@@ -1212,7 +1212,7 @@ export async function completeStepInstance(
 
   if (findError) throw findError;
   
-  const instance = instances?.[0];
+  const instance = instances?.[0] as StepInstance | undefined;
   if (!instance) return null;
 
   // Calculate days to complete
@@ -1220,7 +1220,7 @@ export async function completeStepInstance(
   const completedAt = new Date();
   const daysToComplete = Math.ceil((completedAt.getTime() - startedAt.getTime()) / (1000 * 60 * 60 * 24));
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("rms_actv8_step_instances")
     .update({
       status: 'completed',
@@ -1245,7 +1245,7 @@ export async function getOrCreateFirstStepInstance(
   stepId: string
 ): Promise<StepInstance> {
   // Check if first step instance already exists
-  const { data: existing } = await supabase
+  const { data: existing } = await (supabase as any)
     .from("rms_actv8_step_instances")
     .select("*")
     .eq("actv8_contact_id", actv8ContactId)
