@@ -2,8 +2,7 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/
 import { TrendingUp } from "lucide-react";
 import { DevelopmentPathCard } from "./DevelopmentPathCard";
 import { Outreach } from "@/services/rel8t/outreachService";
-import { CompletedPathInstance } from "./TierProgressBar";
-import { cn } from "@/lib/utils";
+import { CompletedPathInstance, TierProgressBar } from "./TierProgressBar";
 
 interface LinkedOutreach {
   stepIndex: number;
@@ -33,57 +32,6 @@ export function DevelopmentPathAccordion({
   totalStepsInPath = 4,
   onPlanTouchpoint,
 }: DevelopmentPathAccordionProps) {
-  // Derive completed/skipped tiers from path instances
-  const completedTiers = new Set(
-    completedPathInstances
-      .filter(p => p.status === 'ended')
-      .map(p => p.tier)
-  );
-  
-  const skippedTiers = new Set(
-    completedPathInstances
-      .filter(p => p.status === 'skipped')
-      .map(p => p.tier)
-  );
-
-  // Generate 16 progress dots (4 tiers × 4 steps)
-  const getSegmentStatus = (segmentIndex: number) => {
-    const tier = Math.floor(segmentIndex / 4) + 1;
-    const stepInTier = segmentIndex % 4;
-    
-    // Check if this tier was skipped
-    if (skippedTiers.has(tier)) return 'skipped';
-    
-    // Check if this tier was completed
-    if (completedTiers.has(tier)) return 'completed';
-    
-    // Current tier logic
-    if (tier === pathTier) {
-      // Calculate which step we're on in the current tier
-      const stepsPerPath = totalStepsInPath || 4;
-      const normalizedStepIndex = Math.floor((currentStepIndex / stepsPerPath) * 4);
-      
-      if (stepInTier < normalizedStepIndex) return 'completed';
-      if (stepInTier === normalizedStepIndex) return 'current';
-      return 'future';
-    }
-    
-    // Tiers before current (fallback)
-    if (tier < pathTier) return 'completed';
-    
-    // Future tiers
-    return 'future';
-  };
-
-  const getSegmentColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-[hsl(224,76%,48%)]'; // Royal Blue
-      case 'skipped': return 'bg-amber-500'; // Yellow
-      case 'current': return 'bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)]'; // White with glow
-      default: return 'bg-muted-foreground/30'; // Dark gray
-    }
-  };
-
   return (
     <AccordionItem 
       value="development-path" 
@@ -96,9 +44,20 @@ export function DevelopmentPathAccordion({
           </div>
           <div className="flex-1">
             <span className="font-medium text-sm">Relationship Development</span>
-            <div className="flex items-center gap-2 mt-0.5">
+            <div className="flex items-center gap-2 mt-1">
+              {/* Use mini TierProgressBar for header summary */}
+              <div className="w-24">
+                <TierProgressBar
+                  currentTier={pathTier}
+                  currentStepIndex={currentStepIndex}
+                  totalStepsInCurrentPath={totalStepsInPath}
+                  completedPathInstances={completedPathInstances}
+                  size="sm"
+                  animated={false}
+                />
+              </div>
               <span className="text-xs text-muted-foreground">
-                Step {currentStepIndex + 1} of {totalStepsInPath}
+                Step {currentStepIndex + 1}/{totalStepsInPath}
               </span>
             </div>
           </div>
