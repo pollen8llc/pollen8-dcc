@@ -164,6 +164,8 @@ export interface Actv8Contact {
   path_tier: number;
   path_history: PathHistoryEntry[];
   skipped_paths: SkippedPathEntry[];
+  relationship_level: number;
+  level_switches: any[];
   created_at: string;
   updated_at: string;
   // Joined data
@@ -189,6 +191,8 @@ function transformActv8Contact(data: any): Actv8Contact {
     current_path_instance_id: data.current_path_instance_id || null,
     path_history: (data.path_history as PathHistoryEntry[]) || [],
     skipped_paths: (data.skipped_paths as SkippedPathEntry[]) || [],
+    relationship_level: data.relationship_level ?? 1,
+    level_switches: (data.level_switches as any[]) || [],
   };
 }
 

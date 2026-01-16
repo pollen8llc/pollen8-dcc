@@ -226,6 +226,8 @@ export default function NetworkProfile() {
     pathTier: actv8Contact.path_tier || 1,
     pathHistory: actv8Contact.path_history || [],
     skippedPaths: actv8Contact.skipped_paths || [],
+    relationshipLevel: actv8Contact.relationship_level || 1,
+    levelSwitches: actv8Contact.level_switches || [],
     interactions: [] as any[]
   };
   const handleSelectPath = (pathId: string) => {
@@ -374,6 +376,8 @@ export default function NetworkProfile() {
             contactName={contact.name} 
             actv8ContactId={actv8Contact.id} 
             currentTier={contact.pathTier} 
+            currentLevel={contact.relationshipLevel}
+            levelSwitches={contact.levelSwitches}
             skippedPaths={contact.skippedPaths} 
             pathHistory={contact.pathHistory} 
             currentPathId={contact.developmentPathId} 
