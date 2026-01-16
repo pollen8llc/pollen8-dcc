@@ -12,7 +12,10 @@ import { PathSelectionSection } from "@/components/rel8t/actv8/PathSelectionSect
 import { DevelopmentProgressSection } from "@/components/rel8t/actv8/DevelopmentProgressSection";
 import { CompletedPathsHistory } from "@/components/rel8t/actv8/CompletedPathsHistory";
 import OutreachList from "@/components/rel8t/OutreachList";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft, ShieldAlert, UserX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+type ErrorType = 'not-found' | 'not-authorized' | 'error' | null;
 
 export default function Actv8Profile() {
   const { id } = useParams<{ id: string }>();
@@ -23,18 +26,38 @@ export default function Actv8Profile() {
   const [contact, setContact] = useState<any>(null);
   const [completedPathInstances, setCompletedPathInstances] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [openSection, setOpenSection] = useState<string>("level"); // Cascading accordion state
-  const [refreshKey, setRefreshKey] = useState(0); // Force re-render key
+  const [errorType, setErrorType] = useState<ErrorType>(null);
+  const [openSection, setOpenSection] = useState<string>("level");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const { data: stepInstances = [], refetch: refetchSteps } = useStepInstances(actv8Contact?.id);
 
   // Fetch actv8 contact and related data
   useEffect(() => {
     const fetchData = async () => {
-      if (!id) return;
+      if (!id) {
+        setErrorType('not-found');
+        setLoading(false);
+        return;
+      }
+      
       setLoading(true);
+      setErrorType(null);
 
       try {
+        // Check authentication first
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("[Actv8Profile] Session check:", session ? `User: ${session.user.id}` : "No session");
+        
+        if (!session) {
+          console.log("[Actv8Profile] No session - redirecting to auth");
+          setErrorType('not-authorized');
+          setLoading(false);
+          return;
+        }
+
+        console.log("[Actv8Profile] Fetching actv8 contact with id:", id);
+
         // Fetch actv8 contact
         const { data: actv8Data, error: actv8Error } = await supabase
           .from("rms_actv8_contacts")
@@ -46,7 +69,26 @@ export default function Actv8Profile() {
           .eq("id", id)
           .single();
 
-        if (actv8Error) throw actv8Error;
+        console.log("[Actv8Profile] Query result:", { actv8Data, actv8Error });
+
+        if (actv8Error) {
+          console.error("[Actv8Profile] Supabase error:", actv8Error);
+          if (actv8Error.code === 'PGRST116') {
+            // No rows returned - could be RLS blocking or doesn't exist
+            setErrorType('not-found');
+          } else {
+            setErrorType('error');
+          }
+          setLoading(false);
+          return;
+        }
+
+        if (!actv8Data) {
+          console.log("[Actv8Profile] No data returned (likely RLS)");
+          setErrorType('not-authorized');
+          setLoading(false);
+          return;
+        }
 
         setActv8Contact(actv8Data);
         setContact(actv8Data.contact);
@@ -74,14 +116,15 @@ export default function Actv8Profile() {
 
         setCompletedPathInstances(mappedInstances);
       } catch (error) {
-        console.error("Error fetching actv8 profile:", error);
+        console.error("[Actv8Profile] Unexpected error:", error);
+        setErrorType('error');
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [id, refreshKey]); // Add refreshKey to re-fetch on level change
+  }, [id, refreshKey]);
 
   // Real-time subscription for outreach changes
   useEffect(() => {
@@ -101,7 +144,6 @@ export default function Actv8Profile() {
         "postgres_changes",
         { event: "*", schema: "public", table: "rms_actv8_contacts" },
         () => {
-          // Refetch when contact data changes (level switches, etc.)
           setRefreshKey(prev => prev + 1);
         }
       )
@@ -117,7 +159,6 @@ export default function Actv8Profile() {
     setRefreshKey(prev => prev + 1);
     refetchSteps();
     queryClient.invalidateQueries({ queryKey: ["outreaches"] });
-    // Cascade to path selection after level change
     setOpenSection("path");
   }, [refetchSteps, queryClient]);
 
@@ -145,12 +186,55 @@ export default function Actv8Profile() {
     );
   }
 
-  if (!actv8Contact || !contact) {
+  // Error states with helpful UI
+  if (errorType === 'not-authorized') {
     return (
       <div className="min-h-screen bg-background">
         <Rel8OnlyNavigation />
-        <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-          <p className="text-muted-foreground">Contact not found</p>
+        <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
+          <ShieldAlert className="h-12 w-12 mx-auto text-muted-foreground" />
+          <h2 className="text-xl font-semibold">Access Denied</h2>
+          <p className="text-muted-foreground">
+            You don't have permission to view this contact, or you need to sign in.
+          </p>
+          <Button onClick={() => navigate("/rel8/actv8")} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Network
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (errorType === 'not-found') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Rel8OnlyNavigation />
+        <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
+          <UserX className="h-12 w-12 mx-auto text-muted-foreground" />
+          <h2 className="text-xl font-semibold">Contact Not Found</h2>
+          <p className="text-muted-foreground">
+            This contact may have been removed or doesn't exist.
+          </p>
+          <Button onClick={() => navigate("/rel8/actv8")} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Network
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (errorType === 'error' || !actv8Contact || !contact) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Rel8OnlyNavigation />
+        <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
+          <p className="text-muted-foreground">Something went wrong loading this contact.</p>
+          <Button onClick={() => navigate("/rel8/actv8")} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Network
+          </Button>
         </div>
       </div>
     );
