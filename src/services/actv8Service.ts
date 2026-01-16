@@ -46,7 +46,8 @@ export async function updateRelationshipLevel(
   );
 
   // Get paths for tiers that need to be skipped
-  const tiersToSkip = newLevel.skippedTiers.filter(tier => !existingSkippedTiers.has(tier));
+  const skippedTiers = newLevel.skipped_tiers || [];
+  const tiersToSkip = skippedTiers.filter(tier => !existingSkippedTiers.has(tier));
   
   if (tiersToSkip.length > 0) {
     // Get one path per tier to create skipped instances
@@ -77,7 +78,7 @@ export async function updateRelationshipLevel(
 
   // Also update deprecated fields for backward compatibility
   const existingSkipped = (contact.skipped_paths || []) as unknown as SkippedPathEntry[];
-  const newSkippedEntries: SkippedPathEntry[] = newLevel.skippedTiers
+  const newSkippedEntries: SkippedPathEntry[] = skippedTiers
     .filter(tier => !existingSkipped.find(s => s.tier_at_skip === tier))
     .map(tier => ({
       path_id: `tier_${tier}_level_assessment`,
@@ -91,7 +92,7 @@ export async function updateRelationshipLevel(
     .from('rms_actv8_contacts')
     .update({
       relationship_level: newLevel.level, // Store explicit level number (1-4)
-      path_tier: newLevel.startingTier,
+      path_tier: newLevel.starting_tier,
       skipped_paths: [...existingSkipped, ...newSkippedEntries] as unknown as Json[],
       development_path_id: null, // Reset path selection
       current_step_index: 0,
