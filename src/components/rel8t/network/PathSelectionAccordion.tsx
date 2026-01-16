@@ -4,6 +4,7 @@ import { Loader2, Check, Coffee, Users, Handshake, CalendarCheck, Lock, Target }
 import { getDevelopmentPaths, getAvailablePaths, DevelopmentPath } from "@/services/actv8Service";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useTierLabels } from "@/hooks/useRelationshipLevels";
 
 interface PathSelectionAccordionProps {
   onSelectPath: (pathId: string) => void;
@@ -23,13 +24,6 @@ const getBuildRapportStepIcon = (index: number) => {
   return icons[index] || Coffee;
 };
 
-const tierLabels: Record<number, string> = {
-  1: "Foundation",
-  2: "Growth",
-  3: "Professional",
-  4: "Advanced",
-};
-
 export function PathSelectionAccordion({
   onSelectPath,
   currentPathId,
@@ -40,6 +34,7 @@ export function PathSelectionAccordion({
   isPathComplete = false,
   onPathSelected
 }: PathSelectionAccordionProps) {
+  const tierLabels = useTierLabels();
   const { data: pathData, isLoading } = useQuery({
     queryKey: ['available-paths', actv8ContactId],
     queryFn: async () => {
