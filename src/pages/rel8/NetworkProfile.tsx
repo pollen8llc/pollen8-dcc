@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath, advanceToPath, getCompletedPathInstances } from "@/services/actv8Service";
 import { getOutreachesByActv8Contact, getOutreachesForContact } from "@/services/rel8t/outreachService";
+import { useStepInstances } from "@/hooks/useRelationshipLevels";
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { DevelopmentPathAccordion } from "@/components/rel8t/network/DevelopmentPathAccordion";
@@ -68,6 +69,10 @@ export default function NetworkProfile() {
     queryFn: () => getCompletedPathInstances(id!),
     enabled: !!id
   });
+
+  // Fetch step instances for progress tracking
+  const { data: stepInstances = [] } = useStepInstances(actv8Contact?.id);
+
   const {
     data: analysis,
     isLoading: analysisLoading
@@ -409,6 +414,7 @@ export default function NetworkProfile() {
             actv8ContactId={actv8Contact.id}
             pathTier={actv8Contact.path?.tier || contact.pathTier}
             completedPathInstances={completedPathInstances}
+            stepInstances={stepInstances}
             totalStepsInPath={actv8Contact.path?.steps?.length || 4}
             onPlanTouchpoint={handlePlanTouchpoint}
           />

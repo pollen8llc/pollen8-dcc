@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { getDevelopmentPath, getStepInstances, StepInstance } from "@/services/actv8Service";
+import { getDevelopmentPath, getStepInstances } from "@/services/actv8Service";
+import { StepInstance } from "@/hooks/useRelationshipLevels";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -22,6 +23,7 @@ interface DevelopmentPathCardProps {
   actv8ContactId?: string;
   pathTier?: number;
   completedPathInstances?: CompletedPathInstance[];
+  stepInstances?: StepInstance[];
   onPlanTouchpoint?: (stepIndex: number) => void;
   onAdvanceStep?: () => void;
 }
@@ -34,6 +36,7 @@ export function DevelopmentPathCard({
   actv8ContactId,
   pathTier = 1,
   completedPathInstances = [],
+  stepInstances: propStepInstances,
   onPlanTouchpoint,
 }: DevelopmentPathCardProps) {
   const navigate = useNavigate();
@@ -44,11 +47,14 @@ export function DevelopmentPathCard({
     enabled: !!pathId,
   });
 
-  const { data: stepInstances = [] } = useQuery({
+  // Use prop if provided, otherwise fetch internally for backwards compatibility
+  const { data: fetchedStepInstances = [] } = useQuery({
     queryKey: ['step-instances', actv8ContactId],
     queryFn: () => actv8ContactId ? getStepInstances(actv8ContactId) : [],
-    enabled: !!actv8ContactId,
+    enabled: !!actv8ContactId && !propStepInstances,
   });
+
+  const stepInstances = propStepInstances || fetchedStepInstances;
 
   if (!path) {
     return (
