@@ -2329,6 +2329,7 @@ export type Database = {
           path_history: Json | null
           path_started_at: string | null
           path_tier: number | null
+          relationship_level: number | null
           relationship_type: string | null
           skipped_paths: Json | null
           status: string | null
@@ -2353,6 +2354,7 @@ export type Database = {
           path_history?: Json | null
           path_started_at?: string | null
           path_tier?: number | null
+          relationship_level?: number | null
           relationship_type?: string | null
           skipped_paths?: Json | null
           status?: string | null
@@ -2377,6 +2379,7 @@ export type Database = {
           path_history?: Json | null
           path_started_at?: string | null
           path_tier?: number | null
+          relationship_level?: number | null
           relationship_type?: string | null
           skipped_paths?: Json | null
           status?: string | null
