@@ -403,7 +403,7 @@ export default function NetworkProfile() {
             completedSteps={contact.completedSteps}
             linkedOutreaches={linkedOutreaches}
             actv8ContactId={actv8Contact.id}
-            pathTier={contact.pathTier}
+            pathTier={actv8Contact.path?.tier || contact.pathTier}
             completedPathInstances={completedPathInstances}
             totalStepsInPath={actv8Contact.path?.steps?.length || 4}
             onPlanTouchpoint={handlePlanTouchpoint}
