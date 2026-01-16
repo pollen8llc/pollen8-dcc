@@ -1,9 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useStepInstances } from "@/hooks/useRelationshipLevels";
 import { useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion } from "@/components/ui/accordion";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { ProfileHeaderCard } from "@/components/rel8t/actv8/ProfileHeaderCard";
 import { RelationshipLevelSection } from "@/components/rel8t/actv8/RelationshipLevelSection";
@@ -22,6 +23,8 @@ export default function Actv8Profile() {
   const [contact, setContact] = useState<any>(null);
   const [completedPathInstances, setCompletedPathInstances] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openSection, setOpenSection] = useState<string>("level"); // Cascading accordion state
+  const [refreshKey, setRefreshKey] = useState(0); // Force re-render key
 
   const { data: stepInstances = [], refetch: refetchSteps } = useStepInstances(actv8Contact?.id);
 
@@ -78,7 +81,7 @@ export default function Actv8Profile() {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, refreshKey]); // Add refreshKey to re-fetch on level change
 
   // Real-time subscription for outreach changes
   useEffect(() => {
@@ -94,6 +97,14 @@ export default function Actv8Profile() {
           queryClient.invalidateQueries({ queryKey: ["outreaches"] });
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "rms_actv8_contacts" },
+        () => {
+          // Refetch when contact data changes (level switches, etc.)
+          setRefreshKey(prev => prev + 1);
+        }
+      )
       .subscribe();
 
     return () => {
@@ -101,10 +112,27 @@ export default function Actv8Profile() {
     };
   }, [actv8Contact?.id, refetchSteps, queryClient]);
 
-  const handleRefresh = () => {
+  // Handle level change - refetch data and open path section
+  const handleLevelChanged = useCallback(() => {
+    setRefreshKey(prev => prev + 1);
     refetchSteps();
     queryClient.invalidateQueries({ queryKey: ["outreaches"] });
-  };
+    // Cascade to path selection after level change
+    setOpenSection("path");
+  }, [refetchSteps, queryClient]);
+
+  // Handle path selection - cascade to progress section
+  const handlePathSelected = useCallback(() => {
+    setRefreshKey(prev => prev + 1);
+    refetchSteps();
+    queryClient.invalidateQueries({ queryKey: ["outreaches"] });
+    setOpenSection("progress");
+  }, [refetchSteps, queryClient]);
+
+  const handleRefresh = useCallback(() => {
+    refetchSteps();
+    queryClient.invalidateQueries({ queryKey: ["outreaches"] });
+  }, [refetchSteps, queryClient]);
 
   if (loading) {
     return (
@@ -144,34 +172,46 @@ export default function Actv8Profile() {
           onBack={() => navigate("/rel8/actv8")}
         />
 
-        {/* Relationship Level */}
-        <RelationshipLevelSection
-          actv8ContactId={actv8Contact.id}
-          currentLevel={currentLevel}
-          levelSwitches={levelSwitches}
-          onLevelChanged={handleRefresh}
-        />
+        {/* Cascading Accordion Sections */}
+        <Accordion
+          type="single"
+          collapsible
+          value={openSection}
+          onValueChange={setOpenSection}
+          className="space-y-4"
+        >
+          {/* Relationship Level Accordion */}
+          <RelationshipLevelSection
+            actv8ContactId={actv8Contact.id}
+            currentLevel={currentLevel}
+            levelSwitches={levelSwitches}
+            onLevelChanged={handleLevelChanged}
+            key={`level-${refreshKey}`}
+          />
 
-        {/* Path Selection */}
-        <PathSelectionSection
-          actv8ContactId={actv8Contact.id}
-          currentTier={currentTier}
-          currentPathId={actv8Contact.development_path_id}
-          onPathSelected={handleRefresh}
-        />
+          {/* Path Selection Accordion */}
+          <PathSelectionSection
+            actv8ContactId={actv8Contact.id}
+            currentTier={currentTier}
+            currentPathId={actv8Contact.development_path_id}
+            onPathSelected={handlePathSelected}
+            key={`path-${refreshKey}`}
+          />
 
-        {/* Development Progress */}
-        <DevelopmentProgressSection
-          actv8ContactId={actv8Contact.id}
-          contactId={contact.id}
-          pathId={actv8Contact.development_path_id}
-          pathInstanceId={actv8Contact.current_path_instance_id}
-          currentTier={currentTier}
-          currentStepIndex={actv8Contact.current_step_index || 0}
-          stepInstances={stepInstances}
-          completedPathInstances={completedPathInstances}
-          onStepAction={handleRefresh}
-        />
+          {/* Development Progress Accordion */}
+          <DevelopmentProgressSection
+            actv8ContactId={actv8Contact.id}
+            contactId={contact.id}
+            pathId={actv8Contact.development_path_id}
+            pathInstanceId={actv8Contact.current_path_instance_id}
+            currentTier={currentTier}
+            currentStepIndex={actv8Contact.current_step_index || 0}
+            stepInstances={stepInstances}
+            completedPathInstances={completedPathInstances}
+            onStepAction={handleRefresh}
+            key={`progress-${refreshKey}`}
+          />
+        </Accordion>
 
         {/* Outreach & History Tabs */}
         <Tabs defaultValue="outreach" className="w-full">

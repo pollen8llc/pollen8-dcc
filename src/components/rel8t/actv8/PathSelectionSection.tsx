@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Lock, Check, Play, ChevronRight } from "lucide-react";
+import { Lock, Check, Play, ChevronRight, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -121,7 +121,6 @@ export function PathSelectionSection({
 
       toast.success(`Started ${path.name}`);
       
-      // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ["actv8-contact"] });
       queryClient.invalidateQueries({ queryKey: ["step-instances"] });
       
@@ -141,150 +140,166 @@ export function PathSelectionSection({
     return acc;
   }, {} as Record<number, Path[]>);
 
-  if (loading) {
-    return (
-      <Card className="bg-card/60 backdrop-blur-xl border-primary/20">
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-3">
+  const currentPath = paths.find(p => p.id === currentPathId);
+
+  return (
+    <AccordionItem 
+      value="path" 
+      className="border rounded-2xl bg-card/60 backdrop-blur-xl border-primary/20 overflow-hidden"
+    >
+      <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-primary/5 transition-colors">
+        <div className="flex items-center gap-3 text-left flex-1">
+          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <Target className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <span className="font-medium">
+              {currentPath ? currentPath.name : "Choose Development Path"}
+            </span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <Badge variant="outline" className="text-xs">
+                {tierLabels[currentTier] || `Tier ${currentTier}`}
+              </Badge>
+              {currentPathId && (
+                <Badge className="bg-primary/20 text-primary text-xs">
+                  Active
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+      </AccordionTrigger>
+
+      <AccordionContent className="px-4 pb-4">
+        {loading ? (
+          <div className="animate-pulse space-y-3 pt-2">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-14 bg-muted/50 rounded-lg" />
             ))}
           </div>
-        </CardContent>
-      </Card>
-    );
-  }
+        ) : (
+          <div className="space-y-4 pt-2">
+            {Object.entries(pathsByTier).map(([tierStr, tierPaths]) => {
+              const tier = parseInt(tierStr);
+              const isCurrentTier = tier === currentTier;
+              const isLocked = tier > currentTier + 1;
+              const isPastTier = tier < currentTier;
 
-  return (
-    <Card className="bg-card/60 backdrop-blur-xl border-primary/20">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center justify-between">
-          <span>Development Path</span>
-          <Badge variant="outline" className="text-xs">
-            {tierLabels[currentTier] || `Tier ${currentTier}`}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {Object.entries(pathsByTier).map(([tierStr, tierPaths]) => {
-          const tier = parseInt(tierStr);
-          const isCurrentTier = tier === currentTier;
-          const isLocked = tier > currentTier + 1;
-          const isPastTier = tier < currentTier;
-
-          return (
-            <div key={tier} className="space-y-2">
-              {/* Tier Header */}
-              <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "text-xs font-medium px-2 py-0.5 rounded-full",
-                    isCurrentTier && "bg-primary/20 text-primary",
-                    isPastTier && "bg-blue-500/20 text-blue-400",
-                    isLocked && "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {tierLabels[tier] || `Tier ${tier}`}
-                </span>
-                {isLocked && <Lock className="h-3 w-3 text-muted-foreground" />}
-              </div>
-
-              {/* Paths in this tier */}
-              {tierPaths.map((path) => {
-                const isCurrent = path.id === currentPathId;
-                const isSelecting = selectingPath === path.id;
-
-                return (
-                  <div
-                    key={path.id}
-                    className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg border transition-all",
-                      isCurrent
-                        ? "bg-primary/10 border-primary"
-                        : isLocked
-                        ? "bg-muted/20 border-muted opacity-50 cursor-not-allowed"
-                        : "bg-card/80 border-border hover:border-primary/50 cursor-pointer"
-                    )}
-                    onClick={() => !isLocked && !isCurrent && handleSelectPath(path)}
-                  >
-                    {/* Status Icon */}
-                    <div
+              return (
+                <div key={tier} className="space-y-2">
+                  {/* Tier Header */}
+                  <div className="flex items-center gap-2">
+                    <span
                       className={cn(
-                        "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0",
-                        isCurrent
-                          ? "bg-primary text-primary-foreground"
-                          : isPastTier
-                          ? "bg-blue-500/20 text-blue-400"
-                          : "bg-muted text-muted-foreground"
+                        "text-xs font-medium px-2 py-0.5 rounded-full",
+                        isCurrentTier && "bg-primary/20 text-primary",
+                        isPastTier && "bg-blue-500/20 text-blue-400",
+                        isLocked && "bg-muted text-muted-foreground"
                       )}
                     >
-                      {isCurrent ? (
-                        <Play className="h-4 w-4 fill-current" />
-                      ) : isPastTier ? (
-                        <Check className="h-4 w-4" />
-                      ) : isLocked ? (
-                        <Lock className="h-3 w-3" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </div>
+                      {tierLabels[tier] || `Tier ${tier}`}
+                    </span>
+                    {isLocked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                  </div>
 
-                    {/* Path Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span
+                  {/* Paths in this tier */}
+                  {tierPaths.map((path) => {
+                    const isCurrent = path.id === currentPathId;
+                    const isSelecting = selectingPath === path.id;
+
+                    return (
+                      <div
+                        key={path.id}
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-lg border transition-all",
+                          isCurrent
+                            ? "bg-primary/10 border-primary"
+                            : isLocked
+                            ? "bg-muted/20 border-muted opacity-50 cursor-not-allowed"
+                            : "bg-card/80 border-border hover:border-primary/50 cursor-pointer"
+                        )}
+                        onClick={() => !isLocked && !isCurrent && handleSelectPath(path)}
+                      >
+                        {/* Status Icon */}
+                        <div
                           className={cn(
-                            "font-medium text-sm",
-                            isCurrent && "text-primary"
+                            "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0",
+                            isCurrent
+                              ? "bg-primary text-primary-foreground"
+                              : isPastTier
+                              ? "bg-blue-500/20 text-blue-400"
+                              : "bg-muted text-muted-foreground"
                           )}
                         >
-                          {path.name}
+                          {isCurrent ? (
+                            <Play className="h-4 w-4 fill-current" />
+                          ) : isPastTier ? (
+                            <Check className="h-4 w-4" />
+                          ) : isLocked ? (
+                            <Lock className="h-3 w-3" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </div>
+
+                        {/* Path Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={cn(
+                                "font-medium text-sm",
+                                isCurrent && "text-primary"
+                              )}
+                            >
+                              {path.name}
+                            </span>
+                            {path.is_required && (
+                              <Badge variant="secondary" className="text-[10px]">
+                                Required
+                              </Badge>
+                            )}
+                            {isCurrent && (
+                              <Badge className="bg-primary/20 text-primary text-[10px]">
+                                Active
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-1">
+                            {path.description}
+                          </p>
+                        </div>
+
+                        {/* Step Count */}
+                        <span className="text-xs text-muted-foreground flex-shrink-0">
+                          {path.steps_count} steps
                         </span>
-                        {path.is_required && (
-                          <Badge variant="secondary" className="text-[10px]">
-                            Required
-                          </Badge>
-                        )}
-                        {isCurrent && (
-                          <Badge className="bg-primary/20 text-primary text-[10px]">
-                            Active
-                          </Badge>
+
+                        {/* Select Button */}
+                        {!isCurrent && !isLocked && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex-shrink-0"
+                            disabled={isSelecting}
+                          >
+                            {isSelecting ? "..." : "Start"}
+                          </Button>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground line-clamp-1">
-                        {path.description}
-                      </p>
-                    </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
 
-                    {/* Step Count */}
-                    <span className="text-xs text-muted-foreground flex-shrink-0">
-                      {path.steps_count} steps
-                    </span>
-
-                    {/* Select Button */}
-                    {!isCurrent && !isLocked && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex-shrink-0"
-                        disabled={isSelecting}
-                      >
-                        {isSelecting ? "..." : "Start"}
-                      </Button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-
-        {paths.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            No development paths available
-          </p>
+            {paths.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No development paths available
+              </p>
+            )}
+          </div>
         )}
-      </CardContent>
-    </Card>
+      </AccordionContent>
+    </AccordionItem>
   );
 }

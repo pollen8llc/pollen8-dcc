@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Lock, Check, ArrowRight, RefreshCw } from "lucide-react";
+import { Lock, Check, ArrowRight, RefreshCw, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
@@ -10,7 +9,6 @@ import {
   getIconComponent,
   checkLevelCompletion,
   switchRelationshipLevel,
-  RelationshipLevel,
 } from "@/hooks/useRelationshipLevels";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -42,11 +40,9 @@ export function RelationshipLevelSection({
     return levelSwitches.filter((s) => s.to_level === level).length;
   };
 
-  // Check if level is completed (previous level completed)
+  // Check if level is unlocked
   const isLevelUnlocked = (level: number) => {
-    // Level 1 is always unlocked
     if (level === 1) return true;
-    // For now, check if we're at or past that level
     return currentLevel >= level;
   };
 
@@ -71,7 +67,6 @@ export function RelationshipLevelSection({
 
       if (result.success) {
         toast.success(`Switched to Level ${targetLevel}`);
-        // Invalidate relevant queries
         queryClient.invalidateQueries({ queryKey: ["actv8-contact"] });
         queryClient.invalidateQueries({ queryKey: ["step-instances"] });
         onLevelChanged?.();
@@ -88,143 +83,148 @@ export function RelationshipLevelSection({
     }
   };
 
-  if (isLoading) {
-    return (
-      <Card className="bg-card/60 backdrop-blur-xl border-primary/20">
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
+  const currentLevelData = levels.find(l => l.level === currentLevel);
+  const currentLevelLabel = currentLevelData?.label || `Level ${currentLevel}`;
+
+  return (
+    <AccordionItem 
+      value="level" 
+      className="border rounded-2xl bg-card/60 backdrop-blur-xl border-primary/20 overflow-hidden"
+    >
+      <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-primary/5 transition-colors">
+        <div className="flex items-center gap-3 text-left flex-1">
+          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <Heart className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <span className="font-medium">Relationship Standing</span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <Badge variant="secondary" className="text-xs">
+                {currentLevelLabel}
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </AccordionTrigger>
+
+      <AccordionContent className="px-4 pb-4">
+        {isLoading ? (
+          <div className="animate-pulse space-y-3 pt-2">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-16 bg-muted/50 rounded-lg" />
             ))}
           </div>
-        </CardContent>
-      </Card>
-    );
-  }
+        ) : (
+          <div className="space-y-3 pt-2">
+            {levels
+              .sort((a, b) => a.level - b.level)
+              .map((level, index) => {
+                const Icon = getIconComponent(level.icon_name);
+                const isCurrent = level.level === currentLevel;
+                const isUnlocked = isLevelUnlocked(level.level);
+                const switchCount = getSwitchCount(level.level);
+                const isCompleted = level.level < currentLevel;
+                const isSwitching = switchingTo === level.level;
 
-  return (
-    <Card className="bg-card/60 backdrop-blur-xl border-primary/20">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center justify-between">
-          <span>Relationship Standing</span>
-          <Badge variant="secondary" className="text-xs">
-            Level {currentLevel}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {levels
-          .sort((a, b) => a.level - b.level)
-          .map((level, index) => {
-            const Icon = getIconComponent(level.icon_name);
-            const isCurrent = level.level === currentLevel;
-            const isUnlocked = isLevelUnlocked(level.level);
-            const switchCount = getSwitchCount(level.level);
-            const isCompleted = level.level < currentLevel;
-            const isSwitching = switchingTo === level.level;
-
-            return (
-              <div
-                key={level.id}
-                className={cn(
-                  "relative rounded-lg border p-4 transition-all duration-200",
-                  isCurrent
-                    ? "bg-primary/10 border-primary shadow-sm shadow-primary/20"
-                    : isUnlocked
-                    ? "bg-card/80 border-border hover:border-primary/50 cursor-pointer"
-                    : "bg-muted/30 border-muted cursor-not-allowed opacity-60",
-                  // Terraced effect - indent higher levels slightly
-                  index === 0 && "ml-0",
-                  index === 1 && "ml-2",
-                  index === 2 && "ml-4",
-                  index === 3 && "ml-6"
-                )}
-                onClick={() => isUnlocked && !isCurrent && handleSwitchLevel(level.level)}
-              >
-                <div className="flex items-start gap-3">
-                  {/* Level Icon */}
+                return (
                   <div
+                    key={level.id}
                     className={cn(
-                      "flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center",
+                      "relative rounded-lg border p-4 transition-all duration-200",
                       isCurrent
-                        ? "bg-primary text-primary-foreground"
-                        : isCompleted
-                        ? "bg-blue-500/20 text-blue-400"
+                        ? "bg-primary/10 border-primary shadow-sm shadow-primary/20"
                         : isUnlocked
-                        ? "bg-muted text-muted-foreground"
-                        : "bg-muted/50 text-muted-foreground/50"
+                        ? "bg-card/80 border-border hover:border-primary/50 cursor-pointer"
+                        : "bg-muted/30 border-muted cursor-not-allowed opacity-60",
+                      // Terraced effect
+                      index === 0 && "ml-0",
+                      index === 1 && "ml-2",
+                      index === 2 && "ml-4",
+                      index === 3 && "ml-6"
                     )}
+                    onClick={() => isUnlocked && !isCurrent && handleSwitchLevel(level.level)}
                   >
-                    {!isUnlocked ? (
-                      <Lock className="h-4 w-4" />
-                    ) : isCompleted ? (
-                      <Check className="h-5 w-5" />
-                    ) : (
-                      <Icon className="h-5 w-5" />
-                    )}
-                  </div>
-
-                  {/* Level Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
+                    <div className="flex items-start gap-3">
+                      {/* Level Icon */}
+                      <div
                         className={cn(
-                          "font-medium",
-                          isCurrent && "text-primary",
-                          !isUnlocked && "text-muted-foreground"
+                          "flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center",
+                          isCurrent
+                            ? "bg-primary text-primary-foreground"
+                            : isCompleted
+                            ? "bg-blue-500/20 text-blue-400"
+                            : isUnlocked
+                            ? "bg-muted text-muted-foreground"
+                            : "bg-muted/50 text-muted-foreground/50"
                         )}
                       >
-                        Lvl {level.level}: {level.label}
-                      </span>
+                        {!isUnlocked ? (
+                          <Lock className="h-4 w-4" />
+                        ) : isCompleted ? (
+                          <Check className="h-5 w-5" />
+                        ) : (
+                          <Icon className="h-5 w-5" />
+                        )}
+                      </div>
 
-                      {/* Status Badges */}
-                      {isCurrent && (
-                        <Badge className="bg-primary/20 text-primary text-xs">
-                          Current
-                        </Badge>
-                      )}
-                      {isCompleted && (
-                        <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 text-xs">
-                          Done
-                        </Badge>
-                      )}
-                      {switchCount > 0 && (
-                        <Badge variant="outline" className="text-xs gap-1">
-                          <RefreshCw className="h-2.5 w-2.5" />
-                          {switchCount}
-                        </Badge>
+                      {/* Level Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className={cn(
+                              "font-medium",
+                              isCurrent && "text-primary",
+                              !isUnlocked && "text-muted-foreground"
+                            )}
+                          >
+                            Lvl {level.level}: {level.label}
+                          </span>
+
+                          {/* Status Badges */}
+                          {isCurrent && (
+                            <Badge className="bg-primary/20 text-primary text-xs">
+                              Current
+                            </Badge>
+                          )}
+                          {isCompleted && (
+                            <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 text-xs">
+                              Done
+                            </Badge>
+                          )}
+                          {switchCount > 0 && (
+                            <Badge variant="outline" className="text-xs gap-1">
+                              <RefreshCw className="h-2.5 w-2.5" />
+                              {switchCount}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                          {level.description}
+                        </p>
+                      </div>
+
+                      {/* Action Arrow */}
+                      {isUnlocked && !isCurrent && (
+                        <div className="h-8 w-8 flex items-center justify-center flex-shrink-0">
+                          {isSwitching ? (
+                            <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
+                          ) : (
+                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                      {level.description}
-                    </p>
                   </div>
+                );
+              })}
 
-                  {/* Action Arrow */}
-                  {isUnlocked && !isCurrent && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 flex-shrink-0"
-                      disabled={isSwitching}
-                    >
-                      {isSwitching ? (
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <ArrowRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-
-        {/* Helper text */}
-        <p className="text-xs text-muted-foreground text-center mt-4">
-          Complete each level's path to unlock the next level
-        </p>
-      </CardContent>
-    </Card>
+            {/* Helper text */}
+            <p className="text-xs text-muted-foreground text-center mt-4">
+              Complete each level's path to unlock the next level
+            </p>
+          </div>
+        )}
+      </AccordionContent>
+    </AccordionItem>
   );
 }
