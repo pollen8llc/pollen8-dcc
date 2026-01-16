@@ -1165,3 +1165,115 @@ export const syncOutreachesToActv8 = async (actv8ContactId: string): Promise<num
     return 0;
   }
 };
+
+/**
+ * Reschedule an outreach to a new date.
+ * If linked to an actv8 step, triggers a retry on that step.
+ */
+export const rescheduleOutreach = async (
+  outreachId: string,
+  newDueDate: string
+): Promise<boolean> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // Get the outreach to check for actv8 linkage
+    const { data: outreach, error: fetchError } = await supabase
+      .from("rms_outreach")
+      .select("actv8_contact_id, actv8_step_index, calendar_sync_enabled")
+      .eq("id", outreachId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Update the due date
+    const { error: updateError } = await supabase
+      .from("rms_outreach")
+      .update({
+        due_date: newDueDate,
+        scheduled_at: newDueDate,
+        status: 'pending' // Reset to pending if was overdue
+      })
+      .eq("id", outreachId);
+
+    if (updateError) throw updateError;
+
+    // If linked to actv8, trigger a retry on the step
+    if (outreach?.actv8_contact_id && outreach?.actv8_step_index !== null) {
+      try {
+        const { retryStep } = await import("@/hooks/useRelationshipLevels");
+        await retryStep(outreach.actv8_contact_id, outreach.actv8_step_index);
+        console.log("✅ Triggered step retry for rescheduled outreach");
+      } catch (retryError) {
+        console.error("Error triggering step retry:", retryError);
+        // Don't fail the reschedule if retry fails
+      }
+    }
+
+    // Update calendar if sync is enabled
+    if (outreach?.calendar_sync_enabled) {
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("user_id", user.id)
+          .single();
+
+        if (profile?.email) {
+          await sendCalendarUpdate(outreachId, 'update', profile.email);
+        }
+      } catch (calendarError) {
+        console.error("Error updating calendar:", calendarError);
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error rescheduling outreach:", error);
+    return false;
+  }
+};
+
+/**
+ * Mark an outreach as missed/declined.
+ * If linked to an actv8 step, marks that step as missed.
+ */
+export const markOutreachMissed = async (
+  outreachId: string,
+  reason: string = 'missed'
+): Promise<boolean> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // Get the outreach to check for actv8 linkage
+    const { data: outreach, error: fetchError } = await supabase
+      .from("rms_outreach")
+      .select("actv8_contact_id, actv8_step_index, calendar_sync_enabled")
+      .eq("id", outreachId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // We keep the outreach as 'pending' but mark the step as missed
+    // The user can then reschedule the outreach
+
+    // If linked to actv8, mark the step as missed
+    if (outreach?.actv8_contact_id && outreach?.actv8_step_index !== null) {
+      try {
+        const { markStepMissed } = await import("@/hooks/useRelationshipLevels");
+        await markStepMissed(outreach.actv8_contact_id, outreach.actv8_step_index, reason);
+        console.log("✅ Marked step as missed for outreach");
+      } catch (missedError) {
+        console.error("Error marking step missed:", missedError);
+        throw missedError;
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error marking outreach missed:", error);
+    return false;
+  }
+};

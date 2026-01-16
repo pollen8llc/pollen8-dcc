@@ -3,9 +3,9 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, AlertCircle, Download, Trash2, Pencil, Users, CheckCircle2, ExternalLink } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { Outreach, updateOutreachStatus, deleteOutreach, sendCalendarUpdate } from "@/services/rel8t/outreachService";
+import { Calendar, AlertCircle, Download, Trash2, Pencil, Users, CheckCircle2, ExternalLink, RotateCcw, XCircle } from "lucide-react";
+import { formatDistanceToNow, format } from "date-fns";
+import { Outreach, updateOutreachStatus, deleteOutreach, sendCalendarUpdate, rescheduleOutreach, markOutreachMissed } from "@/services/rel8t/outreachService";
 import { areNotesComplete } from "@/components/rel8t/StructuredNotesForm";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
@@ -15,6 +15,8 @@ import { generateOutreachICS } from "@/utils/outreachIcsGenerator";
 import { downloadICS } from "@/utils/icsDownload";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +27,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface OutreachCardProps {
   outreach: Outreach;
@@ -36,9 +44,13 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   const [showCalendarDialog, setShowCalendarDialog] = useState(false);
   const [icsContent, setIcsContent] = useState<string>("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showMissedDialog, setShowMissedDialog] = useState(false);
   const [isNotifying, setIsNotifying] = useState(false);
-  
   const [isCompleting, setIsCompleting] = useState(false);
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [isMarkingMissed, setIsMarkingMissed] = useState(false);
+  const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(undefined);
+  const [showReschedulePopover, setShowReschedulePopover] = useState(false);
 
   const handleMarkComplete = async () => {
     if (isCompleting) return;
@@ -108,6 +120,79 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
     }
   };
 
+  const handleReschedule = async () => {
+    if (!rescheduleDate || isRescheduling) return;
+    
+    setIsRescheduling(true);
+    try {
+      const success = await rescheduleOutreach(outreach.id, rescheduleDate.toISOString());
+      
+      if (success) {
+        queryClient.invalidateQueries({ queryKey: ["outreach"] });
+        queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
+        queryClient.invalidateQueries({ queryKey: ["step-instances"] });
+        queryClient.invalidateQueries({ queryKey: ["actv8-contact"] });
+        
+        toast({
+          title: "Task rescheduled",
+          description: `Outreach moved to ${format(rescheduleDate, 'MMM d, yyyy')}`
+        });
+        setShowReschedulePopover(false);
+        setRescheduleDate(undefined);
+      } else {
+        toast({
+          title: "Failed to reschedule",
+          description: "Could not reschedule the task. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error rescheduling:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRescheduling(false);
+    }
+  };
+
+  const handleMarkMissed = async () => {
+    if (isMarkingMissed) return;
+    
+    setIsMarkingMissed(true);
+    try {
+      const success = await markOutreachMissed(outreach.id, 'missed');
+      
+      if (success) {
+        queryClient.invalidateQueries({ queryKey: ["outreach"] });
+        queryClient.invalidateQueries({ queryKey: ["step-instances"] });
+        queryClient.invalidateQueries({ queryKey: ["actv8-contact"] });
+        
+        toast({
+          title: "Marked as missed",
+          description: "You can reschedule this task to retry."
+        });
+        setShowMissedDialog(false);
+      } else {
+        toast({
+          title: "Failed",
+          description: "Could not mark task as missed.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error marking missed:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsMarkingMissed(false);
+    }
+  };
 
   const handleDelete = async () => {
     // Get user email for calendar update
@@ -374,9 +459,59 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
           </div>
         </div>
         
-        <div className="flex items-center justify-end gap-2 mt-auto pt-3 border-t border-border/20">
+        <div className="flex items-center justify-end gap-2 mt-auto pt-3 border-t border-border/20 flex-wrap">
           {outreach.status === "pending" && (
             <>
+              {/* Reschedule button for overdue tasks */}
+              {isOverdue && (
+                <Popover open={showReschedulePopover} onOpenChange={setShowReschedulePopover}>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="gap-1 border-amber-500/50 text-amber-500 hover:bg-amber-500/10"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      Reschedule
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <CalendarPicker
+                      mode="single"
+                      selected={rescheduleDate}
+                      onSelect={setRescheduleDate}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                    />
+                    {rescheduleDate && (
+                      <div className="p-3 border-t">
+                        <Button 
+                          onClick={handleReschedule} 
+                          disabled={isRescheduling}
+                          className="w-full"
+                          size="sm"
+                        >
+                          {isRescheduling ? "Rescheduling..." : `Move to ${format(rescheduleDate, 'MMM d')}`}
+                        </Button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+              )}
+              
+              {/* Mark Missed dropdown for overdue tasks linked to actv8 */}
+              {isOverdue && outreach.actv8_contact_id && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="gap-1 text-red-400 hover:bg-red-500/10 hover:text-red-400"
+                  onClick={() => setShowMissedDialog(true)}
+                >
+                  <XCircle className="h-4 w-4" />
+                  Mark Missed
+                </Button>
+              )}
+              
               <Button 
                 variant={outreach.contacts_notified_at ? "default" : "outline"}
                 size="sm" 
@@ -432,6 +567,27 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showMissedDialog} onOpenChange={setShowMissedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mark as Missed?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will mark the development step as missed. The progress bar will show red until you reschedule and complete this task.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleMarkMissed}
+              disabled={isMarkingMissed}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {isMarkingMissed ? "Marking..." : "Mark Missed"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
