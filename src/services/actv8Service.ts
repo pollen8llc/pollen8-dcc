@@ -5,27 +5,80 @@ import type { Json } from "@/integrations/supabase/types";
 /**
  * Updates the relationship level for an Actv8 contact.
  * This recalculates skipped tiers based on the new level.
+ * Creates skipped path instances for proper progress bar tracking.
  */
 export async function updateRelationshipLevel(
   actv8ContactId: string,
   newLevel: AssessmentLevel
 ): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
   // Get current contact data
   const { data: contact, error: fetchError } = await supabase
     .from('rms_actv8_contacts')
-    .select('skipped_paths, path_history, path_tier')
+    .select('skipped_paths, path_history, path_tier, current_path_instance_id')
     .eq('id', actv8ContactId)
     .single();
   
   if (fetchError) throw fetchError;
   
+  // Mark current path instance as skipped if exists
+  if (contact.current_path_instance_id) {
+    await supabase
+      .from("rms_actv8_path_instances")
+      .update({ 
+        status: 'skipped',
+        ended_at: new Date().toISOString()
+      })
+      .eq("id", contact.current_path_instance_id);
+  }
+
+  // Get existing skipped tier numbers from path instances
+  const { data: existingInstances } = await supabase
+    .from('rms_actv8_path_instances')
+    .select('path_id, rms_actv8_paths!inner(tier)')
+    .eq('actv8_contact_id', actv8ContactId)
+    .eq('status', 'skipped');
+  
+  const existingSkippedTiers = new Set(
+    (existingInstances || []).map((i: any) => i.rms_actv8_paths.tier)
+  );
+
+  // Get paths for tiers that need to be skipped
+  const tiersToSkip = newLevel.skippedTiers.filter(tier => !existingSkippedTiers.has(tier));
+  
+  if (tiersToSkip.length > 0) {
+    // Get one path per tier to create skipped instances
+    const { data: pathsForTiers } = await supabase
+      .from('rms_actv8_paths')
+      .select('id, tier')
+      .in('tier', tiersToSkip)
+      .order('tier_order', { ascending: true });
+    
+    // Create skipped path instances - one per tier
+    const seenTiers = new Set<number>();
+    for (const path of pathsForTiers || []) {
+      if (seenTiers.has(path.tier)) continue;
+      seenTiers.add(path.tier);
+      
+      await supabase
+        .from('rms_actv8_path_instances')
+        .insert({
+          user_id: user.id,
+          actv8_contact_id: actv8ContactId,
+          path_id: path.id,
+          status: 'skipped',
+          started_at: new Date().toISOString(),
+          ended_at: new Date().toISOString(),
+        });
+    }
+  }
+
+  // Also update deprecated fields for backward compatibility
   const existingSkipped = (contact.skipped_paths || []) as unknown as SkippedPathEntry[];
-  const pathHistory = (contact.path_history || []) as unknown as PathHistoryEntry[];
-  // PathHistoryEntry has path_id, not tier - we need to track completed tiers differently
-  // For now, use existing skipped paths to prevent re-adding those tiers
-  // Calculate new skipped entries (don't duplicate existing skipped tiers)
   const newSkippedEntries: SkippedPathEntry[] = newLevel.skippedTiers
-    .filter(tier => !existingSkipped.find(s => s.tier_at_skip === tier)) // Don't duplicate
+    .filter(tier => !existingSkipped.find(s => s.tier_at_skip === tier))
     .map(tier => ({
       path_id: `tier_${tier}_level_assessment`,
       path_name: `Tier ${tier} (Relationship Level)`,
@@ -42,6 +95,7 @@ export async function updateRelationshipLevel(
       development_path_id: null, // Reset path selection
       current_step_index: 0,
       completed_steps: [],
+      current_path_instance_id: null, // Clear instance reference
     })
     .eq('id', actv8ContactId);
   
@@ -284,6 +338,17 @@ export async function skipCurrentPath(
   if (!contact) throw new Error("Contact not found");
   if (!contact.path) throw new Error("No path assigned");
 
+  // Mark current path instance as SKIPPED (not ended)
+  if (contact.current_path_instance_id) {
+    await supabase
+      .from("rms_actv8_path_instances")
+      .update({ 
+        status: 'skipped',
+        ended_at: new Date().toISOString()
+      })
+      .eq("id", contact.current_path_instance_id);
+  }
+
   const skipEntry: SkippedPathEntry = {
     path_id: contact.development_path_id,
     path_name: contact.path.name,
@@ -304,6 +369,7 @@ export async function skipCurrentPath(
       current_step_index: 0,
       completed_steps: [],
       path_started_at: null,
+      current_path_instance_id: null, // Clear instance reference
     })
     .eq("id", actv8ContactId)
     .select()
