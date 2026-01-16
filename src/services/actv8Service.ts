@@ -90,6 +90,7 @@ export async function updateRelationshipLevel(
   const { error: updateError } = await supabase
     .from('rms_actv8_contacts')
     .update({
+      relationship_level: newLevel.level, // Store explicit level number (1-4)
       path_tier: newLevel.startingTier,
       skipped_paths: [...existingSkipped, ...newSkippedEntries] as unknown as Json[],
       development_path_id: null, // Reset path selection
@@ -623,6 +624,7 @@ export async function activateContact(
         activated_at: new Date().toISOString(),
         path_started_at: new Date().toISOString(),
         path_tier: startingTier,
+        relationship_level: startingTier, // Store explicit level (1-4) for path logic
         path_history: [],
         skipped_paths: skippedPathsEntries as unknown as Json[],
       })

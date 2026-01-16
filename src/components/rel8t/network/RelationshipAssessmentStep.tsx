@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 export interface AssessmentLevel {
   id: string;
+  level: number; // Explicit level number (1-4) for DB storage and path logic
   label: string;
   description: string;
   startingTier: number;
@@ -16,32 +17,36 @@ export interface AssessmentLevel {
 
 const ASSESSMENT_LEVELS: AssessmentLevel[] = [
   {
-    id: "just_met",
-    label: "Just Met",
+    id: "level_1",
+    level: 1,
+    label: "Level 1: Just Met",
     description: "New or minimal contact",
     startingTier: 1,
     skippedTiers: [],
     icon: <UserPlus className="h-5 w-5" />,
   },
   {
-    id: "few_conversations",
-    label: "Building Rapport",
+    id: "level_2",
+    level: 2,
+    label: "Level 2: Building Rapport",
     description: "Some interaction, still connecting",
     startingTier: 2,
     skippedTiers: [1],
     icon: <Users className="h-5 w-5" />,
   },
   {
-    id: "established",
-    label: "Established",
+    id: "level_3",
+    level: 3,
+    label: "Level 3: Established",
     description: "Regular, mutual understanding",
     startingTier: 3,
     skippedTiers: [1, 2],
     icon: <Handshake className="h-5 w-5" />,
   },
   {
-    id: "close",
-    label: "Close Bond",
+    id: "level_4",
+    level: 4,
+    label: "Level 4: Close Bond",
     description: "Strong, long-term connection",
     startingTier: 4,
     skippedTiers: [1, 2, 3],

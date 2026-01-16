@@ -33,10 +33,10 @@ const tierLabels: Record<number, string> = {
 };
 
 const levelLabels: Record<string, string> = {
-  just_met: "Just Met",
-  few_conversations: "Building Rapport",
-  established: "Established",
-  close: "Close Relationship",
+  level_1: "Lvl 1: Just Met",
+  level_2: "Lvl 2: Building Rapport",
+  level_3: "Lvl 3: Established",
+  level_4: "Lvl 4: Close Bond",
 };
 
 const isBuildRapportPath = (pathId: string) => pathId === 'build_rapport';
