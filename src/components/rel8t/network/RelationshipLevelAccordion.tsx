@@ -131,16 +131,6 @@ export function RelationshipLevelAccordion({
     return <IconComponent className="h-4 w-4" />;
   };
 
-  // Calculate segment colors for mini tier bar
-  const skippedTiers = skippedPaths.map(s => s.tier_at_skip).filter(Boolean) as number[];
-  const completedTiersCount = pathHistory.length;
-  
-  const getSegmentColor = (tier: number) => {
-    if (tier <= completedTiersCount && !skippedTiers.includes(tier)) return 'bg-[hsl(224,76%,48%)]';
-    if (skippedTiers.includes(tier)) return 'bg-amber-500';
-    if (tier === effectiveTier) return 'bg-white';
-    return 'bg-muted';
-  };
 
   const currentLevelData = relationshipLevels.find(l => l.level === currentLevel);
   const currentLevelLabel = currentLevelData?.label || `Level ${currentLevel}`;
@@ -159,18 +149,6 @@ export function RelationshipLevelAccordion({
                 {currentLevelLabel} • {tierLabels[effectiveTier] || `Tier ${effectiveTier}`}
               </span>
             </div>
-          </div>
-          {/* Mini Tier Bar */}
-          <div className="flex items-center gap-1 mr-2">
-            {[1, 2, 3, 4].map((tier) => (
-              <div
-                key={tier}
-                className={cn(
-                  "h-2 w-4 rounded-sm transition-colors",
-                  getSegmentColor(tier)
-                )}
-              />
-            ))}
           </div>
         </div>
       </AccordionTrigger>
@@ -292,30 +270,6 @@ export function RelationshipLevelAccordion({
               )}
             </div>
 
-            {/* Tier Progress Indicator */}
-            <div>
-              <div className="flex items-center gap-2">
-                {[1, 2, 3, 4].map((tier) => (
-                  <div key={tier} className="flex-1 space-y-1">
-                    <div
-                      className={cn(
-                        "h-2 rounded-full transition-colors",
-                        getSegmentColor(tier)
-                      )}
-                    />
-                    <span className={cn(
-                      "text-[9px] block text-center",
-                      tier <= completedTiersCount && !skippedTiers.includes(tier) && "text-[hsl(224,76%,48%)] font-medium",
-                      skippedTiers.includes(tier) && "text-amber-500",
-                      tier === effectiveTier && "text-foreground font-medium",
-                      tier > effectiveTier && !skippedTiers.includes(tier) && tier > completedTiersCount && "text-muted-foreground"
-                    )}>
-                      {tierLabels[tier]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
 
           </div>
         )}
