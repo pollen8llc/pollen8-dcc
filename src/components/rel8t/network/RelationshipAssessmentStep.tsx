@@ -2,64 +2,20 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Users, UserPlus, Handshake, Heart } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { 
+  useRelationshipLevels, 
+  useTierLabels, 
+  getIconComponent,
+  RelationshipLevel,
+} from "@/hooks/useRelationshipLevels";
 
-export interface AssessmentLevel {
-  id: string;
-  level: number; // Explicit level number (1-4) for DB storage and path logic
-  label: string;
-  description: string;
-  startingTier: number;
-  skippedTiers: number[];
-  icon: React.ReactNode;
-}
+// Re-export the database type as AssessmentLevel for backward compatibility
+export type AssessmentLevel = RelationshipLevel;
 
-const ASSESSMENT_LEVELS: AssessmentLevel[] = [
-  {
-    id: "level_1",
-    level: 1,
-    label: "Level 1: Just Met",
-    description: "New or minimal contact",
-    startingTier: 1,
-    skippedTiers: [],
-    icon: <UserPlus className="h-5 w-5" />,
-  },
-  {
-    id: "level_2",
-    level: 2,
-    label: "Level 2: Building Rapport",
-    description: "Some interaction, still connecting",
-    startingTier: 2,
-    skippedTiers: [1],
-    icon: <Users className="h-5 w-5" />,
-  },
-  {
-    id: "level_3",
-    level: 3,
-    label: "Level 3: Established",
-    description: "Regular, mutual understanding",
-    startingTier: 3,
-    skippedTiers: [1, 2],
-    icon: <Handshake className="h-5 w-5" />,
-  },
-  {
-    id: "level_4",
-    level: 4,
-    label: "Level 4: Close Bond",
-    description: "Strong, long-term connection",
-    startingTier: 4,
-    skippedTiers: [1, 2, 3],
-    icon: <Heart className="h-5 w-5" />,
-  },
-];
-
-const tierLabels: Record<number, string> = {
-  1: "Foundation",
-  2: "Growth",
-  3: "Professional",
-  4: "Advanced",
-};
+// Legacy export for backward compatibility - now fetched from DB
+export const ASSESSMENT_LEVELS: AssessmentLevel[] = [];
 
 interface RelationshipAssessmentStepProps {
   contactName: string;
@@ -74,14 +30,26 @@ export function RelationshipAssessmentStep({
   onCancel,
   isLoading = false,
 }: RelationshipAssessmentStepProps) {
-  const [selectedLevel, setSelectedLevel] = useState<string>("");
+  const [selectedLevelId, setSelectedLevelId] = useState<string>("");
+  
+  // Fetch from database
+  const { data: levels = [], isLoading: levelsLoading } = useRelationshipLevels();
+  const tierLabels = useTierLabels();
 
   const handleContinue = () => {
-    const level = ASSESSMENT_LEVELS.find((l) => l.id === selectedLevel);
+    const level = levels.find((l) => l.id === selectedLevelId);
     if (level) {
       onSelect(level);
     }
   };
+
+  if (levelsLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -95,12 +63,14 @@ export function RelationshipAssessmentStep({
       </div>
 
       <RadioGroup
-        value={selectedLevel}
-        onValueChange={setSelectedLevel}
+        value={selectedLevelId}
+        onValueChange={setSelectedLevelId}
         className="space-y-3"
       >
-        {ASSESSMENT_LEVELS.map((level) => {
-          const isSelected = selectedLevel === level.id;
+        {levels.map((level) => {
+          const isSelected = selectedLevelId === level.id;
+          const IconComponent = getIconComponent(level.icon_name);
+          
           return (
             <div
               key={level.id}
@@ -111,7 +81,7 @@ export function RelationshipAssessmentStep({
                   ? "border-primary bg-primary/10 ring-2 ring-primary/20"
                   : "border-border/50 bg-card/50"
               )}
-              onClick={() => setSelectedLevel(level.id)}
+              onClick={() => setSelectedLevelId(level.id)}
             >
               <RadioGroupItem value={level.id} id={level.id} className="mt-1" />
               <div className="flex-1">
@@ -127,7 +97,7 @@ export function RelationshipAssessmentStep({
                         : "bg-muted text-muted-foreground"
                     )}
                   >
-                    {level.icon}
+                    <IconComponent className="h-5 w-5" />
                   </div>
                   <div className="flex-1">
                     <span className="font-medium text-foreground block">
@@ -142,9 +112,9 @@ export function RelationshipAssessmentStep({
                 {/* Tier Preview */}
                 <div className="mt-3 flex items-center gap-1.5">
                   {[1, 2, 3, 4].map((tier) => {
-                    const isSkipped = level.skippedTiers.includes(tier);
-                    const isCurrent = tier === level.startingTier;
-                    const isFuture = tier > level.startingTier;
+                    const isSkipped = level.skipped_tiers.includes(tier);
+                    const isCurrent = tier === level.starting_tier;
+                    const isFuture = tier > level.starting_tier;
 
                     return (
                       <div key={tier} className="flex-1 space-y-1">
@@ -170,9 +140,9 @@ export function RelationshipAssessmentStep({
                     );
                   })}
                 </div>
-                {level.skippedTiers.length > 0 && (
+                {level.skipped_tiers.length > 0 && (
                   <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1.5">
-                    Tiers {level.skippedTiers.join(", ")} will be marked as already passed
+                    Tiers {level.skipped_tiers.join(", ")} will be marked as already passed
                   </p>
                 )}
               </div>
@@ -189,7 +159,7 @@ export function RelationshipAssessmentStep({
         )}
         <Button
           onClick={handleContinue}
-          disabled={!selectedLevel || isLoading}
+          disabled={!selectedLevelId || isLoading}
           className="flex-1"
         >
           {isLoading ? "Setting up..." : "Continue"}
@@ -198,5 +168,3 @@ export function RelationshipAssessmentStep({
     </div>
   );
 }
-
-export { ASSESSMENT_LEVELS };
