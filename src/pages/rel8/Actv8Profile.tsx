@@ -10,7 +10,7 @@ import { RelationshipLevelSection } from "@/components/rel8t/actv8/RelationshipL
 import { PathSelectionSection } from "@/components/rel8t/actv8/PathSelectionSection";
 import { DevelopmentProgressSection } from "@/components/rel8t/actv8/DevelopmentProgressSection";
 import { CompletedPathsHistory } from "@/components/rel8t/actv8/CompletedPathsHistory";
-import { OutreachList } from "@/components/rel8t/OutreachList";
+import OutreachList from "@/components/rel8t/OutreachList";
 import { Loader2 } from "lucide-react";
 
 export default function Actv8Profile() {
@@ -180,7 +180,7 @@ export default function Actv8Profile() {
             <TabsTrigger value="history">Completed Paths</TabsTrigger>
           </TabsList>
           <TabsContent value="outreach" className="mt-4">
-            <OutreachList filterTab="all" contactId={contact.id} />
+            <OutreachList defaultTab="all" />
           </TabsContent>
           <TabsContent value="history" className="mt-4">
             <CompletedPathsHistory actv8ContactId={actv8Contact.id} />
