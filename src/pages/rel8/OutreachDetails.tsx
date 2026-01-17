@@ -30,7 +30,8 @@ import {
   Activity,
   Users,
   FileText,
-  UserCircle
+  UserCircle,
+  RefreshCw
 } from "lucide-react";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
@@ -516,7 +517,17 @@ export default function OutreachDetails() {
             </Button>
           )}
           
-          {outreach.status !== 'completed' && (
+          {outreach.status !== 'completed' && isOverdue && (
+            <Button
+              onClick={() => navigate(`/rel8/triggers/wizard?mode=edit&id=${id}`)}
+              className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/20"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Reschedule
+            </Button>
+          )}
+          
+          {outreach.status !== 'completed' && !isOverdue && (
             <Button
               variant="outline"
               onClick={() => navigate(`/rel8/triggers/wizard?mode=edit&id=${id}`)}
