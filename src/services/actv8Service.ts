@@ -142,12 +142,6 @@ export interface DevelopmentPathStep {
   suggested_tone: string;
 }
 
-export interface LevelSwitch {
-  from_level: number;
-  to_level: number;
-  switched_at: string;
-}
-
 export interface Actv8Contact {
   id: string;
   user_id: string;
@@ -158,8 +152,6 @@ export interface Actv8Contact {
   completed_steps: string[];
   connection_strength: string | null;
   relationship_type: string | null;
-  relationship_level: number | null; // Explicit level 1-4
-  level_switches: LevelSwitch[] | null; // Track level changes
   warmth_level: string | null;
   intention_id: string | null;
   intention_notes: string | null;
