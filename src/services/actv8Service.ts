@@ -1283,20 +1283,31 @@ export async function completeStepInstance(
   const instance = instances?.[0] as StepInstance | undefined;
   if (!instance) return null;
 
+  // Check if rapport_progress is declined - if so, mark as missed (red)
+  const isDeclined = outcome?.rapport_progress === 'declined';
+  
+  // Check if this step was previously missed - if so, increment retry_count for purple indicator
+  const wasMissed = instance.status === 'missed' || instance.status === 'retrying';
+  const retryCount = wasMissed ? (instance.retry_count || 0) + 1 : (instance.retry_count || 0);
+
   // Calculate days to complete
   const startedAt = instance.started_at ? new Date(instance.started_at) : new Date(instance.created_at);
   const completedAt = new Date();
   const daysToComplete = Math.ceil((completedAt.getTime() - startedAt.getTime()) / (1000 * 60 * 60 * 24));
 
+  // Determine final status: declined -> missed, retried -> completed (with retry_count), otherwise -> completed
+  const finalStatus = isDeclined ? 'missed' : 'completed';
+
   const { data, error } = await (supabase as any)
     .from("rms_actv8_step_instances")
     .update({
-      status: 'completed',
+      status: finalStatus,
       completed_at: completedAt.toISOString(),
       outreach_id: outreachId,
       days_to_complete: daysToComplete,
       interaction_outcome: outcome?.interaction_outcome || null,
       rapport_progress: outcome?.rapport_progress || null,
+      retry_count: retryCount,
       updated_at: completedAt.toISOString(),
     })
     .eq("id", instance.id)

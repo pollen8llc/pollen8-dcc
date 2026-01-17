@@ -333,13 +333,11 @@ export const updateOutreachStatus = async (id: string, status: OutreachStatus): 
           
           // Only advance if this is the current step
           if (outreach.actv8_step_index === currentStepIndex) {
-            // Use actual step ID from path, not just index
-            const stepId = currentStep?.id || `step_${currentStepIndex}`;
-            const newCompletedSteps = [...completedSteps, stepId];
-            const newStepIndex = currentStepIndex + 1;
+            // Check if rapport_progress is declined
+            const isDeclined = fullOutreach?.structured_notes?.rapport_progress === 'declined';
             
             // Complete the step instance with metrics from structured notes
-            await completeStepInstance(
+            const stepInstance = await completeStepInstance(
               outreach.actv8_contact_id,
               currentStepIndex,
               id,
@@ -349,58 +347,71 @@ export const updateOutreachStatus = async (id: string, status: OutreachStatus): 
               }
             );
             
-            // Update step progress on the contact
-            await updateContactProgress(outreach.actv8_contact_id, newStepIndex, newCompletedSteps);
-            
-            // Create the next step instance as "active" so it appears unlocked
-            const nextStep = actv8Contact.path?.steps?.[newStepIndex];
-            if (nextStep && actv8Contact.development_path_id) {
-              try {
-                await createStepInstance(
-                  outreach.actv8_contact_id,
-                  nextStep.id,
-                  newStepIndex,
-                  actv8Contact.development_path_id,
-                  'active'
-                );
-              } catch (stepError) {
-                // Step instance might already exist, ignore
-                console.log("Step instance may already exist:", stepError);
+            // Only advance to next step if step was completed (not declined/missed)
+            // If declined, step remains current so user can retry/reschedule
+            if (!isDeclined && stepInstance?.status === 'completed') {
+              // Use actual step ID from path, not just index
+              const stepId = currentStep?.id || `step_${currentStepIndex}`;
+              const newCompletedSteps = [...completedSteps, stepId];
+              const newStepIndex = currentStepIndex + 1;
+              
+              // Update step progress on the contact
+              await updateContactProgress(outreach.actv8_contact_id, newStepIndex, newCompletedSteps);
+              
+              // Create the next step instance as "active" so it appears unlocked
+              const nextStep = actv8Contact.path?.steps?.[newStepIndex];
+              if (nextStep && actv8Contact.development_path_id) {
+                try {
+                  await createStepInstance(
+                    outreach.actv8_contact_id,
+                    nextStep.id,
+                    newStepIndex,
+                    actv8Contact.development_path_id,
+                    'active'
+                  );
+                } catch (stepError) {
+                  // Step instance might already exist, ignore
+                  console.log("Step instance may already exist:", stepError);
+                }
               }
-            }
-            
-            // Upgrade connection strength based on completed steps
-            const strengthProgression = ['spark', 'ember', 'flame', 'star'];
-            const currentStrengthIndex = strengthProgression.indexOf(actv8Contact.connection_strength || 'spark');
-            const stepsCompleted = newCompletedSteps.length;
-            
-            // Upgrade strength every 2 completed steps
-            const targetStrengthIndex = Math.min(Math.floor(stepsCompleted / 2), 3);
-            if (targetStrengthIndex > currentStrengthIndex) {
-              await updateActv8Contact(outreach.actv8_contact_id, {
-                connection_strength: strengthProgression[targetStrengthIndex]
-              });
-            }
-            
-            // Create a notification for step completion
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-              await supabase
-                .from("cross_platform_notifications")
-                .insert({
-                  user_id: user.id,
-                  title: `${actv8Contact.path?.name || 'Path'} Progress`,
-                  message: `Completed step ${currentStepIndex + 1} with ${actv8Contact.contact?.name || 'contact'}`,
-                  notification_type: "actv8_step_complete",
-                  is_read: false,
-                  metadata: {
-                    actv8ContactId: outreach.actv8_contact_id,
-                    stepIndex: currentStepIndex,
-                    newStepIndex: newStepIndex,
-                    contactName: actv8Contact.contact?.name,
-                    nextStepName: nextStep?.name || null
-                  }
+              
+              // Upgrade connection strength based on completed steps
+              const strengthProgression = ['spark', 'ember', 'flame', 'star'];
+              const currentStrengthIndex = strengthProgression.indexOf(actv8Contact.connection_strength || 'spark');
+              const stepsCompleted = newCompletedSteps.length;
+              
+              // Upgrade strength every 2 completed steps
+              const targetStrengthIndex = Math.min(Math.floor(stepsCompleted / 2), 3);
+              if (targetStrengthIndex > currentStrengthIndex) {
+                await updateActv8Contact(outreach.actv8_contact_id, {
+                  connection_strength: strengthProgression[targetStrengthIndex]
                 });
+              }
+              
+              // Create a notification for step completion
+              const { data: { user } } = await supabase.auth.getUser();
+              if (user) {
+                await supabase
+                  .from("cross_platform_notifications")
+                  .insert({
+                    user_id: user.id,
+                    title: `${actv8Contact.path?.name || 'Path'} Progress`,
+                    message: `Completed step ${currentStepIndex + 1} with ${actv8Contact.contact?.name || 'contact'}`,
+                    notification_type: "actv8_step_complete",
+                    is_read: false,
+                    metadata: {
+                      actv8ContactId: outreach.actv8_contact_id,
+                      stepIndex: currentStepIndex,
+                      newStepIndex: newStepIndex,
+                      contactName: actv8Contact.contact?.name,
+                      nextStepName: nextStep?.name || null
+                    }
+                  });
+              }
+            } else if (isDeclined) {
+              // If declined, keep current step and mark step instance for retry
+              // User will need to reschedule to complete this step
+              // The step instance status is already set to 'missed' by completeStepInstance
             }
           }
         }
