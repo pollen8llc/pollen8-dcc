@@ -72,7 +72,7 @@ export function RelationshipLevelAccordion({
       if (error) throw error;
       
       setCurrentRelationshipLevel(data?.relationship_level || currentTier || 1);
-      setLevelSwitches((data?.level_switches as LevelSwitch[]) || []);
+      setLevelSwitches((data?.level_switches as unknown as LevelSwitch[]) || []);
       
       return data;
     },
