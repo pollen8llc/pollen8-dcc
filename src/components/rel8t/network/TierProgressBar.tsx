@@ -11,17 +11,32 @@ export interface CompletedPathInstance {
   ended_at?: string;
 }
 
+export interface StepInstanceForProgress {
+  step_index: number;
+  status: 'pending' | 'active' | 'completed' | 'missed' | 'retrying';
+  retry_count: number;
+}
+
 interface TierProgressBarProps {
   currentTier: number; // 1-4 (tier of currently active path)
   currentStepIndex: number; // 0-based index within current path
   totalStepsInCurrentPath?: number; // Total steps in the active path
   completedPathInstances?: CompletedPathInstance[]; // Source of truth for completed/skipped tiers
+  stepInstances?: StepInstanceForProgress[]; // Step-level outcome data for current tier
   size?: 'sm' | 'md' | 'lg';
   showLabels?: boolean;
   animated?: boolean;
 }
 
-type SegmentState = 'completed-tier' | 'in-progress' | 'current' | 'skipped' | 'future';
+type SegmentState = 
+  | 'completed-first'  // Blue - completed on first try
+  | 'completed-retry'  // Purple - completed after retry
+  | 'missed'           // Red - missed or overdue
+  | 'completed-tier'   // Blue - historical tier (path instance ended)
+  | 'in-progress'      // White - active step
+  | 'current'          // White with pulse - current active
+  | 'skipped'          // Amber - tier was skipped
+  | 'future';          // Gray - not yet reached
 
 const tierLabels: Record<number, string> = {
   1: "Foundation",
@@ -41,6 +56,7 @@ export function TierProgressBar({
   currentStepIndex,
   totalStepsInCurrentPath = 4,
   completedPathInstances = [],
+  stepInstances = [],
   size = 'sm',
   showLabels = false,
   animated = true,
@@ -83,14 +99,34 @@ export function TierProgressBar({
       return 'skipped';
     }
 
-    // Current tier logic
+    // Current tier logic - check step instances for outcome coloring
     if (tier === currentTier) {
       // If current path is complete, show entire tier as completed
       if (isCurrentPathComplete) {
         return 'completed-tier';
       }
       
-      // Show progress within the current tier
+      // Find the step instance for this specific segment
+      const stepInstance = stepInstances.find(si => si.step_index === step);
+      
+      if (stepInstance) {
+        // Completed steps - check retry count for color
+        if (stepInstance.status === 'completed') {
+          return stepInstance.retry_count > 0 ? 'completed-retry' : 'completed-first';
+        }
+        
+        // Missed or retrying steps - show as red
+        if (stepInstance.status === 'missed' || stepInstance.status === 'retrying') {
+          return 'missed';
+        }
+        
+        // Active step
+        if (stepInstance.status === 'active') {
+          return 'current';
+        }
+      }
+      
+      // Fallback: position-based logic when no step instance data
       if (step < normalizedStepIndex) return 'in-progress';
       if (step === normalizedStepIndex) return 'current';
       return 'future';
@@ -113,14 +149,27 @@ export function TierProgressBar({
     );
 
     switch (state) {
+      case 'completed-first':
       case 'completed-tier':
-        // Blue - user actually completed all steps in this tier
+        // Blue - completed on first try or historical tier
         return cn(
           baseClasses,
           "bg-[hsl(224,76%,48%)] shadow-[0_0_8px_hsl(224,76%,48%,0.5)]"
         );
+      case 'completed-retry':
+        // Purple - completed after retry/reschedule
+        return cn(
+          baseClasses,
+          "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]"
+        );
+      case 'missed':
+        // Red - missed or overdue, needs retry
+        return cn(
+          baseClasses,
+          "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+        );
       case 'in-progress':
-        // White - steps completed within current tier
+        // White - steps completed within current tier (fallback)
         return cn(
           baseClasses,
           "bg-white shadow-[0_0_6px_rgba(255,255,255,0.4)]"
@@ -169,8 +218,17 @@ export function TierProgressBar({
       if (isCurrentPathComplete) {
         return `${tierLabels[tier]} - Completed (pending save)`;
       }
+      
+      // Calculate step-level stats for tooltip
+      const completedCount = stepInstances.filter(si => si.status === 'completed').length;
+      const missedCount = stepInstances.filter(si => si.status === 'missed' || si.status === 'retrying').length;
+      const retriedCount = stepInstances.filter(si => si.status === 'completed' && si.retry_count > 0).length;
+      
       const displayStep = Math.min(currentStepIndex + 1, totalStepsInCurrentPath);
-      return `${tierLabels[tier]} - In Progress (Step ${displayStep}/${totalStepsInCurrentPath})`;
+      let tooltip = `${tierLabels[tier]} - Step ${displayStep}/${totalStepsInCurrentPath}`;
+      if (missedCount > 0) tooltip += ` (${missedCount} missed)`;
+      if (retriedCount > 0) tooltip += ` (${retriedCount} retried)`;
+      return tooltip;
     }
     
     if (tier < currentTier) {
