@@ -1173,7 +1173,10 @@ export interface StepInstance {
   step_id: string;
   step_index: number;
   path_id: string;
-  status: 'pending' | 'active' | 'completed' | 'skipped';
+  path_instance_id: string | null;
+  status: 'pending' | 'active' | 'completed' | 'skipped' | 'missed' | 'retrying';
+  retry_count: number;
+  last_outcome: string | null;
   started_at: string | null;
   completed_at: string | null;
   outreach_id: string | null;
