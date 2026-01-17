@@ -1,13 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Check, ArrowRight, RefreshCw, Heart, Loader2 } from "lucide-react";
+import { RefreshCw, Heart, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   useRelationshipLevels,
   getIconComponent,
-  checkLevelCompletion,
   switchRelationshipLevel,
 } from "@/hooks/useRelationshipLevels";
 import { useQueryClient } from "@tanstack/react-query";
@@ -34,88 +33,24 @@ export function RelationshipLevelSection({
   const queryClient = useQueryClient();
   const { data: levels = [], isLoading } = useRelationshipLevels();
   const [switchingTo, setSwitchingTo] = useState<number | null>(null);
-  const [levelCompletions, setLevelCompletions] = useState<Record<number, boolean>>({});
-  const [checkingCompletions, setCheckingCompletions] = useState(false);
-
-  // Check completion status for all levels on mount and when currentLevel changes
-  const checkAllCompletions = useCallback(async () => {
-    if (levels.length === 0) return;
-    
-    setCheckingCompletions(true);
-    const completions: Record<number, boolean> = {};
-    
-    try {
-      // Check each level's completion status
-      for (const level of levels) {
-        if (level.level >= 1) {
-          // Check if this level has been completed (path ended)
-          const isComplete = await checkLevelCompletion(actv8ContactId, level.level);
-          completions[level.level] = isComplete;
-        }
-      }
-      setLevelCompletions(completions);
-    } catch (error) {
-      console.error("Error checking level completions:", error);
-    } finally {
-      setCheckingCompletions(false);
-    }
-  }, [actv8ContactId, levels]);
-
-  useEffect(() => {
-    checkAllCompletions();
-  }, [checkAllCompletions]);
 
   // Get switch count for a specific level
   const getSwitchCount = (level: number) => {
     return levelSwitches.filter((s) => s.to_level === level).length;
   };
 
-  // Check if level is unlocked based on completion of previous level
-  const isLevelUnlocked = (level: number) => {
-    // Level 1 is always unlocked
-    if (level === 1) return true;
-    
-    // If we've already been to this level or higher, it's unlocked
-    if (currentLevel >= level) return true;
-    
-    // Otherwise, check if the previous level has been completed
-    const prevLevelCompleted = levelCompletions[level - 1] === true;
-    return prevLevelCompleted;
-  };
-
-  // Check if level is completed
-  const isLevelCompleted = (level: number) => {
-    return levelCompletions[level] === true;
-  };
-
-  // Handle level switch
-  const handleSwitchLevel = async (targetLevel: number) => {
+  // Handle level selection - all levels are freely selectable
+  const handleSelectLevel = async (targetLevel: number) => {
     if (targetLevel === currentLevel) return;
-    if (!isLevelUnlocked(targetLevel)) {
-      toast.error(`Complete Level ${targetLevel - 1} to unlock this level`);
-      return;
-    }
 
     setSwitchingTo(targetLevel);
 
     try {
-      // If advancing to higher level, verify completion first
-      if (targetLevel > currentLevel) {
-        const canAdvance = await checkLevelCompletion(actv8ContactId, currentLevel);
-        if (!canAdvance) {
-          toast.error(`Complete Level ${currentLevel}'s path before advancing`);
-          setSwitchingTo(null);
-          return;
-        }
-      }
-
       const result = await switchRelationshipLevel(actv8ContactId, targetLevel);
 
       if (result.success) {
-        toast.success(`Switched to Level ${targetLevel}`);
-        
-        // Refresh completions after switch
-        await checkAllCompletions();
+        const levelData = levels.find(l => l.level === targetLevel);
+        toast.success(`Switched to ${levelData?.label || `Level ${targetLevel}`}`);
         
         // Invalidate queries
         queryClient.invalidateQueries({ queryKey: ["actv8-contact"] });
@@ -123,8 +58,6 @@ export function RelationshipLevelSection({
         queryClient.invalidateQueries({ queryKey: ["path-instances"] });
         
         onLevelChanged?.();
-      } else if (result.requires_completion) {
-        toast.error(`Complete Level ${result.requires_completion} first`);
       } else {
         toast.error(result.error || "Failed to switch level");
       }
@@ -138,6 +71,7 @@ export function RelationshipLevelSection({
 
   const currentLevelData = levels.find(l => l.level === currentLevel);
   const currentLevelLabel = currentLevelData?.label || `Level ${currentLevel}`;
+  const hasSelectedLevel = currentLevel > 0;
 
   return (
     <AccordionItem 
@@ -152,11 +86,14 @@ export function RelationshipLevelSection({
           <div className="flex-1">
             <span className="font-medium">Relationship Standing</span>
             <div className="flex items-center gap-2 mt-0.5">
-              <Badge variant="secondary" className="text-xs">
-                {currentLevelLabel}
-              </Badge>
-              {checkingCompletions && (
-                <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+              {hasSelectedLevel ? (
+                <Badge variant="secondary" className="text-xs">
+                  {currentLevelLabel}
+                </Badge>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  Select your relationship level
+                </span>
               )}
             </div>
           </div>
@@ -172,62 +109,60 @@ export function RelationshipLevelSection({
           </div>
         ) : (
           <div className="space-y-3 pt-2">
+            {/* Prompt text */}
+            <p className="text-sm text-muted-foreground mb-4">
+              Select how you'd describe your current relationship with this contact:
+            </p>
+
             {levels
               .sort((a, b) => a.level - b.level)
               .map((level, index) => {
                 const Icon = getIconComponent(level.icon_name);
                 const isCurrent = level.level === currentLevel;
-                const isUnlocked = isLevelUnlocked(level.level);
-                const isCompleted = isLevelCompleted(level.level);
                 const switchCount = getSwitchCount(level.level);
                 const isSwitching = switchingTo === level.level;
-                const canClick = isUnlocked && !isCurrent && !isSwitching;
+                const canClick = !isCurrent && switchingTo === null;
 
                 return (
                   <div
                     key={level.id}
-                    role={canClick ? "button" : undefined}
-                    tabIndex={canClick ? 0 : undefined}
+                    role="button"
+                    tabIndex={canClick ? 0 : -1}
                     className={cn(
                       "relative rounded-lg border p-4 transition-all duration-200",
-                      // Current level styling
+                      // Current/selected level styling
                       isCurrent && "bg-primary/10 border-primary shadow-md shadow-primary/20",
-                      // Unlocked but not current
-                      !isCurrent && isUnlocked && "bg-card/80 border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer",
-                      // Locked styling
-                      !isUnlocked && "bg-muted/20 border-muted/50 cursor-not-allowed opacity-50",
+                      // Selectable level styling
+                      !isCurrent && "bg-card/80 border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer",
                       // Switching state
-                      isSwitching && "opacity-70 pointer-events-none",
+                      isSwitching && "opacity-70 border-primary/50 bg-primary/5",
+                      switchingTo !== null && !isSwitching && "opacity-50 pointer-events-none",
                       // Terraced effect
                       index === 0 && "ml-0",
                       index === 1 && "ml-3",
                       index === 2 && "ml-6",
                       index === 3 && "ml-9"
                     )}
-                    onClick={() => canClick && handleSwitchLevel(level.level)}
+                    onClick={() => canClick && handleSelectLevel(level.level)}
                     onKeyDown={(e) => {
                       if (canClick && (e.key === "Enter" || e.key === " ")) {
                         e.preventDefault();
-                        handleSwitchLevel(level.level);
+                        handleSelectLevel(level.level);
                       }
                     }}
                   >
                     <div className="flex items-start gap-3">
-                      {/* Level Icon */}
+                      {/* Level Icon / Selection Indicator */}
                       <div
                         className={cn(
                           "flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center transition-colors",
                           isCurrent && "bg-primary text-primary-foreground",
-                          !isCurrent && isCompleted && "bg-blue-500/20 text-blue-500",
-                          !isCurrent && isUnlocked && !isCompleted && "bg-secondary text-secondary-foreground",
-                          !isUnlocked && "bg-muted text-muted-foreground"
+                          !isCurrent && "bg-secondary text-secondary-foreground"
                         )}
                       >
                         {isSwitching ? (
                           <Loader2 className="h-5 w-5 animate-spin" />
-                        ) : !isUnlocked ? (
-                          <Lock className="h-4 w-4" />
-                        ) : isCompleted && !isCurrent ? (
+                        ) : isCurrent ? (
                           <Check className="h-5 w-5" />
                         ) : (
                           <Icon className="h-5 w-5" />
@@ -240,8 +175,7 @@ export function RelationshipLevelSection({
                           <span
                             className={cn(
                               "font-medium text-sm",
-                              isCurrent && "text-primary",
-                              !isUnlocked && "text-muted-foreground"
+                              isCurrent && "text-primary"
                             )}
                           >
                             Lvl {level.level}: {level.label.replace(`Level ${level.level}: `, "")}
@@ -253,11 +187,6 @@ export function RelationshipLevelSection({
                               Current
                             </Badge>
                           )}
-                          {isCompleted && !isCurrent && (
-                            <Badge className="bg-blue-500/20 text-blue-500 border-blue-500/30 text-xs h-5">
-                              Done
-                            </Badge>
-                          )}
                           {switchCount > 0 && (
                             <Badge variant="outline" className="text-xs h-5 gap-1 border-muted-foreground/30">
                               <RefreshCw className="h-2.5 w-2.5" />
@@ -265,23 +194,14 @@ export function RelationshipLevelSection({
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                           {level.description}
                         </p>
                       </div>
 
-                      {/* Action Indicator */}
-                      {canClick && (
-                        <div className="h-8 w-8 flex items-center justify-center flex-shrink-0 rounded-full bg-primary/10">
-                          <ArrowRight className="h-4 w-4 text-primary" />
-                        </div>
-                      )}
-                      
-                      {/* Locked indicator */}
-                      {!isUnlocked && (
-                        <div className="text-xs text-muted-foreground flex-shrink-0">
-                          Complete Lvl {level.level - 1}
-                        </div>
+                      {/* Radio-style indicator for non-current levels */}
+                      {!isCurrent && !isSwitching && (
+                        <div className="flex-shrink-0 h-5 w-5 rounded-full border-2 border-muted-foreground/30" />
                       )}
                     </div>
                   </div>
@@ -290,7 +210,7 @@ export function RelationshipLevelSection({
 
             {/* Helper text */}
             <p className="text-xs text-muted-foreground text-center mt-4 px-4">
-              Complete each level's development path to unlock the next
+              You can change your relationship level anytime
             </p>
           </div>
         )}
