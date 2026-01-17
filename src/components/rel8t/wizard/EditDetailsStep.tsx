@@ -144,11 +144,11 @@ export const EditDetailsStep: React.FC<EditDetailsStepProps> = ({
         {flipState === 'date' && (
           <Card 
             className={cn(
-              "absolute inset-0 backdrop-blur-md bg-card/95 border-2 border-primary/10 rounded-2xl shadow-xl overflow-hidden",
+              "absolute inset-0 backdrop-blur-md bg-card/95 border-2 border-primary/10 rounded-2xl shadow-xl",
               "[backface-visibility:hidden] [transform:rotateX(180deg)]"
             )}
           >
-            <CardContent className="p-3 sm:p-6 h-full flex flex-col">
+            <CardContent className="p-3 sm:p-4 h-full flex flex-col overflow-visible">
               {/* Calendar Header */}
               <div className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">
                 <div className="min-w-0 flex-1">
@@ -172,18 +172,17 @@ export const EditDetailsStep: React.FC<EditDetailsStepProps> = ({
               </div>
 
               {/* Calendar */}
-              <div className="flex-1 flex items-center justify-center px-0 max-sm:overflow-y-auto max-sm:min-h-0 sm:overflow-visible">
+              <div className="flex-1 flex items-start justify-center overflow-visible">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={handleDateSelect}
-                  fixedWeeks
                   disabled={(date) => {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     return date < today;
                   }}
-                  className="w-full pointer-events-auto [&_.rdp]:w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full"
+                  className="pointer-events-auto"
                 />
               </div>
 
