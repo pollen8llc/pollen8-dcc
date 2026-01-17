@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getOutreachById, updateOutreachStatus, deleteOutreach, updateOutreachStructuredNotes, Outreach, StructuredNotes } from "@/services/rel8t/outreachService";
 import { getActv8Contact } from "@/services/actv8Service";
+import { updateContact } from "@/services/rel8t/contactService";
 import { getDevelopmentPath } from "@/data/mockNetworkData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,12 +101,27 @@ export default function OutreachDetails() {
     },
   });
 
-  // Structured notes mutation
+  // Structured notes mutation - also syncs core_interests to contact profile
   const structuredNotesMutation = useMutation({
-    mutationFn: (notes: StructuredNotes) => updateOutreachStructuredNotes(id!, notes),
+    mutationFn: async (notes: StructuredNotes) => {
+      // 1. Save the structured notes to the outreach
+      await updateOutreachStructuredNotes(id!, notes);
+      
+      // 2. If there are core_interests and contacts, merge them into the contact's profile
+      if (notes.core_interests && notes.core_interests.length > 0 && outreach?.contacts?.length) {
+        const contact = outreach.contacts[0];
+        const existingInterests = (contact as any).interests || [];
+        
+        // Merge new interests with existing (avoid duplicates)
+        const mergedInterests = [...new Set([...existingInterests, ...notes.core_interests])];
+        
+        await updateContact(contact.id, { interests: mergedInterests });
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['outreach', id] });
-      toast.success('Feedback saved!');
+      queryClient.invalidateQueries({ queryKey: ['contact'] });
+      toast.success('Feedback saved & interests updated!');
     },
     onError: () => {
       toast.error('Failed to save feedback');

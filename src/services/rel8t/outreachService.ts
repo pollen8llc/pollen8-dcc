@@ -103,7 +103,7 @@ export interface StructuredNotes {
   energy_level?: 'high' | 'medium' | 'low';
   followup_booked?: 'yes' | 'no' | 'maybe';
   followup_date?: string;
-  key_topics?: string[];
+  core_interests?: string[];
   action_items?: string;
   rapport_progress?: 'strengthened' | 'maintained' | 'declined';
   free_notes?: string;
