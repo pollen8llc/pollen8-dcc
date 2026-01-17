@@ -54,10 +54,11 @@ export function RelationshipLevelAccordion({
 }: RelationshipLevelAccordionProps) {
   const queryClient = useQueryClient();
   const [levelSwitches, setLevelSwitches] = useState<LevelSwitch[]>([]);
-  const [currentRelationshipLevel, setCurrentRelationshipLevel] = useState<number>(1);
+  const [currentRelationshipLevel, setCurrentRelationshipLevel] = useState<number | null>(null);
   const [switchingTo, setSwitchingTo] = useState<number | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [targetLevel, setTargetLevel] = useState<number | null>(null);
+  const [isUnlockMode, setIsUnlockMode] = useState(false);
   
   // Fetch relationship_level and level_switches from database
   useQuery({
@@ -71,7 +72,8 @@ export function RelationshipLevelAccordion({
       
       if (error) throw error;
       
-      setCurrentRelationshipLevel(data?.relationship_level || currentTier || 1);
+      // Only set level if it exists in DB (null means user hasn't selected yet)
+      setCurrentRelationshipLevel(data?.relationship_level || null);
       setLevelSwitches((data?.level_switches as unknown as LevelSwitch[]) || []);
       
       return data;
@@ -81,6 +83,7 @@ export function RelationshipLevelAccordion({
   
   // Derive current level from tier (fallback if relationship_level not set)
   const getCurrentLevelId = () => {
+    if (!currentRelationshipLevel) return null;
     const level = ASSESSMENT_LEVELS.find(l => l.level === currentRelationshipLevel || l.startingTier === currentTier);
     return level?.id || 'level_1';
   };
@@ -90,59 +93,19 @@ export function RelationshipLevelAccordion({
     return levelSwitches.filter((s) => s.to_level === level).length;
   };
   
-  // Check if level is unlocked (previous level must be completed)
-  const isLevelUnlocked = async (level: number): Promise<boolean> => {
-    if (level === 1) return true;
-    if (level <= currentRelationshipLevel) return true; // Can switch to already-reached or lower levels
-    // For higher levels, check if previous level is completed
-    const previousLevel = level - 1;
-    try {
-      return await checkLevelCompletion(actv8ContactId, previousLevel);
-    } catch (error) {
-      console.error('Error checking level completion:', error);
-      return false;
-    }
-  };
-  
-  const [unlockedLevels, setUnlockedLevels] = useState<Set<number>>(new Set([1]));
-  
-  // Pre-check unlocked levels
-  useQuery({
-    queryKey: ['unlocked-levels', actv8ContactId, currentRelationshipLevel],
-    queryFn: async () => {
-      const unlocked = new Set<number>([1]);
-      for (let level = 2; level <= 4; level++) {
-        if (level <= currentRelationshipLevel) {
-          unlocked.add(level);
-        } else {
-          const isUnlocked = await isLevelUnlocked(level);
-          if (isUnlocked) unlocked.add(level);
-        }
-      }
-      setUnlockedLevels(unlocked);
-      return unlocked;
-    },
-    enabled: !!actv8ContactId && currentRelationshipLevel > 0,
-  });
+  // In unlock mode, all levels are selectable
+  const isLevelSelectable = isUnlockMode || currentRelationshipLevel !== null;
 
-  // Handle level switch with confirm dialog
+  // Handle level selection
   const handleLevelCardClick = async (level: number) => {
     if (level === currentRelationshipLevel) return; // Already at this level
-    
-    // Check if level is unlocked
-    if (!unlockedLevels.has(level)) {
-      const isUnlocked = await isLevelUnlocked(level);
-      if (!isUnlocked) {
-        toast.error(`Complete Level ${level - 1} before accessing Level ${level}`);
-        return;
-      }
-    }
+    if (!isUnlockMode && currentRelationshipLevel === null) return; // Not in unlock mode yet
     
     // Show confirm dialog
     setTargetLevel(level);
     setConfirmDialogOpen(true);
   };
-  
+
   const handleConfirmSwitch = async () => {
     if (!targetLevel) return;
     
@@ -154,12 +117,12 @@ export function RelationshipLevelAccordion({
       
       if (result.success) {
         setCurrentRelationshipLevel(targetLevel);
+        setIsUnlockMode(false); // Exit unlock mode after selection
         // Update level switches by refetching
         queryClient.invalidateQueries({ queryKey: ['relationship-level-data', actv8ContactId] });
         queryClient.invalidateQueries({ queryKey: ['actv8-contact'] });
         queryClient.invalidateQueries({ queryKey: ['available-paths', actv8ContactId] });
-        queryClient.invalidateQueries({ queryKey: ['unlocked-levels', actv8ContactId] });
-        toast.success(`Switched to Level ${targetLevel}`);
+        toast.success(`Selected Level ${targetLevel}`);
         onLevelUpdated?.();
       } else if (result.requires_completion) {
         toast.error(`Complete Level ${result.requires_completion} first`);
@@ -174,8 +137,14 @@ export function RelationshipLevelAccordion({
       setTargetLevel(null);
     }
   };
+  
+  const handleCancelUnlock = () => {
+    setIsUnlockMode(false);
+  };
 
-  const currentLevelLabel = levelLabels[getCurrentLevelId()] || 'Unknown';
+  const currentLevelLabel = currentRelationshipLevel 
+    ? (levelLabels[getCurrentLevelId() || ''] || 'Unknown')
+    : 'Not Selected';
 
   return (
     <>
@@ -198,12 +167,42 @@ export function RelationshipLevelAccordion({
       
         <AccordionContent className="px-4 pb-4">
           <div className="space-y-3 pt-2">
+            {/* Unlock Button - shown when no level selected and not in unlock mode */}
+            {!currentRelationshipLevel && !isUnlockMode && (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Select your relationship level to start developing this connection
+                </p>
+                <Button 
+                  onClick={() => setIsUnlockMode(true)}
+                  className="gap-2"
+                >
+                  <Lock className="h-4 w-4" />
+                  Unlock Levels
+                </Button>
+              </div>
+            )}
+
+            {/* Cancel button when in unlock mode */}
+            {isUnlockMode && !currentRelationshipLevel && (
+              <div className="flex justify-end mb-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleCancelUnlock}
+                  className="text-muted-foreground"
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
+
             {ASSESSMENT_LEVELS.map((level, index) => {
               const isCurrent = level.level === currentRelationshipLevel;
-              const isUnlocked = unlockedLevels.has(level.level);
+              const canSelect = isUnlockMode || currentRelationshipLevel !== null;
               const switchCount = getSwitchCount(level.level);
               const isSwitching = switchingTo === level.level;
-              const isCompleted = level.level < currentRelationshipLevel;
+              const isLocked = !canSelect;
 
               return (
                 <div
@@ -212,16 +211,16 @@ export function RelationshipLevelAccordion({
                     "relative rounded-lg border p-4 transition-all duration-200",
                     isCurrent
                       ? "bg-primary/10 border-primary shadow-sm shadow-primary/20"
-                      : isUnlocked
-                      ? "bg-card/80 border-border hover:border-primary/50 cursor-pointer"
-                      : "bg-muted/30 border-muted cursor-not-allowed opacity-60",
+                      : isLocked
+                      ? "bg-muted/30 border-muted opacity-60"
+                      : "bg-card/80 border-border hover:border-primary/50 cursor-pointer",
                     // Terraced effect
                     index === 0 && "ml-0",
                     index === 1 && "ml-2",
                     index === 2 && "ml-4",
                     index === 3 && "ml-6"
                   )}
-                  onClick={() => isUnlocked && !isCurrent && handleLevelCardClick(level.level)}
+                  onClick={() => canSelect && !isCurrent && handleLevelCardClick(level.level)}
                 >
                   <div className="flex items-start gap-3">
                     {/* Level Icon */}
@@ -230,17 +229,13 @@ export function RelationshipLevelAccordion({
                         "flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center",
                         isCurrent
                           ? "bg-primary text-primary-foreground"
-                          : isCompleted
-                          ? "bg-blue-500/20 text-blue-400"
-                          : isUnlocked
-                          ? "bg-muted text-muted-foreground"
-                          : "bg-muted/50 text-muted-foreground/50"
+                          : isLocked
+                          ? "bg-muted/50 text-muted-foreground/50"
+                          : "bg-muted text-muted-foreground"
                       )}
                     >
-                      {!isUnlocked ? (
+                      {isLocked ? (
                         <Lock className="h-4 w-4" />
-                      ) : isCompleted ? (
-                        <Check className="h-5 w-5" />
                       ) : (
                         <div className="h-5 w-5">{level.icon}</div>
                       )}
@@ -253,7 +248,7 @@ export function RelationshipLevelAccordion({
                           className={cn(
                             "font-medium",
                             isCurrent && "text-primary",
-                            !isUnlocked && "text-muted-foreground"
+                            isLocked && "text-muted-foreground"
                           )}
                         >
                           {level.label}
@@ -263,11 +258,6 @@ export function RelationshipLevelAccordion({
                         {isCurrent && (
                           <Badge className="bg-primary/20 text-primary text-xs">
                             Current
-                          </Badge>
-                        )}
-                        {isCompleted && (
-                          <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 text-xs">
-                            Done
                           </Badge>
                         )}
                         {switchCount > 0 && (
@@ -283,7 +273,7 @@ export function RelationshipLevelAccordion({
                     </div>
 
                     {/* Action Arrow */}
-                    {isUnlocked && !isCurrent && (
+                    {canSelect && !isCurrent && (
                       <div className="h-8 w-8 flex items-center justify-center flex-shrink-0">
                         {isSwitching ? (
                           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -298,9 +288,11 @@ export function RelationshipLevelAccordion({
             })}
 
             {/* Helper text */}
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              Complete each level's path to unlock the next level
-            </p>
+            {isUnlockMode && !currentRelationshipLevel && (
+              <p className="text-xs text-muted-foreground text-center mt-4">
+                Select the level that best describes your relationship
+              </p>
+            )}
           </div>
         </AccordionContent>
       </AccordionItem>
