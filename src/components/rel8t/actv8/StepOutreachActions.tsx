@@ -49,7 +49,7 @@ export function StepOutreachActions({
 
     setIsRescheduling(true);
     try {
-      await rescheduleOutreach(outreachId, rescheduleDate.toISOString());
+      await rescheduleOutreach(outreachId, rescheduleDate);
 
       toast.success("Outreach rescheduled");
       
