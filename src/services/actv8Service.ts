@@ -46,8 +46,7 @@ export async function updateRelationshipLevel(
   );
 
   // Get paths for tiers that need to be skipped
-  const skippedTiers = newLevel.skipped_tiers || [];
-  const tiersToSkip = skippedTiers.filter(tier => !existingSkippedTiers.has(tier));
+  const tiersToSkip = newLevel.skippedTiers.filter(tier => !existingSkippedTiers.has(tier));
   
   if (tiersToSkip.length > 0) {
     // Get one path per tier to create skipped instances
@@ -78,7 +77,7 @@ export async function updateRelationshipLevel(
 
   // Also update deprecated fields for backward compatibility
   const existingSkipped = (contact.skipped_paths || []) as unknown as SkippedPathEntry[];
-  const newSkippedEntries: SkippedPathEntry[] = skippedTiers
+  const newSkippedEntries: SkippedPathEntry[] = newLevel.skippedTiers
     .filter(tier => !existingSkipped.find(s => s.tier_at_skip === tier))
     .map(tier => ({
       path_id: `tier_${tier}_level_assessment`,
@@ -92,7 +91,7 @@ export async function updateRelationshipLevel(
     .from('rms_actv8_contacts')
     .update({
       relationship_level: newLevel.level, // Store explicit level number (1-4)
-      path_tier: newLevel.starting_tier,
+      path_tier: newLevel.startingTier,
       skipped_paths: [...existingSkipped, ...newSkippedEntries] as unknown as Json[],
       development_path_id: null, // Reset path selection
       current_step_index: 0,
@@ -164,8 +163,6 @@ export interface Actv8Contact {
   path_tier: number;
   path_history: PathHistoryEntry[];
   skipped_paths: SkippedPathEntry[];
-  relationship_level: number;
-  level_switches: any[];
   created_at: string;
   updated_at: string;
   // Joined data
@@ -191,8 +188,6 @@ function transformActv8Contact(data: any): Actv8Contact {
     current_path_instance_id: data.current_path_instance_id || null,
     path_history: (data.path_history as PathHistoryEntry[]) || [],
     skipped_paths: (data.skipped_paths as SkippedPathEntry[]) || [],
-    relationship_level: data.relationship_level ?? 1,
-    level_switches: (data.level_switches as any[]) || [],
   };
 }
 

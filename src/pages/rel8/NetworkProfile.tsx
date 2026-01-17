@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath, advanceToPath, getCompletedPathInstances } from "@/services/actv8Service";
 import { getOutreachesByActv8Contact, getOutreachesForContact } from "@/services/rel8t/outreachService";
-import { useStepInstances } from "@/hooks/useRelationshipLevels";
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
 import { DevelopmentPathAccordion } from "@/components/rel8t/network/DevelopmentPathAccordion";
@@ -69,10 +68,6 @@ export default function NetworkProfile() {
     queryFn: () => getCompletedPathInstances(id!),
     enabled: !!id
   });
-
-  // Fetch step instances for progress tracking
-  const { data: stepInstances = [] } = useStepInstances(actv8Contact?.id);
-
   const {
     data: analysis,
     isLoading: analysisLoading
@@ -231,8 +226,6 @@ export default function NetworkProfile() {
     pathTier: actv8Contact.path_tier || 1,
     pathHistory: actv8Contact.path_history || [],
     skippedPaths: actv8Contact.skipped_paths || [],
-    relationshipLevel: actv8Contact.relationship_level || 1,
-    levelSwitches: actv8Contact.level_switches || [],
     interactions: [] as any[]
   };
   const handleSelectPath = (pathId: string) => {
@@ -381,8 +374,6 @@ export default function NetworkProfile() {
             contactName={contact.name} 
             actv8ContactId={actv8Contact.id} 
             currentTier={contact.pathTier} 
-            currentLevel={contact.relationshipLevel}
-            levelSwitches={contact.levelSwitches}
             skippedPaths={contact.skippedPaths} 
             pathHistory={contact.pathHistory} 
             currentPathId={contact.developmentPathId} 
@@ -412,9 +403,8 @@ export default function NetworkProfile() {
             completedSteps={contact.completedSteps}
             linkedOutreaches={linkedOutreaches}
             actv8ContactId={actv8Contact.id}
-            pathTier={actv8Contact.path?.tier || contact.pathTier}
+            pathTier={contact.pathTier}
             completedPathInstances={completedPathInstances}
-            stepInstances={stepInstances}
             totalStepsInPath={actv8Contact.path?.steps?.length || 4}
             onPlanTouchpoint={handlePlanTouchpoint}
           />

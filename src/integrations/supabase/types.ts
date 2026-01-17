@@ -2326,7 +2326,6 @@ export type Database = {
           intention_id: string | null
           intention_notes: string | null
           last_touchpoint_at: string | null
-          level_switches: Json | null
           path_history: Json | null
           path_started_at: string | null
           path_tier: number | null
@@ -2352,7 +2351,6 @@ export type Database = {
           intention_id?: string | null
           intention_notes?: string | null
           last_touchpoint_at?: string | null
-          level_switches?: Json | null
           path_history?: Json | null
           path_started_at?: string | null
           path_tier?: number | null
@@ -2378,7 +2376,6 @@ export type Database = {
           intention_id?: string | null
           intention_notes?: string | null
           last_touchpoint_at?: string | null
-          level_switches?: Json | null
           path_history?: Json | null
           path_started_at?: string | null
           path_tier?: number | null
@@ -2500,7 +2497,6 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string
-          icon_name: string | null
           id: string
           name: string
           path_id: string
@@ -2512,7 +2508,6 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description: string
-          icon_name?: string | null
           id: string
           name: string
           path_id: string
@@ -2524,7 +2519,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string
-          icon_name?: string | null
           id?: string
           name?: string
           path_id?: string
@@ -2584,136 +2578,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
-      }
-      rms_actv8_relationship_levels: {
-        Row: {
-          created_at: string | null
-          description: string
-          display_order: number
-          icon_name: string
-          id: string
-          label: string
-          level: number
-          skipped_tiers: number[] | null
-          starting_tier: number
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description: string
-          display_order: number
-          icon_name: string
-          id: string
-          label: string
-          level: number
-          skipped_tiers?: number[] | null
-          starting_tier: number
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string
-          display_order?: number
-          icon_name?: string
-          id?: string
-          label?: string
-          level?: number
-          skipped_tiers?: number[] | null
-          starting_tier?: number
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      rms_actv8_step_instances: {
-        Row: {
-          actv8_contact_id: string
-          completed_at: string | null
-          created_at: string | null
-          days_to_complete: number | null
-          id: string
-          interaction_outcome: string | null
-          last_outcome: string | null
-          metadata: Json | null
-          notes: string | null
-          outreach_id: string | null
-          path_id: string
-          path_instance_id: string | null
-          rapport_progress: string | null
-          retry_count: number | null
-          started_at: string | null
-          status: string
-          step_id: string
-          step_index: number
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          actv8_contact_id: string
-          completed_at?: string | null
-          created_at?: string | null
-          days_to_complete?: number | null
-          id?: string
-          interaction_outcome?: string | null
-          last_outcome?: string | null
-          metadata?: Json | null
-          notes?: string | null
-          outreach_id?: string | null
-          path_id: string
-          path_instance_id?: string | null
-          rapport_progress?: string | null
-          retry_count?: number | null
-          started_at?: string | null
-          status?: string
-          step_id: string
-          step_index: number
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          actv8_contact_id?: string
-          completed_at?: string | null
-          created_at?: string | null
-          days_to_complete?: number | null
-          id?: string
-          interaction_outcome?: string | null
-          last_outcome?: string | null
-          metadata?: Json | null
-          notes?: string | null
-          outreach_id?: string | null
-          path_id?: string
-          path_instance_id?: string | null
-          rapport_progress?: string | null
-          retry_count?: number | null
-          started_at?: string | null
-          status?: string
-          step_id?: string
-          step_index?: number
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "rms_actv8_step_instances_actv8_contact_id_fkey"
-            columns: ["actv8_contact_id"]
-            isOneToOne: false
-            referencedRelation: "rms_actv8_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "rms_actv8_step_instances_outreach_id_fkey"
-            columns: ["outreach_id"]
-            isOneToOne: false
-            referencedRelation: "rms_outreach"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "rms_actv8_step_instances_path_instance_id_fkey"
-            columns: ["path_instance_id"]
-            isOneToOne: false
-            referencedRelation: "rms_actv8_path_instances"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       rms_actv8_strategies: {
         Row: {
@@ -2805,27 +2669,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      rms_actv8_tier_metadata: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          label: string
-          tier: number
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          label: string
-          tier: number
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          label?: string
-          tier?: number
-        }
-        Relationships: []
       }
       rms_contact_affiliations: {
         Row: {
@@ -3657,21 +3500,7 @@ export type Database = {
         Args: { profile_user_id: string; viewer_id: string }
         Returns: boolean
       }
-      check_level_completion: {
-        Args: { p_actv8_contact_id: string; p_level: number }
-        Returns: boolean
-      }
       check_rel8_completion: { Args: { p_user_id: string }; Returns: boolean }
-      complete_step: {
-        Args: {
-          p_actv8_contact_id: string
-          p_interaction_outcome?: string
-          p_outreach_id?: string
-          p_rapport_progress?: string
-          p_step_index: number
-        }
-        Returns: Json
-      }
       create_community: {
         Args: {
           p_communication_platforms?: Json
@@ -3812,58 +3641,6 @@ export type Database = {
         }[]
       }
       get_rel8t_metrics: { Args: never; Returns: Json }
-      get_relationship_levels: {
-        Args: never
-        Returns: {
-          created_at: string | null
-          description: string
-          display_order: number
-          icon_name: string
-          id: string
-          label: string
-          level: number
-          skipped_tiers: number[] | null
-          starting_tier: number
-          updated_at: string | null
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "rms_actv8_relationship_levels"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      get_step_instances: {
-        Args: { p_actv8_contact_id: string }
-        Returns: {
-          actv8_contact_id: string
-          completed_at: string | null
-          created_at: string | null
-          days_to_complete: number | null
-          id: string
-          interaction_outcome: string | null
-          last_outcome: string | null
-          metadata: Json | null
-          notes: string | null
-          outreach_id: string | null
-          path_id: string
-          path_instance_id: string | null
-          rapport_progress: string | null
-          retry_count: number | null
-          started_at: string | null
-          status: string
-          step_id: string
-          step_index: number
-          updated_at: string | null
-          user_id: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "rms_actv8_step_instances"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
       get_term_suggestions: {
         Args: { p_limit?: number; p_search_query?: string; p_term_type: string }
         Returns: {
@@ -3872,21 +3649,6 @@ export type Database = {
           term: string
           usage_count: number
         }[]
-      }
-      get_tier_metadata: {
-        Args: never
-        Returns: {
-          created_at: string | null
-          description: string | null
-          label: string
-          tier: number
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "rms_actv8_tier_metadata"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_user_community_ids: { Args: { user_uuid: string }; Returns: string[] }
       get_user_memberships: {
@@ -3962,78 +3724,12 @@ export type Database = {
         Args: { action_details?: Json; action_name: string; user_id?: string }
         Returns: string
       }
-      mark_step_missed: {
-        Args: {
-          p_actv8_contact_id: string
-          p_reason?: string
-          p_step_index: number
-        }
-        Returns: {
-          actv8_contact_id: string
-          completed_at: string | null
-          created_at: string | null
-          days_to_complete: number | null
-          id: string
-          interaction_outcome: string | null
-          last_outcome: string | null
-          metadata: Json | null
-          notes: string | null
-          outreach_id: string | null
-          path_id: string
-          path_instance_id: string | null
-          rapport_progress: string | null
-          retry_count: number | null
-          started_at: string | null
-          status: string
-          step_id: string
-          step_index: number
-          updated_at: string | null
-          user_id: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "rms_actv8_step_instances"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       populate_us_states_from_atlas: { Args: never; Returns: number }
       record_invite_use: {
         Args: { invite_code: string; used_by_id: string }
         Returns: boolean
       }
       register_for_event: { Args: { event_id: string }; Returns: boolean }
-      retry_step: {
-        Args: { p_actv8_contact_id: string; p_step_index: number }
-        Returns: {
-          actv8_contact_id: string
-          completed_at: string | null
-          created_at: string | null
-          days_to_complete: number | null
-          id: string
-          interaction_outcome: string | null
-          last_outcome: string | null
-          metadata: Json | null
-          notes: string | null
-          outreach_id: string | null
-          path_id: string
-          path_instance_id: string | null
-          rapport_progress: string | null
-          retry_count: number | null
-          started_at: string | null
-          status: string
-          step_id: string
-          step_index: number
-          updated_at: string | null
-          user_id: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "rms_actv8_step_instances"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       search_locations: {
         Args: {
           limit_count?: number
@@ -4049,10 +3745,6 @@ export type Database = {
           state_code: string
           type: string
         }[]
-      }
-      switch_relationship_level: {
-        Args: { p_actv8_contact_id: string; p_new_level: number }
-        Returns: Json
       }
       sync_existing_data_to_lexicon: { Args: never; Returns: number }
       track_location_usage: {

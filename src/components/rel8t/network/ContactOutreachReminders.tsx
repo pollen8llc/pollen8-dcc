@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { format, parseISO, isPast, isToday, formatDistanceToNow } from "date-fns";
 import { CompletedPathInstance } from "./TierProgressBar";
-import { useTierLabels } from "@/hooks/useRelationshipLevels";
 
 interface LinkedOutreach {
   stepIndex: number;
@@ -33,6 +32,13 @@ interface ContactOutreachRemindersProps {
   completedPathInstances?: CompletedPathInstance[];
 }
 
+const tierLabels: Record<number, string> = {
+  1: "Foundation",
+  2: "Growth", 
+  3: "Professional",
+  4: "Advanced",
+};
+
 export function ContactOutreachReminders({
   contactId,
   actv8ContactId,
@@ -41,7 +47,6 @@ export function ContactOutreachReminders({
   completedPathInstances = []
 }: ContactOutreachRemindersProps) {
   const navigate = useNavigate();
-  const tierLabels = useTierLabels();
   const [activeTab, setActiveTab] = useState<"outreach" | "completed-paths">("outreach");
 
   const getStatusBadge = (status: string) => {

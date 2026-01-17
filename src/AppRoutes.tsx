@@ -66,7 +66,6 @@ const Triggers = lazy(() => import("@/pages/rel8/Triggers"));
 const BuildRapport = lazy(() => import("@/pages/rel8/BuildRapport"));
 const Network = lazy(() => import("@/pages/rel8/Network"));
 const NetworkProfile = lazy(() => import("@/pages/rel8/NetworkProfile"));
-const Actv8Profile = lazy(() => import("@/pages/rel8/Actv8Profile"));
 const NetworkStrategy = lazy(() => import("@/pages/rel8/NetworkStrategy"));
 const NetworkOverview = lazy(() => import("@/pages/rel8/NetworkOverview"));
 // NetworkTimeline - deleted for rebuild
@@ -482,7 +481,7 @@ const AppRoutes = () => {
           <Route path="/rel8/actv8/:id/profile" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <Actv8Profile />
+                <NetworkProfile />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />

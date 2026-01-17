@@ -3,7 +3,6 @@ import { TrendingUp } from "lucide-react";
 import { DevelopmentPathCard } from "./DevelopmentPathCard";
 import { Outreach } from "@/services/rel8t/outreachService";
 import { CompletedPathInstance, TierProgressBar } from "./TierProgressBar";
-import { StepInstance } from "@/hooks/useRelationshipLevels";
 
 interface LinkedOutreach {
   stepIndex: number;
@@ -18,7 +17,6 @@ interface DevelopmentPathAccordionProps {
   actv8ContactId?: string;
   pathTier?: number;
   completedPathInstances?: CompletedPathInstance[];
-  stepInstances?: StepInstance[];
   totalStepsInPath?: number;
   onPlanTouchpoint?: (stepIndex: number) => void;
 }
@@ -31,7 +29,6 @@ export function DevelopmentPathAccordion({
   actv8ContactId,
   pathTier = 1,
   completedPathInstances = [],
-  stepInstances = [],
   totalStepsInPath = 4,
   onPlanTouchpoint,
 }: DevelopmentPathAccordionProps) {
@@ -55,7 +52,6 @@ export function DevelopmentPathAccordion({
                   currentStepIndex={currentStepIndex}
                   totalStepsInCurrentPath={totalStepsInPath}
                   completedPathInstances={completedPathInstances}
-                  stepInstances={stepInstances}
                   size="sm"
                   animated={false}
                 />
@@ -77,7 +73,6 @@ export function DevelopmentPathAccordion({
           actv8ContactId={actv8ContactId}
           pathTier={pathTier}
           completedPathInstances={completedPathInstances}
-          stepInstances={stepInstances}
           onPlanTouchpoint={onPlanTouchpoint}
         />
       </AccordionContent>
