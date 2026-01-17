@@ -1195,12 +1195,21 @@ export interface StepInstance {
   updated_at: string;
 }
 
-export async function getStepInstances(actv8ContactId: string): Promise<StepInstance[]> {
-  const { data, error } = await (supabase as any)
+export async function getStepInstances(
+  actv8ContactId: string,
+  pathInstanceId?: string | null
+): Promise<StepInstance[]> {
+  let query = (supabase as any)
     .from("rms_actv8_step_instances")
     .select("*")
-    .eq("actv8_contact_id", actv8ContactId)
-    .order("step_index");
+    .eq("actv8_contact_id", actv8ContactId);
+  
+  // Filter by path instance if provided for proper isolation
+  if (pathInstanceId) {
+    query = query.eq("path_instance_id", pathInstanceId);
+  }
+  
+  const { data, error } = await query.order("step_index");
 
   if (error) throw error;
   return (data || []) as StepInstance[];

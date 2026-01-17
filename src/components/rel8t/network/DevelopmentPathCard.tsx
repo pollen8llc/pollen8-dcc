@@ -20,6 +20,7 @@ interface DevelopmentPathCardProps {
   completedSteps?: string[];
   linkedOutreaches?: LinkedOutreach[];
   actv8ContactId?: string;
+  currentPathInstanceId?: string | null;
   pathTier?: number;
   completedPathInstances?: CompletedPathInstance[];
   onPlanTouchpoint?: (stepIndex: number) => void;
@@ -32,6 +33,7 @@ export function DevelopmentPathCard({
   completedSteps,
   linkedOutreaches = [],
   actv8ContactId,
+  currentPathInstanceId,
   pathTier = 1,
   completedPathInstances = [],
   onPlanTouchpoint,
@@ -45,8 +47,8 @@ export function DevelopmentPathCard({
   });
 
   const { data: stepInstances = [] } = useQuery({
-    queryKey: ['step-instances', actv8ContactId],
-    queryFn: () => actv8ContactId ? getStepInstances(actv8ContactId) : [],
+    queryKey: ['step-instances', actv8ContactId, currentPathInstanceId],
+    queryFn: () => actv8ContactId ? getStepInstances(actv8ContactId, currentPathInstanceId) : [],
     enabled: !!actv8ContactId,
   });
 
