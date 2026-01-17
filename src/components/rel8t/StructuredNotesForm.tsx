@@ -32,7 +32,7 @@ export interface StructuredNotes {
   energy_level?: 'high' | 'medium' | 'low';
   followup_booked?: 'yes' | 'no' | 'maybe';
   followup_date?: string;
-  key_topics?: string[];
+  core_interests?: string[];
   action_items?: string;
   rapport_progress?: 'strengthened' | 'maintained' | 'declined';
   free_notes?: string;
@@ -50,9 +50,9 @@ interface StructuredNotesFormProps {
   disabled?: boolean;
 }
 
-const SUGGESTED_TOPICS = [
-  "Career", "Project", "Personal", "Industry", 
-  "Networking", "Advice", "Collaboration", "Business"
+const SUGGESTED_INTERESTS = [
+  "Technology", "Business", "Finance", "Health", 
+  "Travel", "Arts", "Sports", "Networking"
 ];
 
 export function StructuredNotesForm({ 
@@ -62,7 +62,7 @@ export function StructuredNotesForm({
   disabled = false 
 }: StructuredNotesFormProps) {
   const [notes, setNotes] = useState<StructuredNotes>(initialNotes || {});
-  const [newTopic, setNewTopic] = useState("");
+  const [newInterest, setNewInterest] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
@@ -80,19 +80,19 @@ export function StructuredNotesForm({
     setHasChanges(true);
   };
 
-  const addTopic = (topic: string) => {
-    const trimmed = topic.trim();
+  const addInterest = (interest: string) => {
+    const trimmed = interest.trim();
     if (!trimmed) return;
-    const currentTopics = notes.key_topics || [];
-    if (!currentTopics.includes(trimmed)) {
-      updateField('key_topics', [...currentTopics, trimmed]);
+    const currentInterests = notes.core_interests || [];
+    if (!currentInterests.includes(trimmed)) {
+      updateField('core_interests', [...currentInterests, trimmed]);
     }
-    setNewTopic("");
+    setNewInterest("");
   };
 
-  const removeTopic = (topic: string) => {
-    const currentTopics = notes.key_topics || [];
-    updateField('key_topics', currentTopics.filter(t => t !== topic));
+  const removeInterest = (interest: string) => {
+    const currentInterests = notes.core_interests || [];
+    updateField('core_interests', currentInterests.filter(i => i !== interest));
   };
 
   const handleSave = async () => {
@@ -251,20 +251,20 @@ export function StructuredNotesForm({
           )}
         </div>
 
-        {/* Key Topics */}
+        {/* Core Interests */}
         <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">Key Topics Discussed</Label>
+          <Label className="text-sm text-muted-foreground">Core Interests</Label>
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {(notes.key_topics || []).map((topic) => (
+            {(notes.core_interests || []).map((interest) => (
               <Badge 
-                key={topic} 
+                key={interest} 
                 variant="secondary" 
                 className="gap-1 pr-1"
               >
-                {topic}
+                {interest}
                 <button
                   type="button"
-                  onClick={() => removeTopic(topic)}
+                  onClick={() => removeInterest(interest)}
                   disabled={disabled}
                   className="ml-1 hover:bg-muted rounded-full p-0.5"
                 >
@@ -275,15 +275,15 @@ export function StructuredNotesForm({
           </div>
           <div className="flex gap-2">
             <Input
-              value={newTopic}
-              onChange={(e) => setNewTopic(e.target.value)}
-              placeholder="Add topic..."
+              value={newInterest}
+              onChange={(e) => setNewInterest(e.target.value)}
+              placeholder="Add interest..."
               disabled={disabled}
               className="flex-1"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
-                  addTopic(newTopic);
+                  addInterest(newInterest);
                 }
               }}
             />
@@ -291,24 +291,24 @@ export function StructuredNotesForm({
               type="button" 
               size="sm" 
               variant="outline"
-              onClick={() => addTopic(newTopic)}
-              disabled={disabled || !newTopic.trim()}
+              onClick={() => addInterest(newInterest)}
+              disabled={disabled || !newInterest.trim()}
             >
               <Plus className="h-4 w-4" />
             </Button>
           </div>
           <div className="flex flex-wrap gap-1 mt-2">
-            {SUGGESTED_TOPICS
-              .filter(t => !(notes.key_topics || []).includes(t))
+            {SUGGESTED_INTERESTS
+              .filter(i => !(notes.core_interests || []).includes(i))
               .slice(0, 4)
-              .map((topic) => (
+              .map((interest) => (
                 <Badge 
-                  key={topic}
+                  key={interest}
                   variant="outline"
                   className="cursor-pointer hover:bg-muted/50 text-xs"
-                  onClick={() => !disabled && addTopic(topic)}
+                  onClick={() => !disabled && addInterest(interest)}
                 >
-                  + {topic}
+                  + {interest}
                 </Badge>
               ))}
           </div>
