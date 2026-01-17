@@ -44,22 +44,9 @@ export function DevelopmentPathAccordion({
           </div>
           <div className="flex-1">
             <span className="font-medium text-sm">Relationship Progress</span>
-            <div className="flex items-center gap-2 mt-1">
-              {/* Use mini TierProgressBar for header summary */}
-              <div className="w-24">
-                <TierProgressBar
-                  currentTier={pathTier}
-                  currentStepIndex={currentStepIndex}
-                  totalStepsInCurrentPath={totalStepsInPath}
-                  completedPathInstances={completedPathInstances}
-                  size="sm"
-                  animated={false}
-                />
-              </div>
-              <span className="text-xs text-muted-foreground">
-                Step {currentStepIndex + 1}/{totalStepsInPath}
-              </span>
-            </div>
+            <span className="block text-xs text-muted-foreground mt-0.5">
+              Step {currentStepIndex + 1}/{totalStepsInPath}
+            </span>
           </div>
         </div>
       </AccordionTrigger>
