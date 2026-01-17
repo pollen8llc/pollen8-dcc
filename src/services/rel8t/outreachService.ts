@@ -1,6 +1,84 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { retryStep, markStepMissed } from "@/hooks/useRelationshipLevels";
+
+// Reschedule an outreach to a new date and trigger step retry
+export async function rescheduleOutreach(
+  outreachId: string,
+  newDueDate: Date
+): Promise<boolean> {
+  try {
+    // Get the outreach to check for actv8 linkage
+    const { data: outreach, error: fetchError } = await supabase
+      .from("rms_outreach")
+      .select("actv8_contact_id, actv8_step_index")
+      .eq("id", outreachId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Update the outreach with new due date and reset status
+    const { error } = await supabase
+      .from("rms_outreach")
+      .update({
+        due_date: newDueDate.toISOString(),
+        status: "pending",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", outreachId);
+
+    if (error) throw error;
+
+    // If linked to actv8, trigger the retry_step RPC for purple outcome
+    if (outreach?.actv8_contact_id && outreach?.actv8_step_index !== null) {
+      await retryStep(outreach.actv8_contact_id, outreach.actv8_step_index);
+    }
+
+    return true;
+  } catch (error: any) {
+    console.error("Error rescheduling outreach:", error);
+    throw error;
+  }
+}
+
+// Mark an outreach as missed and trigger step missed tracking
+export async function markOutreachMissed(
+  outreachId: string,
+  reason: string = "missed"
+): Promise<boolean> {
+  try {
+    // Get the outreach to check for actv8 linkage
+    const { data: outreach, error: fetchError } = await supabase
+      .from("rms_outreach")
+      .select("actv8_contact_id, actv8_step_index")
+      .eq("id", outreachId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Update the outreach status to indicate it was missed
+    const { error } = await supabase
+      .from("rms_outreach")
+      .update({
+        status: "completed", // Mark as completed but with missed metadata
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", outreachId);
+
+    if (error) throw error;
+
+    // If linked to actv8, trigger the mark_step_missed RPC for red outcome
+    if (outreach?.actv8_contact_id && outreach?.actv8_step_index !== null) {
+      await markStepMissed(outreach.actv8_contact_id, outreach.actv8_step_index, reason);
+    }
+
+    return true;
+  } catch (error: any) {
+    console.error("Error marking outreach as missed:", error);
+    throw error;
+  }
+}
 
 export type OutreachStatus = "pending" | "overdue" | "completed";
 export type OutreachPriority = "low" | "medium" | "high";

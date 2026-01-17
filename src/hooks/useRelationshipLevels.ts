@@ -37,7 +37,7 @@ export function useRelationshipLevels() {
   return useQuery({
     queryKey: ["relationship-levels"],
     queryFn: async (): Promise<RelationshipLevel[]> => {
-      const { data, error } = await supabase.rpc("get_relationship_levels");
+      const { data, error } = await (supabase.rpc as any)("get_relationship_levels");
 
       if (error) {
         console.error("Error fetching relationship levels:", error);
@@ -55,7 +55,7 @@ export function useTierMetadata() {
   return useQuery({
     queryKey: ["tier-metadata"],
     queryFn: async (): Promise<TierMetadata[]> => {
-      const { data, error } = await supabase.rpc("get_tier_metadata");
+      const { data, error } = await (supabase.rpc as any)("get_tier_metadata");
 
       if (error) {
         console.error("Error fetching tier metadata:", error);
@@ -130,7 +130,7 @@ export function useStepInstances(actv8ContactId: string | undefined) {
     queryFn: async (): Promise<StepInstance[]> => {
       if (!actv8ContactId) return [];
 
-      const { data, error } = await supabase.rpc("get_step_instances", {
+      const { data, error } = await (supabase.rpc as any)("get_step_instances", {
         p_actv8_contact_id: actv8ContactId,
       });
 
@@ -151,7 +151,7 @@ export async function markStepMissed(
   stepIndex: number,
   reason: string = "missed"
 ): Promise<StepInstance | null> {
-  const { data, error } = await supabase.rpc("mark_step_missed", {
+  const { data, error } = await (supabase.rpc as any)("mark_step_missed", {
     p_actv8_contact_id: actv8ContactId,
     p_step_index: stepIndex,
     p_reason: reason,
@@ -169,7 +169,7 @@ export async function retryStep(
   actv8ContactId: string,
   stepIndex: number
 ): Promise<StepInstance | null> {
-  const { data, error } = await supabase.rpc("retry_step", {
+  const { data, error } = await (supabase.rpc as any)("retry_step", {
     p_actv8_contact_id: actv8ContactId,
     p_step_index: stepIndex,
   });
@@ -196,7 +196,7 @@ export async function completeStep(
   interactionOutcome?: string,
   rapportProgress?: string
 ): Promise<CompleteStepResult> {
-  const { data, error } = await supabase.rpc("complete_step", {
+  const { data, error } = await (supabase.rpc as any)("complete_step", {
     p_actv8_contact_id: actv8ContactId,
     p_step_index: stepIndex,
     p_outreach_id: outreachId || null,
@@ -216,7 +216,7 @@ export async function checkLevelCompletion(
   actv8ContactId: string,
   level: number
 ): Promise<boolean> {
-  const { data, error } = await supabase.rpc("check_level_completion", {
+  const { data, error } = await (supabase.rpc as any)("check_level_completion", {
     p_actv8_contact_id: actv8ContactId,
     p_level: level,
   });
@@ -242,7 +242,7 @@ export async function switchRelationshipLevel(
   actv8ContactId: string,
   newLevel: number
 ): Promise<SwitchLevelResult> {
-  const { data, error } = await supabase.rpc("switch_relationship_level", {
+  const { data, error } = await (supabase.rpc as any)("switch_relationship_level", {
     p_actv8_contact_id: actv8ContactId,
     p_new_level: newLevel,
   });
