@@ -182,25 +182,29 @@ export default {
           }
         },
         "gradient-border-celebration": {
-          "0%": { 
-            "border-color": "hsl(220, 90%, 60%)",
-            "box-shadow": "0 0 12px hsl(220, 90%, 60% / 0.4)"
+          "0%, 100%": { 
+            "border-color": "hsla(0, 0%, 100%, 0.4)"
           },
-          "25%": { 
-            "border-color": "hsl(174, 84%, 50%)",
-            "box-shadow": "0 0 16px hsl(174, 84%, 50% / 0.5)"
+          "28%": { 
+            "border-color": "hsla(0, 0%, 100%, 0.4)"
           },
-          "50%": { 
-            "border-color": "hsl(0, 0%, 100%)",
-            "box-shadow": "0 0 20px hsl(0, 0%, 100% / 0.4)"
+          "33.33%": { 
+            "border-color": "hsla(150, 70%, 75%, 0.5)"
           },
-          "75%": { 
-            "border-color": "hsl(280, 70%, 60%)",
-            "box-shadow": "0 0 16px hsl(280, 70%, 60% / 0.5)"
+          "38%": { 
+            "border-color": "hsla(150, 70%, 75%, 0.5)"
           },
-          "100%": { 
-            "border-color": "hsl(220, 90%, 60%)",
-            "box-shadow": "0 0 12px hsl(220, 90%, 60% / 0.4)"
+          "61.67%": { 
+            "border-color": "hsla(174, 84%, 50%, 0.5)"
+          },
+          "66.67%": { 
+            "border-color": "hsla(174, 84%, 50%, 0.5)"
+          },
+          "72%": { 
+            "border-color": "hsla(174, 84%, 50%, 0.5)"
+          },
+          "94%": { 
+            "border-color": "hsla(0, 0%, 100%, 0.4)"
           }
         }
       },
@@ -221,7 +225,7 @@ export default {
         "avatar-fast-rotate": "avatar-rotate 6s linear infinite",
         "pulse-border": "pulse-border 2s ease-in-out infinite",
         "pulse-border-teal": "pulse-border-teal 2s ease-in-out infinite",
-        "gradient-border-celebration": "gradient-border-celebration 3s ease-in-out infinite",
+        "gradient-border-celebration": "gradient-border-celebration 15s ease-in-out infinite",
         "avatar-slow-rotate": "avatar-rotate 10s linear infinite",
         "avatar-delayed-orbit": "avatar-orbit 3s linear infinite 1.5s",
         // Admin avatar animations - slow and subtle

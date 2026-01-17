@@ -109,7 +109,7 @@ export const CrossPlatformNotificationCard = ({
                 <h3 className={cn(
                   "font-medium text-sm leading-tight sm:truncate sm:flex-1",
                   isPathCompletion 
-                    ? "bg-gradient-to-r from-primary via-accent to-violet-400 bg-clip-text text-transparent"
+                    ? "text-primary"
                     : notification.is_read ? 'text-foreground' : 'text-primary'
                 )}>
                   {notification.title}

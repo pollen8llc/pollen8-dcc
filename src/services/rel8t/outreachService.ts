@@ -489,7 +489,7 @@ export const updateOutreachStatus = async (id: string, status: OutreachStatus): 
                     .from("cross_platform_notifications")
                     .insert({
                       user_id: user.id,
-                      title: `🎉 Path Completed!`,
+                      title: `Path Completed!`,
                       message: `You've completed "${actv8Contact.path?.name}" with ${actv8Contact.contact?.name}! You're now at Level ${newLevel}.`,
                       notification_type: "actv8_path_complete",
                       is_read: false,

@@ -1271,7 +1271,7 @@ export async function verifyAndAdvancePathCompletion(
     .from("cross_platform_notifications")
     .insert({
       user_id: user.id,
-      title: `🎉 Path Completed!`,
+      title: `Path Completed!`,
       message: `You've completed "${contact.path?.name}" with ${contact.contact?.name}! You're now at Level ${newLevel}.`,
       notification_type: "actv8_path_complete",
       is_read: false,
