@@ -65,18 +65,18 @@ export const EditDetailsStep: React.FC<EditDetailsStepProps> = ({
     >
       <div
         className={cn(
-          "relative w-full transition-transform duration-700 ease-in-out",
+          "relative w-full grid transition-transform duration-700 ease-in-out",
           "[transform-style:preserve-3d]",
-          flipState === 'date' ? "min-h-[460px] sm:min-h-[500px]" : "min-h-0",
+          flipState === 'date' ? "min-h-[560px] sm:min-h-[620px]" : "min-h-0",
           flipState === 'date' && "[transform:rotateX(180deg)]"
         )}
       >
         {/* Front Face - Form */}
         <div
           className={cn(
-            "w-full",
+            "col-start-1 row-start-1 w-full",
             "[backface-visibility:hidden]",
-            flipState !== 'none' && "absolute inset-0 pointer-events-none"
+            flipState !== 'none' && "pointer-events-none"
           )}
         >
           <div className="space-y-6">
@@ -144,11 +144,11 @@ export const EditDetailsStep: React.FC<EditDetailsStepProps> = ({
         {flipState === 'date' && (
           <Card 
             className={cn(
-              "absolute top-0 left-0 right-0 backdrop-blur-md bg-card/95 border-2 border-primary/10 rounded-2xl shadow-xl",
+              "col-start-1 row-start-1 w-full h-auto backdrop-blur-md bg-card/95 border-2 border-primary/10 rounded-2xl shadow-xl",
               "[backface-visibility:hidden] [transform:rotateX(180deg)]"
             )}
           >
-            <CardContent className="p-3 sm:p-4 flex flex-col">
+            <CardContent className="p-3 sm:p-4 flex flex-col flex-grow-0">
               {/* Calendar Header */}
               <div className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">
                 <div className="min-w-0 flex-1">
@@ -172,7 +172,7 @@ export const EditDetailsStep: React.FC<EditDetailsStepProps> = ({
               </div>
 
               {/* Calendar */}
-              <div className="flex items-center justify-center">
+              <div className="w-full flex items-center justify-center">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -183,7 +183,10 @@ export const EditDetailsStep: React.FC<EditDetailsStepProps> = ({
                     today.setHours(0, 0, 0, 0);
                     return date < today;
                   }}
-                  className="pointer-events-auto"
+                  className={cn(
+                    "pointer-events-auto w-full max-w-md",
+                    "[&_.rdp]:w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full [&_.rdp-table]:table-fixed"
+                  )}
                 />
               </div>
 
