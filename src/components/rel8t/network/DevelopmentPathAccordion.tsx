@@ -15,6 +15,7 @@ interface DevelopmentPathAccordionProps {
   completedSteps?: string[];
   linkedOutreaches?: LinkedOutreach[];
   actv8ContactId?: string;
+  currentPathInstanceId?: string | null;
   pathTier?: number;
   completedPathInstances?: CompletedPathInstance[];
   totalStepsInPath?: number;
@@ -27,6 +28,7 @@ export function DevelopmentPathAccordion({
   completedSteps,
   linkedOutreaches = [],
   actv8ContactId,
+  currentPathInstanceId,
   pathTier = 1,
   completedPathInstances = [],
   totalStepsInPath = 4,
@@ -58,6 +60,7 @@ export function DevelopmentPathAccordion({
           completedSteps={completedSteps}
           linkedOutreaches={linkedOutreaches}
           actv8ContactId={actv8ContactId}
+          currentPathInstanceId={currentPathInstanceId}
           pathTier={pathTier}
           completedPathInstances={completedPathInstances}
           onPlanTouchpoint={onPlanTouchpoint}

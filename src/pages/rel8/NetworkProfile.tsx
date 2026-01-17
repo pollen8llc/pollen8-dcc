@@ -435,6 +435,7 @@ export default function NetworkProfile() {
             completedSteps={contact.completedSteps}
             linkedOutreaches={linkedOutreaches}
             actv8ContactId={actv8Contact.id}
+            currentPathInstanceId={actv8Contact.current_path_instance_id}
             pathTier={contact.pathTier}
             completedPathInstances={completedPathInstances}
             totalStepsInPath={actv8Contact.path?.steps?.length || 4}
