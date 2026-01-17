@@ -43,7 +43,7 @@ export function DevelopmentPathAccordion({
             <TrendingUp className="h-4 w-4 text-primary" />
           </div>
           <div className="flex-1">
-            <span className="font-medium text-sm">Relationship Development</span>
+            <span className="font-medium text-sm">Development Path</span>
             <div className="flex items-center gap-2 mt-1">
               {/* Use mini TierProgressBar for header summary */}
               <div className="w-24">
