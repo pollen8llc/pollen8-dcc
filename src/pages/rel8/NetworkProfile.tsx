@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath, advanceToPath, getCompletedPathInstances } from "@/services/actv8Service";
+import { getActv8Contact, deactivateContact, updateContactProgress, getDevelopmentPath, advanceToPath, getCompletedPathInstances, verifyAndAdvancePathCompletion } from "@/services/actv8Service";
 import { getOutreachesByActv8Contact, getOutreachesForContact } from "@/services/rel8t/outreachService";
 import { supabase } from "@/integrations/supabase/client";
 import { ConnectionStrengthBar } from "@/components/rel8t/network/ConnectionStrengthBar";
@@ -105,6 +105,34 @@ export default function NetworkProfile() {
     // Update tracked path ID
     prevPathId.current = actv8Contact.development_path_id;
   }, [actv8Contact?.development_path_id]);
+
+  // Redundancy check: verify path completion on load
+  // This catches edge cases where path completion didn't trigger properly
+  const hasVerifiedCompletion = useRef(false);
+  useEffect(() => {
+    if (!actv8Contact || !id || hasVerifiedCompletion.current) return;
+    
+    // Only check if there's an active path
+    if (!actv8Contact.development_path_id) return;
+    
+    hasVerifiedCompletion.current = true;
+    
+    const verifyCompletion = async () => {
+      try {
+        const result = await verifyAndAdvancePathCompletion(id);
+        if (result.wasAdvanced) {
+          toast.success(`Path "${result.pathName}" completed! You're now at Level ${result.newLevel}`);
+          queryClient.invalidateQueries({ queryKey: ['actv8-contact', id] });
+          queryClient.invalidateQueries({ queryKey: ['completed-path-instances', id] });
+          setOpenAccordion("path-selection");
+        }
+      } catch (error) {
+        console.error("Path completion verification failed:", error);
+      }
+    };
+    
+    verifyCompletion();
+  }, [actv8Contact?.id, actv8Contact?.development_path_id, id, queryClient]);
 
   // Fetch outreaches - filter by current path INSTANCE for proper isolation
   const {
