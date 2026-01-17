@@ -1,8 +1,6 @@
-import { useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getOutreachById, updateOutreachStatus, deleteOutreach, updateOutreachStructuredNotes, Outreach, StructuredNotes } from "@/services/rel8t/outreachService";
-import { areNotesComplete } from "@/components/rel8t/StructuredNotesForm";
 import { getActv8Contact } from "@/services/actv8Service";
 import { getDevelopmentPath } from "@/data/mockNetworkData";
 import { Button } from "@/components/ui/button";
@@ -10,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { StructuredNotesForm } from "@/components/rel8t/StructuredNotesForm";
 import { OutreachTimelineAccordion } from "@/components/rel8t/OutreachTimelineAccordion";
@@ -27,7 +26,9 @@ import {
   AlertTriangle,
   ExternalLink,
   MessageSquare,
-  Activity
+  Activity,
+  Users,
+  FileText
 } from "lucide-react";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
@@ -60,8 +61,6 @@ export default function OutreachDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const notesRef = useRef<HTMLDivElement>(null);
-  const [showNotesAlert, setShowNotesAlert] = useState(false);
 
   // Fetch outreach details
   const { data: outreach, isLoading, error } = useQuery({
@@ -77,35 +76,16 @@ export default function OutreachDetails() {
     enabled: !!outreach?.actv8_contact_id,
   });
 
-  // Scroll to notes and show alert
-  const scrollToNotes = () => {
-    setShowNotesAlert(true);
-    notesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    // Auto-hide the alert after 5 seconds
-    setTimeout(() => setShowNotesAlert(false), 5000);
-  };
-
-  // Complete mutation
+  // Complete mutation - no longer requires feedback
   const completeMutation = useMutation({
-    mutationFn: () => {
-      // Check if notes are complete before allowing completion
-      const structuredNotes = (outreach as any)?.structured_notes || {};
-      if (!areNotesComplete(structuredNotes)) {
-        scrollToNotes();
-        throw new Error('Please complete the required feedback fields before marking as complete.');
-      }
-      return updateOutreachStatus(id!, 'completed');
-    },
+    mutationFn: () => updateOutreachStatus(id!, 'completed'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['outreach', id] });
       queryClient.invalidateQueries({ queryKey: ['actv8-contact'] });
       toast.success('Outreach marked as complete!');
     },
     onError: (error) => {
-      // Only show toast if it's not the notes validation error (we handle that with the scroll)
-      if (error instanceof Error && !error.message.includes('required feedback')) {
-        toast.error(error.message);
-      }
+      toast.error(error instanceof Error ? error.message : 'Failed to complete outreach');
     },
   });
 
@@ -272,84 +252,119 @@ export default function OutreachDetails() {
           </div>
         </motion.div>
 
-        {/* Contacts */}
-        {outreach.contacts && outreach.contacts.length > 0 && (
-          <motion.div variants={fadeInUp}>
-            <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
-              <CardHeader className="pb-3 border-b border-border/30">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <div className="p-1.5 rounded-md bg-primary/10">
-                    <Mail className="h-4 w-4 text-primary" />
-                  </div>
-                  Contacts
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <div className="space-y-3">
-                  {outreach.contacts.map((contact, index) => (
-                    <motion.div 
-                      key={contact.id} 
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/30 hover:bg-muted/50 transition-colors"
-                    >
-                      <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                          {contact.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{contact.name}</p>
-                        {contact.organization && (
-                          <p className="text-sm text-muted-foreground truncate">{contact.organization}</p>
-                        )}
-                      </div>
-                      {contact.email && (
-                        <a href={`mailto:${contact.email}`} className="text-primary hover:text-primary/80 transition-colors text-sm hidden sm:block">
-                          {contact.email}
-                        </a>
-                      )}
-                    </motion.div>
-                  ))}
+        {/* Consolidated Outreach Details Card */}
+        <motion.div variants={fadeInUp}>
+          <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
+            <CardHeader className="pb-3 border-b border-border/30">
+              <CardTitle className="text-base flex items-center gap-2">
+                <div className="p-1.5 rounded-md bg-primary/10">
+                  <FileText className="h-4 w-4 text-primary" />
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Channel Details */}
-        {outreach.outreach_channel && (
-          <motion.div variants={fadeInUp}>
-            <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
-              <CardHeader className="pb-3 border-b border-border/30">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <div className="p-1.5 rounded-md bg-primary/10">
-                    {getChannelIcon()}
+                Outreach Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-0">
+              {/* Contacts Section */}
+              {outreach.contacts && outreach.contacts.length > 0 && (
+                <div className="pb-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-muted-foreground">Contacts</span>
                   </div>
-                  Outreach Channel
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <div className="space-y-2">
-                  <p className="font-medium capitalize">{outreach.outreach_channel.replace('_', ' ')}</p>
-                  {outreach.channel_details && (
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      {Object.entries(outreach.channel_details).map(([key, value]) => (
-                        <div key={key} className="flex items-center gap-2">
-                          <span className="capitalize text-muted-foreground/70">{key.replace('_', ' ')}:</span>
-                          <span className="text-foreground">{String(value)}</span>
+                  <div className="space-y-2">
+                    {outreach.contacts.map((contact, index) => (
+                      <motion.div 
+                        key={contact.id} 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/30 hover:bg-muted/50 transition-colors"
+                      >
+                        <Avatar className="h-10 w-10 ring-2 ring-primary/20">
+                          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                            {contact.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{contact.name}</p>
+                          {contact.organization && (
+                            <p className="text-sm text-muted-foreground truncate">{contact.organization}</p>
+                          )}
                         </div>
-                      ))}
+                        {contact.email && (
+                          <a href={`mailto:${contact.email}`} className="text-primary hover:text-primary/80 transition-colors text-sm hidden sm:block">
+                            {contact.email}
+                          </a>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Divider */}
+              {outreach.contacts && outreach.contacts.length > 0 && outreach.outreach_channel && (
+                <Separator className="my-4 bg-border/30" />
+              )}
+
+              {/* Channel Section */}
+              {outreach.outreach_channel && (
+                <div className="py-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    {getChannelIcon()}
+                    <span className="text-sm font-medium text-muted-foreground">Channel</span>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="font-medium capitalize">{outreach.outreach_channel.replace('_', ' ')}</p>
+                    {outreach.channel_details && (
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        {Object.entries(outreach.channel_details).map(([key, value]) => (
+                          <div key={key} className="flex items-center gap-2">
+                            <span className="capitalize text-muted-foreground/70">{key.replace('_', ' ')}:</span>
+                            <span className="text-foreground">{String(value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Divider */}
+              <Separator className="my-4 bg-border/30" />
+
+              {/* Metadata Section */}
+              <div className="pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground">Timestamps</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  {outreach.created_at && (
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-muted-foreground">Created</span>
+                      <span className="font-mono text-xs">{format(parseISO(outreach.created_at), 'PPp')}</span>
+                    </div>
+                  )}
+                  {outreach.updated_at && (
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-muted-foreground">Last updated</span>
+                      <span className="font-mono text-xs">{format(parseISO(outreach.updated_at), 'PPp')}</span>
+                    </div>
+                  )}
+                  {outreach.contacts_notified_at && (
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-muted-foreground">Contacts notified</span>
+                      <span className="font-mono text-xs">{format(parseISO(outreach.contacts_notified_at), 'PPp')}</span>
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Calendar Sync Status & Timeline */}
+        {/* Calendar Sync Status & Timeline - Kept Separate */}
         <motion.div variants={fadeInUp}>
           <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
             <CardHeader className="pb-3 border-b border-border/30">
@@ -393,66 +408,42 @@ export default function OutreachDetails() {
           </Card>
         </motion.div>
 
-        {/* Structured Notes Form */}
-        <motion.div variants={fadeInUp} ref={notesRef} className="relative scroll-mt-6">
-          {showNotesAlert && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute -top-2 left-0 right-0 z-10 flex items-center justify-center"
-            >
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-destructive text-destructive-foreground text-sm font-medium shadow-lg animate-pulse">
-                <AlertTriangle className="h-4 w-4" />
-                Complete required fields below
-              </div>
-            </motion.div>
-          )}
-          <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
-            <StructuredNotesForm
-              initialNotes={(outreach as any).structured_notes || {}}
-              onSave={async (notes) => {
-                await structuredNotesMutation.mutateAsync(notes);
-                setShowNotesAlert(false);
-              }}
-              isSaving={structuredNotesMutation.isPending}
-              disabled={false}
-            />
-          </Card>
-        </motion.div>
-
-        {/* Metadata */}
-        <motion.div variants={fadeInUp}>
-          <Card className="bg-card/80 backdrop-blur-md border-border/50 mb-6 shadow-lg overflow-hidden">
-            <CardHeader className="pb-3 border-b border-border/30">
-              <CardTitle className="text-base flex items-center gap-2">
-                <div className="p-1.5 rounded-md bg-muted/50">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                </div>
-                Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4 space-y-3 text-sm">
-              {outreach.created_at && (
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-muted-foreground">Created</span>
-                  <span className="font-mono text-xs">{format(parseISO(outreach.created_at), 'PPp')}</span>
-                </div>
-              )}
-              {outreach.updated_at && (
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-muted-foreground">Last updated</span>
-                  <span className="font-mono text-xs">{format(parseISO(outreach.updated_at), 'PPp')}</span>
-                </div>
-              )}
-              {outreach.contacts_notified_at && (
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-muted-foreground">Contacts notified</span>
-                  <span className="font-mono text-xs">{format(parseISO(outreach.contacts_notified_at), 'PPp')}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+        {/* Post-Outreach Feedback Accordion - Only shown when completed */}
+        {outreach.status === 'completed' && (
+          <motion.div variants={fadeInUp}>
+            <Accordion type="single" collapsible className="w-full mb-6">
+              <AccordionItem 
+                value="feedback" 
+                className="bg-card/80 backdrop-blur-md border border-border/50 rounded-xl shadow-lg overflow-hidden"
+              >
+                <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                  <div className="flex items-center gap-3">
+                    <div className="p-1.5 rounded-md bg-primary/10">
+                      <MessageSquare className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="font-semibold">Post-Outreach Feedback</span>
+                    {(outreach as any).structured_notes?.interaction_outcome && (
+                      <Badge variant="outline" className="ml-2 bg-emerald-500/10 text-emerald-500 border-emerald-500/30">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        Recorded
+                      </Badge>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-0 pb-0">
+                  <StructuredNotesForm
+                    initialNotes={(outreach as any).structured_notes || {}}
+                    onSave={async (notes) => {
+                      await structuredNotesMutation.mutateAsync(notes);
+                    }}
+                    isSaving={structuredNotesMutation.isPending}
+                    disabled={false}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </motion.div>
+        )}
 
         <Separator className="my-6 bg-border/30" />
 
