@@ -127,6 +127,11 @@ export function DevelopmentPathCard({
         currentStepIndex={stepIndex}
         totalStepsInCurrentPath={path?.steps?.length || 4}
         completedPathInstances={completedPathInstances}
+        stepInstances={stepInstances.map(si => ({
+          step_index: si.step_index,
+          status: si.status as 'pending' | 'active' | 'completed' | 'missed' | 'retrying',
+          retry_count: si.retry_count || 0,
+        }))}
         size="md"
         showLabels
         animated
