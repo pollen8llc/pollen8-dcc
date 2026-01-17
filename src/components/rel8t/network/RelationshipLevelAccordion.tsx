@@ -167,24 +167,31 @@ export function RelationshipLevelAccordion({
       
         <AccordionContent className="px-4 pb-4">
           <div className="space-y-3 pt-2">
-            {/* Unlock Button - shown when no level selected and not in unlock mode */}
-            {!currentRelationshipLevel && !isUnlockMode && (
-              <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground mb-3">
-                  Select your relationship level to start developing this connection
-                </p>
+            {/* Unlock/Change Level Button - shown when not in unlock mode */}
+            {!isUnlockMode && (
+              <div className={cn(
+                "flex items-center mb-2",
+                !currentRelationshipLevel ? "justify-center py-4 flex-col" : "justify-end"
+              )}>
+                {!currentRelationshipLevel && (
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Select your relationship level to start developing this connection
+                  </p>
+                )}
                 <Button 
                   onClick={() => setIsUnlockMode(true)}
                   className="gap-2"
+                  variant={currentRelationshipLevel ? "outline" : "default"}
+                  size={currentRelationshipLevel ? "sm" : "default"}
                 >
                   <Lock className="h-4 w-4" />
-                  Unlock Levels
+                  {currentRelationshipLevel ? "Change Level" : "Unlock Levels"}
                 </Button>
               </div>
             )}
 
             {/* Cancel button when in unlock mode */}
-            {isUnlockMode && !currentRelationshipLevel && (
+            {isUnlockMode && (
               <div className="flex justify-end mb-2">
                 <Button 
                   variant="ghost" 
