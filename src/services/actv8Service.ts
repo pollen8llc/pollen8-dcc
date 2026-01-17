@@ -1195,6 +1195,102 @@ export interface StepInstance {
   updated_at: string;
 }
 
+/**
+ * Verifies if a contact's path is complete but hasn't been advanced.
+ * This serves as a redundancy check on page load to catch edge cases
+ * where the path completion logic didn't trigger properly.
+ */
+export async function verifyAndAdvancePathCompletion(
+  actv8ContactId: string
+): Promise<{ wasAdvanced: boolean; newLevel?: number; pathName?: string }> {
+  const contact = await getActv8Contact(actv8ContactId);
+  
+  // No contact, no path, or already cleared - nothing to verify
+  if (!contact || !contact.path || !contact.development_path_id) {
+    return { wasAdvanced: false };
+  }
+
+  const totalSteps = contact.path.steps?.length || 0;
+  const currentStepIndex = contact.current_step_index || 0;
+
+  // Check if all steps are completed but path wasn't cleared
+  if (currentStepIndex < totalSteps) {
+    // Path is still in progress - no action needed
+    return { wasAdvanced: false };
+  }
+
+  // PATH SHOULD HAVE BEEN COMPLETED - Fix the data
+  console.log("Path completion verification: Detected incomplete advancement, fixing...");
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  // Mark current path instance as ended
+  if (contact.current_path_instance_id) {
+    await supabase
+      .from("rms_actv8_path_instances")
+      .update({ 
+        status: 'ended',
+        ended_at: new Date().toISOString()
+      })
+      .eq("id", contact.current_path_instance_id);
+  }
+
+  // Add to path history
+  const pathHistory = (contact.path_history || []) as PathHistoryEntry[];
+  const newPathHistory: PathHistoryEntry[] = [
+    ...pathHistory,
+    {
+      path_id: contact.development_path_id,
+      path_name: contact.path?.name || 'Unknown Path',
+      completed_at: new Date().toISOString(),
+      steps_completed: totalSteps
+    }
+  ];
+  
+  // Calculate new relationship level (advance by 1, max 4)
+  const currentLevel = contact.relationship_level || 1;
+  const newLevel = Math.min(currentLevel + 1, 4);
+  
+  // Update contact with advancement
+  const { error: updateError } = await supabase
+    .from('rms_actv8_contacts')
+    .update({
+      path_history: newPathHistory as unknown as Json[],
+      relationship_level: newLevel,
+      path_tier: newLevel,
+      development_path_id: null,
+      current_path_instance_id: null,
+    })
+    .eq('id', actv8ContactId);
+  
+  if (updateError) throw updateError;
+
+  // Create notification for path completion
+  await supabase
+    .from("cross_platform_notifications")
+    .insert({
+      user_id: user.id,
+      title: `🎉 Path Completed!`,
+      message: `You've completed "${contact.path?.name}" with ${contact.contact?.name}! You're now at Level ${newLevel}.`,
+      notification_type: "actv8_path_complete",
+      is_read: false,
+      metadata: {
+        actv8ContactId: actv8ContactId,
+        pathName: contact.path?.name,
+        contactName: contact.contact?.name,
+        newLevel: newLevel,
+        previousLevel: currentLevel
+      }
+    });
+
+  return { 
+    wasAdvanced: true, 
+    newLevel,
+    pathName: contact.path?.name 
+  };
+}
+
 export async function getStepInstances(
   actv8ContactId: string,
   pathInstanceId?: string | null
