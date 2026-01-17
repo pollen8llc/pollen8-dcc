@@ -40,6 +40,8 @@ export interface Actv8ContactDisplay {
   pathTier: number;
   pathHistory: PathHistoryEntry[];
   skippedPaths: SkippedPathEntry[];
+  currentPathInstanceId?: string | null;
+  relationshipLevel?: number;
 }
 
 export function useActv8Contacts() {
@@ -76,6 +78,8 @@ export function useActv8Contacts() {
         pathTier: ac.path_tier || 1,
         pathHistory: ac.path_history || [],
         skippedPaths: ac.skipped_paths || [],
+        currentPathInstanceId: ac.current_path_instance_id || null,
+        relationshipLevel: ac.relationship_level || 1,
       }));
     },
     enabled: !!userId,

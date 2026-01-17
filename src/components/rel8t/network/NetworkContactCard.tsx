@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Actv8ContactDisplay, useDeactivateContact } from "@/hooks/useActv8Contacts";
+import { getStepInstances, getCompletedPathInstances } from "@/services/actv8Service";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
@@ -24,7 +26,7 @@ import {
 import { MoreVertical, Pause, Play, Trash2, MapPin, TrendingUp, Route } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { relationshipTypes } from "@/services/actv8Service";
-import { TierProgressBar } from "./TierProgressBar";
+import { TierProgressBar, CompletedPathInstance } from "./TierProgressBar";
 import { getStrengthConfig } from "@/config/connectionStrengthConfig";
 
 interface NetworkContactCardProps {
@@ -39,6 +41,22 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
   const [isPaused, setIsPaused] = useState(contact.status === 'paused');
   const [animatedStrength, setAnimatedStrength] = useState(0);
   const [animatedSegments, setAnimatedSegments] = useState(0);
+  
+  // Fetch step instances for outcome-aware progress bar coloring
+  const { data: stepInstances = [] } = useQuery({
+    queryKey: ['step-instances', contact.id, contact.currentPathInstanceId],
+    queryFn: () => getStepInstances(contact.id, contact.currentPathInstanceId),
+    enabled: !!contact.id,
+    staleTime: 30000, // Cache for 30s to avoid excessive fetches in list view
+  });
+
+  // Fetch completed path instances for historical tier coloring
+  const { data: completedPathInstances = [] } = useQuery({
+    queryKey: ['completed-path-instances', contact.id],
+    queryFn: () => getCompletedPathInstances(contact.id),
+    enabled: !!contact.id,
+    staleTime: 30000,
+  });
   
   const relationshipType = relationshipTypes.find(rt => rt.id === contact.relationshipType);
   const currentStep = contact.currentStepIndex ?? 0;
@@ -218,6 +236,12 @@ export function NetworkContactCard({ contact }: NetworkContactCardProps) {
                   currentTier={contact.pathTier}
                   currentStepIndex={currentStep}
                   totalStepsInCurrentPath={totalSteps}
+                  completedPathInstances={completedPathInstances as CompletedPathInstance[]}
+                  stepInstances={stepInstances.map(si => ({
+                    step_index: si.step_index,
+                    status: si.status as 'pending' | 'active' | 'completed' | 'missed' | 'retrying',
+                    retry_count: si.retry_count || 0,
+                  }))}
                   size="sm"
                   animated
                 />
