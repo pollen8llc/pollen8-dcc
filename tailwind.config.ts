@@ -170,6 +170,16 @@ export default {
             "border-color": "hsl(var(--primary) / 0.5)",
             "box-shadow": "0 0 8px hsl(var(--primary) / 0.15)"
           }
+        },
+        "pulse-border-teal": {
+          "0%, 100%": { 
+            "border-color": "hsl(174, 84%, 45% / 0.3)",
+            "box-shadow": "0 0 0 hsl(174, 84%, 45% / 0)"
+          },
+          "50%": { 
+            "border-color": "hsl(174, 84%, 45% / 0.7)",
+            "box-shadow": "0 0 12px hsl(174, 84%, 45% / 0.25)"
+          }
         }
       },
       animation: {
@@ -188,6 +198,7 @@ export default {
         "avatar-shimmer": "avatar-shimmer 3s ease-in-out infinite",
         "avatar-fast-rotate": "avatar-rotate 6s linear infinite",
         "pulse-border": "pulse-border 2s ease-in-out infinite",
+        "pulse-border-teal": "pulse-border-teal 2s ease-in-out infinite",
         "avatar-slow-rotate": "avatar-rotate 10s linear infinite",
         "avatar-delayed-orbit": "avatar-orbit 3s linear infinite 1.5s",
         // Admin avatar animations - slow and subtle

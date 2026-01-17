@@ -82,8 +82,19 @@ export function PathSelectionAccordion({
     return acc;
   }, {} as Record<number, DevelopmentPath[]>);
 
+  // Determine if we should show the nudge animation (no path selected)
+  const shouldNudge = !hasCurrentPath && !currentPathId;
+
   return (
-    <AccordionItem value="path-selection" className="border rounded-2xl bg-card/50 backdrop-blur-sm border-primary/20 overflow-hidden">
+    <AccordionItem 
+      value="path-selection" 
+      className={cn(
+        "border rounded-2xl bg-card/50 backdrop-blur-sm overflow-hidden",
+        shouldNudge 
+          ? "animate-pulse-border-teal border-[hsl(174,84%,45%)/0.5]" 
+          : "border-primary/20"
+      )}
+    >
       <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-primary/5 transition-colors">
         <div className="flex items-center gap-3 text-left">
           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
