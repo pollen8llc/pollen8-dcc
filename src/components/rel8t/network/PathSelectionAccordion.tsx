@@ -93,7 +93,7 @@ export function PathSelectionAccordion({
             <span className="font-medium text-sm">
               {hasCurrentPath && currentPathName 
                 ? currentPathName
-                : "Choose Development Path"
+                : "Select a Path"
               }
             </span>
             {hasCurrentPath && (
