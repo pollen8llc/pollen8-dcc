@@ -152,6 +152,7 @@ export interface Actv8Contact {
   completed_steps: string[];
   connection_strength: string | null;
   relationship_type: string | null;
+  relationship_level: number; // Explicit level number (1-4) determining max accessible tier
   warmth_level: string | null;
   intention_id: string | null;
   intention_notes: string | null;
@@ -185,6 +186,7 @@ function transformActv8Contact(data: any): Actv8Contact {
   return {
     ...data,
     path_tier: data.path_tier ?? 1,
+    relationship_level: data.relationship_level ?? 1,
     current_path_instance_id: data.current_path_instance_id || null,
     path_history: (data.path_history as PathHistoryEntry[]) || [],
     skipped_paths: (data.skipped_paths as SkippedPathEntry[]) || [],
@@ -281,7 +283,7 @@ export async function getDevelopmentPaths(): Promise<DevelopmentPath[]> {
   }));
 }
 
-// Get available paths based on contact's current tier
+// Get available paths based on contact's relationship level
 export async function getAvailablePaths(actv8ContactId: string): Promise<{
   available: DevelopmentPath[];
   locked: DevelopmentPath[];
@@ -293,9 +295,12 @@ export async function getAvailablePaths(actv8ContactId: string): Promise<{
   const allPaths = await getDevelopmentPaths();
   const currentTier = contact.path_tier || 1;
   
-  // Available paths are current tier and one tier ahead (to allow advancement)
-  const available = allPaths.filter(p => p.tier <= currentTier + 1);
-  const locked = allPaths.filter(p => p.tier > currentTier + 1);
+  // Relationship level determines max accessible tier (level 1 = tier 1, level 2 = tier 2, etc.)
+  const relationshipLevel = contact.relationship_level || 1;
+  
+  // Available paths are those within the relationship level's accessible tiers
+  const available = allPaths.filter(p => p.tier <= relationshipLevel);
+  const locked = allPaths.filter(p => p.tier > relationshipLevel);
 
   return { available, locked, currentTier };
 }
