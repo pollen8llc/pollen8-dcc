@@ -82,11 +82,18 @@ export default function NetworkProfile() {
       hasInitializedAccordion.current = true;
       prevPathId.current = actv8Contact.development_path_id;
       
-      // If no development path selected, start onboarding at relationship level
-      // Otherwise, show the active development path
       if (!actv8Contact.development_path_id) {
-        setOpenAccordion("relationship-level");
+        // No path selected - check if they've completed a path before
+        const hasCompletedPaths = (actv8Contact.path_history?.length || 0) > 0;
+        if (hasCompletedPaths) {
+          // Previously completed a path - open path selection for next path
+          setOpenAccordion("path-selection");
+        } else {
+          // Brand new - start at relationship level assessment
+          setOpenAccordion("relationship-level");
+        }
       } else {
+        // Active path - show development progress
         setOpenAccordion("development-path");
       }
     }
