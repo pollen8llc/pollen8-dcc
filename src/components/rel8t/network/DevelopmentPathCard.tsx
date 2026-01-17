@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO, isPast, isToday } from "date-fns";
-import { Calendar, ExternalLink, Check, ChevronRight, Play, SkipForward, History, Clock } from "lucide-react";
+import { Calendar, ExternalLink, Check, ChevronRight, Play, SkipForward, History, Clock, RefreshCw } from "lucide-react";
 import { Outreach } from "@/services/rel8t/outreachService";
 import { TierProgressBar, CompletedPathInstance } from "./TierProgressBar";
 
@@ -299,13 +299,29 @@ export function DevelopmentPathCard({
                             {format(parseISO(linkedOutreach.outreach.due_date), 'MMM d')}
                           </span>
                         </div>
-                        <button 
-                          onClick={() => navigate(`/rel8/outreach/${linkedOutreach.outreach.id}`)}
-                          className="text-xs text-primary flex items-center gap-1 hover:underline"
-                        >
-                          View
-                          <ExternalLink className="h-3 w-3" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {/* Reschedule button for overdue tasks */}
+                          {linkedOutreach.outreach.status === 'pending' && 
+                           isPast(parseISO(linkedOutreach.outreach.due_date)) && 
+                           !isToday(parseISO(linkedOutreach.outreach.due_date)) && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => navigate(`/rel8/triggers/wizard?mode=edit&id=${linkedOutreach.outreach.id}`)}
+                              className="h-6 px-2 text-[10px] text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 gap-1"
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                              Reschedule
+                            </Button>
+                          )}
+                          <button 
+                            onClick={() => navigate(`/rel8/outreach/${linkedOutreach.outreach.id}`)}
+                            className="text-xs text-primary flex items-center gap-1 hover:underline"
+                          >
+                            View
+                            <ExternalLink className="h-3 w-3" />
+                          </button>
+                        </div>
                       </div>
                       <p className="text-xs text-foreground mt-1 truncate">
                         {linkedOutreach.outreach.title}
