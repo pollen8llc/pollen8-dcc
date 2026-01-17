@@ -90,12 +90,7 @@ export function PathSelectionAccordion({
             <Target className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <span className="font-medium text-sm">
-              {hasCurrentPath && currentPathName 
-                ? currentPathName
-                : "Select a Path"
-              }
-            </span>
+            <span className="font-medium text-sm">Select a Path</span>
             {hasCurrentPath && (
               <span className="block text-xs text-muted-foreground">
                 {tierLabels[currentTier] || `Tier ${currentTier}`}
