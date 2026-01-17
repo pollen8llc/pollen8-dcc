@@ -73,10 +73,14 @@ export default function NetworkProfile() {
     isLoading: analysisLoading
   } = useContactAnalysis(actv8Contact?.contact_id);
   
+  // Track previous path state to detect path completion
+  const prevPathId = useRef<string | null | undefined>(undefined);
+  
   // Set smart default accordion based on onboarding state
   useEffect(() => {
     if (actv8Contact && !hasInitializedAccordion.current) {
       hasInitializedAccordion.current = true;
+      prevPathId.current = actv8Contact.development_path_id;
       
       // If no development path selected, start onboarding at relationship level
       // Otherwise, show the active development path
@@ -87,6 +91,20 @@ export default function NetworkProfile() {
       }
     }
   }, [actv8Contact]);
+  
+  // Detect path completion - when path becomes null after having a path
+  useEffect(() => {
+    if (!actv8Contact || !hasInitializedAccordion.current) return;
+    
+    // If we had a path before and now it's cleared, path was completed
+    if (prevPathId.current && !actv8Contact.development_path_id) {
+      // Path just completed! Open path selection for next path
+      setOpenAccordion("path-selection");
+    }
+    
+    // Update tracked path ID
+    prevPathId.current = actv8Contact.development_path_id;
+  }, [actv8Contact?.development_path_id]);
 
   // Fetch outreaches - filter by current path INSTANCE for proper isolation
   const {
@@ -110,12 +128,12 @@ export default function NetworkProfile() {
     staleTime: 0
   });
 
-  // Real-time subscription for outreach updates
+  // Real-time subscription for outreach and actv8 contact updates
   useEffect(() => {
     if (!id) return;
 
     const channel = supabase
-      .channel(`actv8-outreach-profile-${id}`)
+      .channel(`actv8-profile-${id}`)
       .on(
         'postgres_changes',
         {
@@ -136,6 +154,20 @@ export default function NetworkProfile() {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['contact-triggers'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'rms_actv8_contacts',
+          filter: `id=eq.${id}`
+        },
+        () => {
+          // Refetch actv8 contact when it's updated (e.g., path completion, level change)
+          queryClient.invalidateQueries({ queryKey: ['actv8-contact', id] });
+          queryClient.invalidateQueries({ queryKey: ['completed-path-instances', id] });
         }
       )
       .subscribe();
