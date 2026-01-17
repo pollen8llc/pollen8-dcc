@@ -12,7 +12,8 @@ import {
   Clock,
   Ban,
   X,
-  AlertTriangle
+  AlertTriangle,
+  Trophy
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +49,22 @@ interface OverdueOutreach {
       email: string | null;
     } | null;
   }>;
+}
+
+interface PathCompletionNotification {
+  id: string;
+  title: string;
+  message: string;
+  notification_type: string;
+  is_read: boolean;
+  created_at: string;
+  metadata: {
+    actv8ContactId?: string;
+    pathName?: string;
+    contactName?: string;
+    newLevel?: number;
+    previousLevel?: number;
+  } | null;
 }
 
 const NotificationShortlist = () => {
@@ -113,7 +130,30 @@ const NotificationShortlist = () => {
     staleTime: 0
   });
 
-  // Real-time subscription for sync log and outreach updates
+  // Query for path completion notifications
+  const { data: pathCompletions = [], refetch: refetchPathCompletions } = useQuery({
+    queryKey: ["path-completions-shortlist"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from("cross_platform_notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("notification_type", "actv8_path_complete")
+        .eq("is_read", false)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      return (data || []) as PathCompletionNotification[];
+    },
+    refetchOnMount: true,
+    staleTime: 0
+  });
+
+  // Real-time subscription for sync log, outreach, and notification updates
   useEffect(() => {
     const channel = supabase
       .channel('sync-log-shortlist-changes')
@@ -135,12 +175,21 @@ const NotificationShortlist = () => {
         },
         () => refetchOverdue()
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'cross_platform_notifications'
+        },
+        () => refetchPathCompletions()
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [refetch, refetchOverdue]);
+  }, [refetch, refetchOverdue, refetchPathCompletions]);
 
   const getSyncIcon = (syncType: string) => {
     switch (syncType) {
@@ -272,7 +321,26 @@ const NotificationShortlist = () => {
 
   const hasResponses = syncLogs && syncLogs.length > 0;
   const hasOverdue = overdueOutreach && overdueOutreach.length > 0;
-  const totalAlerts = syncLogs.length + overdueOutreach.length;
+  const hasPathCompletions = pathCompletions && pathCompletions.length > 0;
+  const totalAlerts = syncLogs.length + overdueOutreach.length + pathCompletions.length;
+
+  // Handle path completion click - navigate to network profile
+  const handlePathCompletionClick = (notification: PathCompletionNotification) => {
+    const actv8ContactId = notification.metadata?.actv8ContactId;
+    if (actv8ContactId) {
+      navigate(`/rel8/actv8/${actv8ContactId}/profile`);
+    }
+  };
+
+  // Mark path completion as read
+  const markPathCompletionRead = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    await supabase
+      .from("cross_platform_notifications")
+      .update({ is_read: true })
+      .eq("id", id);
+    refetchPathCompletions();
+  };
 
   return (
     <motion.div
@@ -296,7 +364,7 @@ const NotificationShortlist = () => {
               <div>
                 <CardTitle className="text-xl font-bold">Activity Alerts</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Overdue tasks & calendar responses
+                  Overdue tasks, completions & responses
                 </p>
               </div>
             </div>
@@ -313,7 +381,7 @@ const NotificationShortlist = () => {
         </CardHeader>
 
         <CardContent className="pt-0">
-          {!hasResponses && !hasOverdue ? (
+          {!hasResponses && !hasOverdue && !hasPathCompletions ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="w-10 h-10 mx-auto mb-3 opacity-40" />
               <p className="text-sm">No alerts</p>
@@ -322,7 +390,66 @@ const NotificationShortlist = () => {
           ) : (
           <div className="space-y-2">
             <AnimatePresence mode="popLayout">
-              {/* Overdue outreach items first */}
+              {/* Path completion notifications first - with celebration gradient border */}
+              {pathCompletions.map((notification, index) => (
+                <motion.div
+                  key={`path-complete-${notification.id}`}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20, height: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  layout
+                >
+                  <div
+                    className={cn(
+                      "w-full rounded-xl border-2 overflow-hidden transition-all duration-300 text-left group cursor-pointer",
+                      "hover:bg-primary/10 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5",
+                      "animate-gradient-border-celebration"
+                    )}
+                    onClick={() => handlePathCompletionClick(notification)}
+                  >
+                    <div className="px-4 py-3 flex items-center gap-4">
+                      {/* Icon */}
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-primary/20 via-accent/20 to-violet-500/20">
+                        <Trophy className="w-5 h-5 text-primary" />
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 text-left">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold text-sm truncate bg-gradient-to-r from-primary via-accent to-violet-400 bg-clip-text text-transparent">
+                            Path Completed!
+                          </h4>
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-foreground truncate max-w-[180px]">
+                            {notification.metadata?.pathName || "Development Path"}
+                          </span>
+                        </div>
+                        {notification.metadata?.contactName && (
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-xs text-muted-foreground truncate max-w-[180px]">
+                              {notification.metadata.contactName} → Level {notification.metadata?.newLevel || "?"}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Dismiss button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary hover:bg-primary/10"
+                        onClick={(e) => markPathCompletionRead(e, notification.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+
+              {/* Overdue outreach items */}
               {overdueOutreach.map((outreach, index) => {
                 const daysOverdue = getDaysOverdue(outreach.due_date);
                 const contactName = getPrimaryContact(outreach);
@@ -333,7 +460,7 @@ const NotificationShortlist = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20, height: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    transition={{ duration: 0.3, delay: (pathCompletions.length + index) * 0.05 }}
                     layout
                   >
                     <div
@@ -390,7 +517,7 @@ const NotificationShortlist = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20, height: 0 }}
-                    transition={{ duration: 0.3, delay: (overdueOutreach.length + index) * 0.05 }}
+                    transition={{ duration: 0.3, delay: (pathCompletions.length + overdueOutreach.length + index) * 0.05 }}
                     layout
                   >
                     <div

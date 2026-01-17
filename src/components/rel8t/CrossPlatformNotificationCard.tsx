@@ -1,8 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Bell, User, Building2, Check, X } from "lucide-react";
+import { Trash2, Bell, User, Building2, Check, X, Trophy } from "lucide-react";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +40,9 @@ export const CrossPlatformNotificationCard = ({
 }: CrossPlatformNotificationCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  
+  const isPathCompletion = notification.notification_type === 'actv8_path_complete';
   
   // Extract reference from metadata
   const getReference = () => {
@@ -67,9 +72,22 @@ export const CrossPlatformNotificationCard = ({
     return 'bg-muted-foreground/50';
   };
 
+  // Handle click for path completion - navigate to profile
+  const handleCardClick = () => {
+    if (isPathCompletion && notification.metadata?.actv8ContactId) {
+      navigate(`/rel8/actv8/${notification.metadata.actv8ContactId}/profile`);
+    }
+  };
+
   return (
     <>
-      <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md hover:bg-card/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200">
+      <Card 
+        className={cn(
+          "glass-morphism border-0 bg-card/30 backdrop-blur-md hover:bg-card/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200",
+          isPathCompletion && "border-2 animate-gradient-border-celebration cursor-pointer bg-gradient-to-r from-primary/5 via-accent/5 to-violet-500/5"
+        )}
+        onClick={isPathCompletion ? handleCardClick : undefined}
+      >
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             {/* Status Indicator */}
@@ -77,14 +95,23 @@ export const CrossPlatformNotificationCard = ({
             
             {/* Icon */}
             <div className="shrink-0 mt-0.5">
-              <Bell className={`h-4 w-4 ${notification.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
+              {isPathCompletion ? (
+                <Trophy className="h-4 w-4 text-primary" />
+              ) : (
+                <Bell className={`h-4 w-4 ${notification.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
+              )}
             </div>
             
             {/* Content */}
             <div className="flex-1 min-w-0 space-y-2">
               {/* Header - Stack on mobile */}
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
-                <h3 className={`font-medium text-sm leading-tight ${notification.is_read ? 'text-foreground' : 'text-primary'} sm:truncate sm:flex-1`}>
+                <h3 className={cn(
+                  "font-medium text-sm leading-tight sm:truncate sm:flex-1",
+                  isPathCompletion 
+                    ? "bg-gradient-to-r from-primary via-accent to-violet-400 bg-clip-text text-transparent"
+                    : notification.is_read ? 'text-foreground' : 'text-primary'
+                )}>
                   {notification.title}
                 </h3>
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -179,6 +206,26 @@ export const CrossPlatformNotificationCard = ({
                     </Button>
                   </div>
                 </>
+              )}
+
+              {/* Path Completion Action */}
+              {isPathCompletion && notification.metadata?.actv8ContactId && (
+                <div className="mt-3 pt-3 border-t border-border/30">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="w-full bg-gradient-to-r from-primary/10 via-accent/10 to-violet-500/10 border-primary/30 hover:border-primary/50 hover:bg-primary/20 transition-all"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/rel8/actv8/${notification.metadata.actv8ContactId}/profile`);
+                    }}
+                  >
+                    <Trophy className="h-4 w-4 mr-1.5 text-primary" /> 
+                    <span className="bg-gradient-to-r from-primary via-accent to-violet-400 bg-clip-text text-transparent font-medium">
+                      View Relationship
+                    </span>
+                  </Button>
+                </div>
               )}
             </div>
           </div>
