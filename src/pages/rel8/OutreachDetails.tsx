@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
-import { StructuredNotesForm } from "@/components/rel8t/StructuredNotesForm";
+import { StructuredNotesForm, areNotesComplete } from "@/components/rel8t/StructuredNotesForm";
 import { OutreachTimelineAccordion } from "@/components/rel8t/OutreachTimelineAccordion";
 import { motion } from "framer-motion";
 import { 
@@ -28,10 +28,12 @@ import {
   MessageSquare,
   Activity,
   Users,
-  FileText
+  FileText,
+  UserCircle
 } from "lucide-react";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -409,41 +411,61 @@ export default function OutreachDetails() {
         </motion.div>
 
         {/* Post-Outreach Feedback Accordion - Only shown when completed */}
-        {outreach.status === 'completed' && (
-          <motion.div variants={fadeInUp}>
-            <Accordion type="single" collapsible className="w-full mb-6">
-              <AccordionItem 
-                value="feedback" 
-                className="bg-card/80 backdrop-blur-md border border-border/50 rounded-xl shadow-lg overflow-hidden"
-              >
-                <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                  <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-md bg-primary/10">
-                      <MessageSquare className="h-4 w-4 text-primary" />
+        {outreach.status === 'completed' && (() => {
+          const structuredNotes = (outreach as any).structured_notes || {};
+          const isFeedbackComplete = areNotesComplete(structuredNotes);
+          
+          return (
+            <motion.div variants={fadeInUp}>
+              <Accordion type="single" collapsible className="w-full mb-6">
+                <AccordionItem 
+                  value="feedback" 
+                  className={cn(
+                    "bg-card/80 backdrop-blur-md rounded-xl shadow-lg overflow-hidden",
+                    isFeedbackComplete 
+                      ? "border border-border/50" 
+                      : "border-2 border-amber-500/70 animate-pulse"
+                  )}
+                >
+                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "p-1.5 rounded-md",
+                        isFeedbackComplete ? "bg-primary/10" : "bg-amber-500/20"
+                      )}>
+                        <MessageSquare className={cn(
+                          "h-4 w-4",
+                          isFeedbackComplete ? "text-primary" : "text-amber-500"
+                        )} />
+                      </div>
+                      <span className="font-semibold">Post-Outreach Feedback</span>
+                      {isFeedbackComplete ? (
+                        <Badge variant="outline" className="ml-2 bg-emerald-500/10 text-emerald-500 border-emerald-500/30">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Recorded
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="ml-2 bg-amber-500/10 text-amber-500 border-amber-500/30">
+                          Pending
+                        </Badge>
+                      )}
                     </div>
-                    <span className="font-semibold">Post-Outreach Feedback</span>
-                    {(outreach as any).structured_notes?.interaction_outcome && (
-                      <Badge variant="outline" className="ml-2 bg-emerald-500/10 text-emerald-500 border-emerald-500/30">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Recorded
-                      </Badge>
-                    )}
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-0 pb-0">
-                  <StructuredNotesForm
-                    initialNotes={(outreach as any).structured_notes || {}}
-                    onSave={async (notes) => {
-                      await structuredNotesMutation.mutateAsync(notes);
-                    }}
-                    isSaving={structuredNotesMutation.isPending}
-                    disabled={false}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </motion.div>
-        )}
+                  </AccordionTrigger>
+                  <AccordionContent className="px-0 pb-0">
+                    <StructuredNotesForm
+                      initialNotes={structuredNotes}
+                      onSave={async (notes) => {
+                        await structuredNotesMutation.mutateAsync(notes);
+                      }}
+                      isSaving={structuredNotesMutation.isPending}
+                      disabled={false}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </motion.div>
+          );
+        })()}
 
         <Separator className="my-6 bg-border/30" />
 
@@ -452,6 +474,17 @@ export default function OutreachDetails() {
           variants={fadeInUp}
           className="flex flex-wrap gap-3"
         >
+          {/* Return to Relationship Button */}
+          {outreach.contacts && outreach.contacts.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/rel8/actv8/${outreach.actv8_contact_id || outreach.contacts![0].id}/profile`)}
+              className="flex items-center gap-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all"
+            >
+              <UserCircle className="h-4 w-4" />
+              Return to Relationship
+            </Button>
+          )}
           {outreach.status === 'pending' && (
             <Button 
               onClick={() => completeMutation.mutate()}
