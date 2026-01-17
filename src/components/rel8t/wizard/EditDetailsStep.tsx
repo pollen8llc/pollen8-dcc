@@ -65,8 +65,9 @@ export const EditDetailsStep: React.FC<EditDetailsStepProps> = ({
     >
       <div
         className={cn(
-          "relative w-full transition-transform duration-700 ease-in-out min-h-[420px]",
+          "relative w-full transition-transform duration-700 ease-in-out",
           "[transform-style:preserve-3d]",
+          flipState === 'date' ? "min-h-[380px]" : "min-h-0",
           flipState === 'date' && "[transform:rotateX(180deg)]"
         )}
       >
