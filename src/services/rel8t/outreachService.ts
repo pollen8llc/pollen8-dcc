@@ -432,59 +432,131 @@ export const updateOutreachStatus = async (id: string, status: OutreachStatus): 
               const stepId = currentStep?.id || `step_${currentStepIndex}`;
               const newCompletedSteps = [...completedSteps, stepId];
               const newStepIndex = currentStepIndex + 1;
+              const totalSteps = actv8Contact.path?.steps?.length || 0;
               
-              // Update step progress on the contact
-              await updateContactProgress(outreach.actv8_contact_id, newStepIndex, newCompletedSteps);
+              // Check if this was the final step of the path
+              const isPathComplete = newStepIndex >= totalSteps;
               
-              // Create the next step instance as "active" so it appears unlocked
-              const nextStep = actv8Contact.path?.steps?.[newStepIndex];
-              if (nextStep && actv8Contact.development_path_id) {
-                try {
-                  await createStepInstance(
-                    outreach.actv8_contact_id,
-                    nextStep.id,
-                    newStepIndex,
-                    actv8Contact.development_path_id,
-                    'active'
-                  );
-                } catch (stepError) {
-                  // Step instance might already exist, ignore
-                  console.log("Step instance may already exist:", stepError);
+              if (isPathComplete) {
+                // PATH COMPLETED - Mark instance as ended and advance relationship level
+                console.log("Path completed! Advancing relationship level...");
+                
+                // Mark current path instance as ended
+                if (actv8Contact.current_path_instance_id) {
+                  await supabase
+                    .from("rms_actv8_path_instances")
+                    .update({ 
+                      status: 'ended',
+                      ended_at: new Date().toISOString()
+                    })
+                    .eq("id", actv8Contact.current_path_instance_id);
                 }
-              }
-              
-              // Upgrade connection strength based on completed steps
-              const strengthProgression = ['spark', 'ember', 'flame', 'star'];
-              const currentStrengthIndex = strengthProgression.indexOf(actv8Contact.connection_strength || 'spark');
-              const stepsCompleted = newCompletedSteps.length;
-              
-              // Upgrade strength every 2 completed steps
-              const targetStrengthIndex = Math.min(Math.floor(stepsCompleted / 2), 3);
-              if (targetStrengthIndex > currentStrengthIndex) {
-                await updateActv8Contact(outreach.actv8_contact_id, {
-                  connection_strength: strengthProgression[targetStrengthIndex]
-                });
-              }
-              
-              // Create a notification for step completion
-              const { data: { user } } = await supabase.auth.getUser();
-              if (user) {
+                
+                // Add to path history
+                const pathHistory = (actv8Contact.path_history || []) as unknown as { path_id: string; path_name: string; completed_at: string; steps_completed: number }[];
+                const newPathHistory = [
+                  ...pathHistory,
+                  {
+                    path_id: actv8Contact.development_path_id,
+                    path_name: actv8Contact.path?.name || 'Unknown Path',
+                    completed_at: new Date().toISOString(),
+                    steps_completed: totalSteps
+                  }
+                ];
+                
+                // Calculate new relationship level (advance by 1, max 4)
+                const currentLevel = actv8Contact.relationship_level || 1;
+                const newLevel = Math.min(currentLevel + 1, 4);
+                
+                // Update contact with completed path and new level
                 await supabase
-                  .from("cross_platform_notifications")
-                  .insert({
-                    user_id: user.id,
-                    title: `${actv8Contact.path?.name || 'Path'} Progress`,
-                    message: `Completed step ${currentStepIndex + 1} with ${actv8Contact.contact?.name || 'contact'}`,
-                    notification_type: "actv8_step_complete",
-                    is_read: false,
-                    metadata: {
-                      actv8ContactId: outreach.actv8_contact_id,
-                      stepIndex: currentStepIndex,
-                      newStepIndex: newStepIndex,
-                      contactName: actv8Contact.contact?.name,
-                      nextStepName: nextStep?.name || null
-                    }
+                  .from('rms_actv8_contacts')
+                  .update({
+                    current_step_index: newStepIndex,
+                    completed_steps: newCompletedSteps,
+                    path_history: newPathHistory,
+                    relationship_level: newLevel,
+                    path_tier: newLevel, // Sync path_tier with level
+                    development_path_id: null, // Clear path so user can select new one
+                    current_path_instance_id: null, // Clear instance reference
+                  })
+                  .eq('id', outreach.actv8_contact_id);
+                
+                // Create notification for path completion and level up
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                  await supabase
+                    .from("cross_platform_notifications")
+                    .insert({
+                      user_id: user.id,
+                      title: `🎉 Path Completed!`,
+                      message: `You've completed "${actv8Contact.path?.name}" with ${actv8Contact.contact?.name}! You're now at Level ${newLevel}.`,
+                      notification_type: "actv8_path_complete",
+                      is_read: false,
+                      metadata: {
+                        actv8ContactId: outreach.actv8_contact_id,
+                        pathName: actv8Contact.path?.name,
+                        contactName: actv8Contact.contact?.name,
+                        newLevel: newLevel,
+                        previousLevel: currentLevel
+                      }
+                    });
+                }
+              } else {
+                // Not final step - continue normal progression
+                // Update step progress on the contact
+                await updateContactProgress(outreach.actv8_contact_id, newStepIndex, newCompletedSteps);
+                
+                // Create the next step instance as "active" so it appears unlocked
+                const nextStep = actv8Contact.path?.steps?.[newStepIndex];
+                if (nextStep && actv8Contact.development_path_id) {
+                  try {
+                    await createStepInstance(
+                      outreach.actv8_contact_id,
+                      nextStep.id,
+                      newStepIndex,
+                      actv8Contact.development_path_id,
+                      'active'
+                    );
+                  } catch (stepError) {
+                    // Step instance might already exist, ignore
+                    console.log("Step instance may already exist:", stepError);
+                  }
+                }
+                
+                // Upgrade connection strength based on completed steps
+                const strengthProgression = ['spark', 'ember', 'flame', 'star'];
+                const currentStrengthIndex = strengthProgression.indexOf(actv8Contact.connection_strength || 'spark');
+                const stepsCompleted = newCompletedSteps.length;
+                
+                // Upgrade strength every 2 completed steps
+                const targetStrengthIndex = Math.min(Math.floor(stepsCompleted / 2), 3);
+                if (targetStrengthIndex > currentStrengthIndex) {
+                  await updateActv8Contact(outreach.actv8_contact_id, {
+                    connection_strength: strengthProgression[targetStrengthIndex]
                   });
+                }
+                
+                // Create a notification for step completion
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                  await supabase
+                    .from("cross_platform_notifications")
+                    .insert({
+                      user_id: user.id,
+                      title: `${actv8Contact.path?.name || 'Path'} Progress`,
+                      message: `Completed step ${currentStepIndex + 1} with ${actv8Contact.contact?.name || 'contact'}`,
+                      notification_type: "actv8_step_complete",
+                      is_read: false,
+                      metadata: {
+                        actv8ContactId: outreach.actv8_contact_id,
+                        stepIndex: currentStepIndex,
+                        newStepIndex: newStepIndex,
+                        contactName: actv8Contact.contact?.name,
+                        nextStepName: nextStep?.name || null
+                      }
+                    });
+                }
               }
             } else if (isDeclined) {
               // If declined, keep current step and mark step instance for retry
