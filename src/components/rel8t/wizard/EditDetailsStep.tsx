@@ -67,16 +67,16 @@ export const EditDetailsStep: React.FC<EditDetailsStepProps> = ({
         className={cn(
           "relative w-full transition-transform duration-700 ease-in-out",
           "[transform-style:preserve-3d]",
-          flipState === 'date' ? "min-h-[380px]" : "min-h-0",
+          flipState === 'date' ? "min-h-[460px] sm:min-h-[500px]" : "min-h-0",
           flipState === 'date' && "[transform:rotateX(180deg)]"
         )}
       >
         {/* Front Face - Form */}
         <div
           className={cn(
-            "absolute inset-0 w-full",
+            "w-full",
             "[backface-visibility:hidden]",
-            flipState !== 'none' && "pointer-events-none"
+            flipState !== 'none' && "absolute inset-0 pointer-events-none"
           )}
         >
           <div className="space-y-6">
@@ -144,11 +144,11 @@ export const EditDetailsStep: React.FC<EditDetailsStepProps> = ({
         {flipState === 'date' && (
           <Card 
             className={cn(
-              "absolute inset-0 backdrop-blur-md bg-card/95 border-2 border-primary/10 rounded-2xl shadow-xl",
+              "absolute top-0 left-0 right-0 backdrop-blur-md bg-card/95 border-2 border-primary/10 rounded-2xl shadow-xl",
               "[backface-visibility:hidden] [transform:rotateX(180deg)]"
             )}
           >
-            <CardContent className="p-3 sm:p-4 h-full flex flex-col overflow-visible">
+            <CardContent className="p-3 sm:p-4 flex flex-col">
               {/* Calendar Header */}
               <div className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">
                 <div className="min-w-0 flex-1">
@@ -172,11 +172,12 @@ export const EditDetailsStep: React.FC<EditDetailsStepProps> = ({
               </div>
 
               {/* Calendar */}
-              <div className="flex-1 flex items-start justify-center overflow-visible">
+              <div className="flex items-center justify-center">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={handleDateSelect}
+                  fixedWeeks
                   disabled={(date) => {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
