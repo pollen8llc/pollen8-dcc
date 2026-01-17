@@ -418,13 +418,13 @@ export default function OutreachDetails() {
           return (
             <motion.div variants={fadeInUp}>
               <Accordion type="single" collapsible className="w-full mb-6">
-                <AccordionItem 
+              <AccordionItem 
                   value="feedback" 
                   className={cn(
                     "bg-card/80 backdrop-blur-md rounded-xl shadow-lg overflow-hidden",
                     isFeedbackComplete 
                       ? "border border-border/50" 
-                      : "border-2 border-amber-500/70 animate-pulse"
+                      : "border-2 animate-border-pulse"
                   )}
                 >
                   <AccordionTrigger className="px-6 py-4 hover:no-underline">
