@@ -55,13 +55,10 @@ export function PathSelectionAccordion({
     },
   });
 
-  const isPathInProgress = hasCurrentPath && !isPathComplete;
-
+  // Allow path switching after level change - no blocking
   const handleSelect = (pathId: string) => {
-    if (isPathInProgress && pathId !== currentPathId) {
-      toast.error("Complete your current path first", {
-        description: "You must complete all steps before selecting a new path."
-      });
+    if (pathId === currentPathId) {
+      toast.info("This path is already selected");
       return;
     }
     onSelectPath(pathId);
@@ -103,7 +100,7 @@ export function PathSelectionAccordion({
               <span className="block text-xs text-muted-foreground">
                 {tierLabels[currentTier] || `Tier ${currentTier}`}
                 {isPathComplete && " • Complete"}
-                {isPathInProgress && " • In Progress"}
+                {!isPathComplete && " • In Progress"}
               </span>
             )}
           </div>
@@ -135,14 +132,7 @@ export function PathSelectionAccordion({
               </p>
             </div>
 
-            {/* Path in Progress Notice */}
-            {isPathInProgress && (
-              <div className="p-3 rounded-lg border border-primary/30 bg-primary/5">
-                <p className="text-sm text-muted-foreground">
-                  Complete all steps in your current path to unlock new paths.
-                </p>
-              </div>
-            )}
+            {/* Removed: Path in Progress blocking notice - users can now freely switch paths */}
 
             {/* Available Paths by Tier */}
             {Object.entries(pathsByTier)
@@ -160,7 +150,7 @@ export function PathSelectionAccordion({
                         <button
                           key={path.id}
                           onClick={() => handleSelect(path.id)}
-                          disabled={(isNextTier && !hasCurrentPath) || (isPathInProgress && !isCurrent)}
+                          disabled={isNextTier && !hasCurrentPath}
                           className={cn(
                             "text-left p-3 rounded-lg border transition-all",
                             "hover:border-primary/50 hover:bg-primary/5",
