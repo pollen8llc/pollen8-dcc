@@ -93,13 +93,13 @@ export function RelationshipLevelAccordion({
     return levelSwitches.filter((s) => s.to_level === level).length;
   };
   
-  // In unlock mode, all levels are selectable
-  const isLevelSelectable = isUnlockMode || currentRelationshipLevel !== null;
+  // Levels are ONLY selectable when in unlock mode
+  const isLevelSelectable = isUnlockMode;
 
-  // Handle level selection
+  // Handle level selection - only works when unlocked
   const handleLevelCardClick = async (level: number) => {
+    if (!isUnlockMode) return; // Must be in unlock mode
     if (level === currentRelationshipLevel) return; // Already at this level
-    if (!isUnlockMode && currentRelationshipLevel === null) return; // Not in unlock mode yet
     
     // Show confirm dialog
     setTargetLevel(level);
@@ -206,10 +206,10 @@ export function RelationshipLevelAccordion({
 
             {ASSESSMENT_LEVELS.map((level, index) => {
               const isCurrent = level.level === currentRelationshipLevel;
-              const canSelect = isUnlockMode || currentRelationshipLevel !== null;
+              const canSelect = isUnlockMode; // Only selectable in unlock mode
               const switchCount = getSwitchCount(level.level);
               const isSwitching = switchingTo === level.level;
-              const isLocked = !canSelect;
+              const isLocked = !isUnlockMode; // Locked unless in unlock mode
 
               return (
                 <div
@@ -279,8 +279,8 @@ export function RelationshipLevelAccordion({
                       </p>
                     </div>
 
-                    {/* Action Arrow */}
-                    {canSelect && !isCurrent && (
+                    {/* Action Arrow - only show in unlock mode */}
+                    {isUnlockMode && !isCurrent && (
                       <div className="h-8 w-8 flex items-center justify-center flex-shrink-0">
                         {isSwitching ? (
                           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
