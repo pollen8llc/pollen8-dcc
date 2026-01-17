@@ -491,11 +491,16 @@ export default function OutreachDetails() {
           variants={fadeInUp}
           className="flex flex-wrap gap-3"
         >
-          {/* Return to Relationship Button - Only for completed outreach with linked Actv8 contact */}
-          {outreach.status === 'completed' && outreach.actv8_contact_id && (
+          {/* Return to Relationship Button - For completed outreach */}
+          {outreach.status === 'completed' && (outreach.actv8_contact_id || (outreach.contacts && outreach.contacts.length > 0)) && (
             <Button
               variant="outline"
-              onClick={() => navigate(`/rel8/actv8/${outreach.actv8_contact_id}/profile`)}
+              onClick={() => {
+                const contactId = outreach.actv8_contact_id || outreach.contacts?.[0]?.id;
+                if (contactId) {
+                  navigate(`/rel8/actv8/${contactId}/profile`);
+                }
+              }}
               className="flex items-center gap-2 border-primary hover:bg-primary/10 hover:border-primary transition-all"
             >
               <UserCircle className="h-4 w-4 text-primary" />
