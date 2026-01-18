@@ -115,10 +115,10 @@ export const CrossPlatformNotificationCard = ({
     <>
       <Card 
         className={cn(
-          "border transition-all duration-200 bg-card/40 backdrop-blur-md hover:bg-card/50",
+          "border transition-all duration-200",
           isPathCompletion 
-            ? "border-violet-500/30" 
-            : "border-border/30",
+            ? "border-2 animate-gradient-border-celebration bg-gradient-to-r from-primary/5 via-accent/5 to-violet-500/5" 
+            : "border-border/30 bg-card/40 backdrop-blur-md hover:bg-card/50",
           !notification.is_read && "shadow-lg shadow-primary/10"
         )}
       >
@@ -145,7 +145,7 @@ export const CrossPlatformNotificationCard = ({
               <h3 className={cn(
                 "font-semibold text-sm truncate",
                 isPathCompletion 
-                  ? "text-violet-400"
+                  ? "bg-gradient-to-r from-primary via-accent to-violet-400 bg-clip-text text-transparent"
                   : !notification.is_read ? "text-foreground" : "text-muted-foreground"
               )}>
                 {notification.title?.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim() || notification.title}
@@ -261,12 +261,13 @@ export const CrossPlatformNotificationCard = ({
             {isPathCompletion && notification.metadata?.actv8ContactId && (
               <Button 
                 size="sm" 
-                variant="outline"
-                className="flex-1 sm:flex-none border-violet-500/30 text-violet-400 hover:bg-violet-500/10"
+                className="flex-1 sm:flex-none bg-gradient-to-r from-primary/20 via-accent/20 to-violet-500/20 border border-primary/30 hover:from-primary/30 hover:via-accent/30 hover:to-violet-500/30"
                 onClick={handleViewProfile}
               >
                 <ExternalLink className="h-4 w-4 mr-1.5" />
-                View Relationship
+                <span className="bg-gradient-to-r from-primary via-accent to-violet-400 bg-clip-text text-transparent font-medium">
+                  View Relationship
+                </span>
               </Button>
             )}
 
