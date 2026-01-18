@@ -112,7 +112,7 @@ export const CrossPlatformNotificationCard = ({
                     ? "text-primary"
                     : notification.is_read ? 'text-foreground' : 'text-primary'
                 )}>
-                  {notification.title}
+                  {notification.title?.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim() || notification.title}
                 </h3>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
