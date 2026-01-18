@@ -53,19 +53,49 @@ const getBuildRapportProgressCount = async (): Promise<number> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return 0;
   
-  // Count Actv8 contacts on Build Rapport path who have made progress (step > 0)
-  const { count, error } = await supabase
+  // Check multiple sources of truth for Build Rapport completion:
+  
+  // 1. Check for completed path instances (primary source)
+  const { count: completedPathsCount } = await supabase
+    .from("rms_actv8_path_instances")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("status", "ended");
+  
+  if (completedPathsCount && completedPathsCount > 0) {
+    return 1;
+  }
+  
+  // 2. Check for completed outreach tasks
+  const { count: completedOutreachCount } = await supabase
+    .from("rms_outreach")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("status", "completed");
+  
+  if (completedOutreachCount && completedOutreachCount > 0) {
+    return 1;
+  }
+  
+  // 3. Check for relationship level advancement
+  const { count: advancedContactsCount } = await supabase
     .from("rms_actv8_contacts")
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
-    .eq("development_path_id", "build_rapport")
+    .gt("relationship_level", 1);
+  
+  if (advancedContactsCount && advancedContactsCount > 0) {
+    return 1;
+  }
+  
+  // 4. Fallback: Check for in-progress path work
+  const { count: inProgressCount } = await supabase
+    .from("rms_actv8_contacts")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
     .gt("current_step_index", 0);
   
-  if (error) {
-    console.error("Error fetching build rapport count:", error);
-    return 0;
-  }
-  return count || 0;
+  return inProgressCount && inProgressCount > 0 ? 1 : 0;
 };
 
 export const useSetupProgress = (): SetupProgressData => {
